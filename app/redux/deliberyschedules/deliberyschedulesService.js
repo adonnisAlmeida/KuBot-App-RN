@@ -33,7 +33,7 @@ async function getDeliberySchedulesSource() {
 async function addDeliberySchedulesSource(delibery_schedule) {
 	const data = await AsyncStorage.getItem('@deliberyschedulesSource')
 	let events = JSON.parse(data)
-	events.push(delibery_schedule)
+	events.unshift(delibery_schedule)
 	await AsyncStorage.setItem('@deliberyschedulesSource', JSON.stringify(events))
 	return events
 }
@@ -53,7 +53,7 @@ async function updateDeliberySchedulesSource(delibery_schedule) {
 	let events = JSON.parse(data)
 	const list = events.filter((event) => delibery_schedule.node.id != event.node.id)
 	events.length = 0
-	events.push(...list, delibery_schedule)
+	events.push(delibery_schedule, ...list)
 	await AsyncStorage.setItem('@deliberyschedulesSource', JSON.stringify(events))
 	return events
 }

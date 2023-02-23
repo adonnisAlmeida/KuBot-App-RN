@@ -1,22 +1,12 @@
 import { gql } from '@apollo/client'
 
-export const CARRIER_UPDATE = gql`
-mutation carrierUpdate($id: Int!, $input: CarrierEditInput!) {
-    carrierUpdate(id: $id, input: $input) {
+export const PI_PHOTO_FRONTAL_UPDATE = gql`
+mutation carrierPiPhotoFrontalUpdate($id: ID!, $image: Upload!) {
+    carrierPiPhotoFrontalUpdate(id: $id, input: {image: $image}) {
         carrier{
             piPhotoFrontal{
                 image{
-                    url
-                }
-            }
-            piPhotoBack{
-                image{
-                    url
-                }
-            }
-            bustPhoto{
-                image{
-                    url
+                  url
                 }
             }
         }
@@ -24,23 +14,27 @@ mutation carrierUpdate($id: Int!, $input: CarrierEditInput!) {
 }
 `
 
-export const DELIVERED_IMAGEUPDATE = gql`
-mutation shipmentDeliveredPackageImage($id: ID!, $input: ShipmentDeliveredInput!) {
-    shipmentDeliveredPackageImage(id: $id, input: $input) {
+export const PI_PHOTO_BACK_UPDATE = gql`
+mutation carrierPiPhotoBackUpdate($id: ID!, $image: Upload!) {
+    carrierPiPhotoBackUpdate(id: $id, input: {image: $image}) {
         carrier{
-            piPhotoFrontal{
-                image{
-                    url
-                }
-            }
             piPhotoBack{
                 image{
-                    url
+                  url
                 }
             }
+        }
+    }
+}
+`
+
+export const BUST_PHOTO_UPDATE = gql`
+mutation carrierBustPhotoUpdate($id: ID!, $image: Upload!) {
+    carrierBustPhotoUpdate(id: $id, input: {image: $image}) {
+        carrier{
             bustPhoto{
                 image{
-                    url
+                  url
                 }
             }
         }

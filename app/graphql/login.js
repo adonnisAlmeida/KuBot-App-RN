@@ -9,6 +9,10 @@ export const TOKEN_CREATE = gql`
 				firstName
 				lastName
 				addresses{
+					id
+					companyName
+					isDefaultBillingAddress
+					isDefaultShippingAddress
 					streetAddress1
 					firstName
 					lastName

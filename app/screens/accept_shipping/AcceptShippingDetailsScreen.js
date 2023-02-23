@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react'
 import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import { FloatingActionButton, Loading, Typography } from '../../components'
 import moment from 'moment'
-import { ACCEPT_ORDER, ORDER_ID } from '../../graphql/orders'
+import { ACCEPT_ORDER, ACCEPT_ORDER_ID } from '../../graphql/orders'
 import { NetworkStatus, useLazyQuery, useMutation } from '@apollo/client'
 import { useDispatch } from 'react-redux'
 import { removeAcceptShipping } from '../../redux/accept_shipping/accept_shippingSlice'
+import AwesomeAlert from 'react-native-awesome-alerts'
+import { MONTH_NAMES, DAY_NAMES } from '../../constants/Other'
+import { getCurrencySimbol } from '../../utils/CommonFunctions'
 
 
 moment.locale('es')
@@ -14,21 +17,13 @@ moment.locale('es')
 const AcceptShippingDetails = ({ route, navigation, ...props }) => {
     const { colors } = useTheme()
     let order_id = route.params?.order_id
-    const [sellers, setSellers] = useState([])
     const dispatch = useDispatch()
     const [orderDetails, setOrderDetails] = useState(null)
     const [displayLoading, setDisplayLoading] = useState(false)
-    let hasNote = false
+    const [showAlertAw, setShowAlert] = useState(false)
 
-    const [getOrderDetail, { loadingOrder, errorOrder, dataOrder, networkStatus }] = useLazyQuery(ORDER_ID, {
+    const [getOrderDetail, { loadingOrder, errorOrder, dataOrder, networkStatus }] = useLazyQuery(ACCEPT_ORDER_ID, {
         onCompleted: (dataOrder) => {
-            let temp = []
-            dataOrder.order.sellers.map((seller) => {
-                if (!temp.includes(seller)) {
-                    temp.push(seller)
-                }
-            })
-            setSellers(temp)
             setOrderDetails(dataOrder)
         },
         onError: () => {
@@ -36,6 +31,17 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
         },
         fetchPolicy: "no-cache"
     })
+
+    const printCreated = (date) => {
+        let output = 'ff'
+        let dateObject = new Date(date)
+        output = DAY_NAMES[dateObject.getDay()] +
+            ' ' + dateObject.getDate() +
+            ' de ' + MONTH_NAMES[dateObject.getMonth()] +
+            ' del ' + dateObject.getFullYear()
+
+        return output
+    }
 
     const autoLoad = () => {
         getOrderDetail({
@@ -48,6 +54,9 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
             if (data.orderAcceptedCarrier.errors) {
                 if (data.orderAcceptedCarrier.errors.length > 0) {
                     console.log("ERROR ACEPTANDO ENVIO EL ENVIO >> ", data)
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Error aceptado envío.', ToastAndroid.LONG)
+                    }
                 } else {
                     if (data.orderAcceptedCarrier.order) {
                         if (data.orderAcceptedCarrier.order.shippingStatus == 'ACCEPTED_CARRIER') {
@@ -73,12 +82,12 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
         autoLoad()
     }, [])
 
-    const llamar = (phoneNumber) => {
-        Linking.openURL(`tel:${phoneNumber}`)
-    }
-
     const acceptShipping = () => {
+        setShowAlert(false)
         setDisplayLoading(true)
+        /* setTimeout(() => {
+            setDisplayLoading(false)
+        }, 2000); */
         acceptOrder({ variables: { id: orderDetails.order.id } })
     }
 
@@ -87,7 +96,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
     if (loadingOrder || errorOrder) return <Loading />
     if (orderDetails == undefined || orderDetails == null) return <Loading />
 
-    console.log("orderDetails >> ", orderDetails)
+    //console.log("orderDetails >> ", orderDetails)
 
     return (
         <>
@@ -95,31 +104,16 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                 {orderDetails ? (
                     <>
                         <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
-                            <Typography bold h3 style={{ marginBottom: 10 }}>
-                                Cliente
-                            </Typography>
-                            {orderDetails.order.user ? (
-                                <TouchableOpacity
-                                    onPress={() => navigation.navigate('ClientDetails', { client: orderDetails.order.user })}
-                                >
-                                    <Typography color={colors.primary}>
-                                        {orderDetails.order.user.firstName + ' ' + orderDetails.order.user.lastName}
-                                    </Typography>
-                                </TouchableOpacity>
-                            ) : (
-                                <Typography color={colors.ON_SURFACE}>
-                                    Invitado
-                                </Typography>
-                            )}
                             <View>
+                                <Typography
+                                    bold h3
+                                    color={colors.ON_SURFACE}
+                                    style={{ marginBottom: 8 }}
+                                >
+                                    Orden # {orderDetails.order.number}
+                                </Typography>
                                 <Typography bold h3 style={{ marginVertical: 10 }}>
                                     Dirección de Envío
-                                </Typography>
-                                <Typography color={colors.ON_SURFACE}>
-                                    {orderDetails.order.shippingAddress.firstName} {orderDetails.order.shippingAddress.lastName}
-                                </Typography>
-                                <Typography color={colors.ON_SURFACE}>
-                                    {orderDetails.order.shippingAddress.streetAddress1}
                                 </Typography>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
@@ -127,6 +121,14 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                     </Typography>
                                     <Typography color={colors.ON_SURFACE}>
                                         {orderDetails.order.shippingAddress.country.country}
+                                    </Typography>
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                        Municipio:
+                                    </Typography>
+                                    <Typography color={colors.ON_SURFACE}>
+                                        {orderDetails.order.shippingAddress.countryArea}
                                     </Typography>
                                 </View>
                                 <View style={{ flexDirection: 'row' }}>
@@ -146,46 +148,34 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                     </Typography>
                                 </View>
                             </View>
-                            <View>
-                                <Typography bold h3 style={{ marginVertical: 10 }}>
-                                    Teléfono
-                                </Typography>
-                                {
-                                    orderDetails.order.shippingAddress.phone ?
-                                        (
-                                            <TouchableOpacity onPress={() => llamar(orderDetails.order.shippingAddress.phone)}>
-                                                <Typography color={colors.primary}>
-                                                    {orderDetails.order.shippingAddress.phone}
-                                                </Typography>
-                                            </TouchableOpacity>
-
-                                        ) : (
-                                            <Typography color={colors.ON_SURFACE}>
-                                                'No especificado'
-                                            </Typography>
-                                        )
-                                }
-                            </View>
                         </View>
                         <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
-                            <Typography bold h3 style={{ marginBottom: 10 }}>
-                                Vendedor
+                            <Typography h3 style={{ marginVertical: 6 }}>
+                                Creada el:
                             </Typography>
-                            {sellers.map((seller, index) => (
-                                <TouchableOpacity
-                                    style={{ marginBottom: 6 }}
-                                    key={index}
-                                    onPress={() => navigation.navigate('SellerDetails', { seller: seller.user })}
-                                >
-                                    <Typography color={colors.primary}>
-                                        {seller.user.firstName + ' ' + seller.user.lastName}
-                                    </Typography>
-                                </TouchableOpacity>
-                            ))}
+                            <Typography color={colors.ON_SURFACE}>
+                                {printCreated(orderDetails.order.created)}
+                            </Typography>
                         </View>
                         <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                             <Typography bold h3 style={{ marginBottom: 10 }}>
-                                Peso Total
+                                Distancia (kms):
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                {orderDetails.order.getDistance}
+                            </Typography>
+                        </View>
+                        <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
+                            <Typography bold h3 style={{ marginBottom: 10 }}>
+                                Costo de envío:
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                {orderDetails.order.shippingPrice.gross.amount} {getCurrencySimbol(orderDetails.order.shippingPrice.gross.currency)}
+                            </Typography>
+                        </View>
+                        <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
+                            <Typography bold h3 style={{ marginBottom: 10 }}>
+                                Peso Total:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
                                 {parseFloat(orderDetails.order.weight.value).toFixed(2)} {orderDetails.order.weight.unit}
@@ -202,51 +192,6 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                 {orderDetails.order.allDimensions}
                             </Typography>
                         </View>
-
-                        <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
-                            <Typography bold h3 style={{ marginBottom: 10 }}>
-                                Nota del Cliente
-                            </Typography>
-                            {orderDetails.order.customerNote ?
-                                (
-                                    <Typography color={colors.ON_SURFACE}>
-                                        {orderDetails.order.customerNote}
-                                    </Typography>
-                                ) :
-                                (
-                                    <Typography color={colors.ON_SURFACE}>
-                                        No hay nota del cliente asociado con esta pedido.
-                                    </Typography>
-                                )}
-                        </View>
-                        <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
-                            <Typography bold h3 style={{ marginBottom: 10 }}>
-                                Nota del Pedido
-                            </Typography>
-                            {orderDetails.order.events.map((event, index) => {
-                                if (event.type == 'NOTE_ADDED') {
-                                    hasNote = true
-                                    return (
-                                        <View key={index}>
-                                            <Typography small color={colors.ON_SURFACE}>
-                                                {event.user.firstName && ' - '}{moment(event.date).format('YYYY-MM-DD')}
-                                            </Typography>
-                                            <Typography color={colors.ON_SURFACE}>
-                                                {event.message}
-                                            </Typography>
-                                        </View>
-                                    )
-                                }
-                            })}
-                            {
-                                !hasNote &&
-                                (
-                                    <Typography color={colors.ON_SURFACE}>
-                                        No hay notas asociadas con este pedido.
-                                    </Typography>
-                                )
-                            }
-                        </View>
                         <Typography></Typography>
                     </>
                 ) : (null)}
@@ -256,12 +201,31 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                     <ActivityIndicator size={50} color={colors.PRIMARY} />
                 </View>
             ) : (null)}
-
-
             <FloatingActionButton
                 color={colors.primary}
                 icon={'check-square-o'}
-                onPress={() => acceptShipping()}
+                onPress={() => setShowAlert(true)}
+            />
+            <AwesomeAlert
+                show={showAlertAw}
+                title="Aceptar Envío"
+                message="¿Esta seguro de aceptar este envío?"
+                closeOnTouchOutside={true}
+                closeOnHardwareBackPress={true}
+                showCancelButton={true}
+                showConfirmButton={true}
+                cancelText="Cancelar"
+                confirmText="Aceptar"
+                confirmButtonColor="#2DCE89"
+                onCancelPressed={() => {
+                    setShowAlert(false)
+                }}
+                onDismiss={() => {
+                    setShowAlert(false)
+                }}
+                onConfirmPressed={() => {
+                    acceptShipping()
+                }}
             />
         </>
     )

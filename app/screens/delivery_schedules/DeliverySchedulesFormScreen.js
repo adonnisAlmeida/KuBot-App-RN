@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, StyleSheet, TextInput, ToastAndroid, View } from 'react-native'
+import { ActivityIndicator, StatusBar, StyleSheet, TextInput, ToastAndroid, View } from 'react-native'
 import {
 	Typography,
 	Button,
@@ -19,7 +19,7 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import { GET_DELIVERY_SCHEDULE } from '../../graphql/deliverySchedule'
 import Colors from '../../constants/Colors'
 import { addDeliberySchedulesSource, delivery_schedules_list, delivery_schedules_source, getDeliberySchedules, removeDeliberySchedulesSource, setDeliberySchedules, setDeliberySchedulesSource, updateDeliberySchedulesSource } from '../../redux/deliberyschedules/deliberyschedulesSlice'
-import { applyRules } from '../../utils/CommonFunctions'
+import { applyRules, stringToColour } from '../../utils/CommonFunctions'
 import SelectDropdown from 'react-native-select-dropdown'
 import Theme from '../../constants/Theme'
 moment.locale('es')
@@ -117,6 +117,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 
 	const [deleteDeliverySchedules, { loadingDelete, errorDelete, dataDelete }] = useMutation(DELETE_DELIVERY_SCHEDULE, {
 		onCompleted: (dataDelete) => {
+			console.log("dataDelete ", dataDelete)
 			dispatch(removeDeliberySchedulesSource(eventId))
 			/* let newData = {}
 			Object.entries(delivery_schedules).forEach(([key, value]) => {
@@ -133,11 +134,13 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 			setShowAlert(false)
 			if (Platform.OS === 'android')
 				ToastAndroid.show('Evento eliminado correctamente.', ToastAndroid.LONG)
-			navigation.navigate('DeliverySchedulesScreen')
+			navigation.navigate('DeliverySchedulesScreen', {
+				makeReload: 'KAKA',
+			})
 		},
 		onError: () => {
-			setNewLoadingDelete(false)
 			console.log('Error eliminando deleteDeliverySchedules >> ', errorDelete)
+			console.log('Error eliminando deleteDeliverySchedules >> ', dataDelete)
 			setLoadingApp(false)
 			setDisplayLoading(false)
 		}
@@ -147,19 +150,20 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		if (eventServerId) {
 			setShowAlert(false)
 			setDisplayLoading(true)
+			console.log("eventServerId ", eventServerId)
 			deleteDeliverySchedules({ variables: { id: eventServerId } })
 		}
 	}
 
 	const deleteEvent = () => {
-		setAlertMessage(`Esta seguro que desea eliminar el evento de horario "${titulo}"`)
-		setAlertTitle('¿Estas Seguro?')
+		setAlertMessage(`¿Esta seguro que desea eliminar el evento de horario?`)
+		setAlertTitle('¿Estás seguro?')
 		setShowAlert(true)
 	}
 
-	useEffect(() => {
+	/* useEffect(() => {
 		console.log("delivery_schedules_source >", schedules_source)
-	},[schedules_source])
+	},[schedules_source]) */
 
 	const userStore = useSelector(state => state.userlogin)
 	const carrierID = userStore.carrierInfo.serverId;
@@ -196,7 +200,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				ToastAndroid.show('Se adicionó correctamente el horario de reparto.', ToastAndroid.LONG)
 			setNewLoadingcreate(false)
 			handleReset()
-			navigation.navigate('DeliverySchedulesScreen')
+			navigation.navigate('DeliverySchedulesScreen', {
+				makeReload: 'KAKA',
+			})
 		},
 		onError: (errorCreate) => {
 			setNewLoadingcreate(false)
@@ -210,11 +216,14 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				"node": dataUpdated.eventUpdate.event
 			}
 			dispatch(updateDeliberySchedulesSource(eventUpdated))
+			navigation.navigate('DeliverySchedulesScreen', {
+				makeReload: 'KAKA',
+			})
 			if (Platform.OS === 'android')
 				ToastAndroid.show('Se actualizó correctamente el horario de reparto.', ToastAndroid.LONG)
 
 			handleReset()
-			navigation.navigate('DeliverySchedulesScreen')
+
 			setNewLoadingUpdate(false)
 		},
 		onError: (errorUpdated) => {
@@ -322,6 +331,12 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		console.log('allEvents >> ', allEvents)
 	}
 
+	/* navigation.setOptions({
+		headerStyle: {
+			backgroundColor: stringToColour(localRules[selectedRule] ? localRules[selectedRule].name : 'Never') + '99'
+		},
+	}) */
+
 	useEffect(() => {
 		if (event_details) { // cuando es editar un evento
 			console.log('EVENT Details >> ', event_details)
@@ -345,6 +360,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 			setEventStart(humaneventStart)
 			navigation.setOptions({
 				title: `Actualizar Evento`,
+				/* headerStyle: {
+					backgroundColor: stringToColour(localRules[selectedRule] ? localRules[selectedRule].name : 'Never') + '40'
+				}, */
 			})
 		}
 	}, [])
@@ -560,14 +578,18 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	//if (rules.length == 0 || loading || loadingApp) return <Loading />
 
 	return (
-		<View style={styles.container}>
-			{/* {error ?
+		<>
+			{/* <StatusBar
+				backgroundColor={stringToColour(localRules[selectedRule] ? localRules[selectedRule].name : 'Never') + '40'}
+			/> */}
+			<View style={styles.container}>
+				{/* {error ?
 				(
 					<NetworkError accion={reloadApp} />
 				) :
 				( */}
-			<>
-				{/* <View style={{ marginBottom: 5 }}>
+				<>
+					{/* <View style={{ marginBottom: 5 }}>
 					<Input
 						label="Título"
 						value={titulo}
@@ -583,68 +605,74 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 						error={hasErrors('descripcion')}
 					/>
 				</View> */}
-				{/* <View style={{ marginBottom: 5 }}>
+					{/* <View style={{ marginBottom: 5 }}>
 					<Input
 						label="Desde"
 						value="dessddd"
 						editable = {false}
 					/>
 				</View> */}
-				<View style={{ marginBottom: 5 }}>
-					{isDetails ? (
-						<Typography>
-							Desde: {eventStart}
+					<View style={{ marginBottom: 5 }}>
+						{isDetails ? (
+							<>
+								<Typography>
+									Desde: {eventStart}
+								</Typography>
+								{/* <Typography>
+									SERVER ID: {eventServerId}
+								</Typography> */}
+							</>
+
+						) : (
+							<Typography>
+								Desde: {date_param}
+							</Typography>
+						)}
+
+					</View>
+					<View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
+						<View style={{ width: '48%' }}>
+							<TimePickerInput
+								date={inicioFull}
+								label="Hora de Inicio"
+								value={inicio}
+								setValue={setInicio}
+								error={hasErrors('inicio')}
+							/>
+						</View>
+						<View style={{ width: '48%' }}>
+							<TimePickerInput
+								date={finFull}
+								label="Hora de Fin"
+								value={fin}
+								setValue={setFin}
+								error={hasErrors('fin')}
+							/>
+						</View>
+					</View>
+					{hasErrors('fin') ? (
+						<Typography color='#CF6679'>
+							{horaErrorText}
 						</Typography>
 					) : (
-						<Typography>
-							Desde: {date_param}
-						</Typography>
+						null
 					)}
 
-				</View>
-				<View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
-					<View style={{ width: '48%' }}>
-						<TimePickerInput
-							date={inicioFull}
-							label="Hora de Inicio"
-							value={inicio}
-							setValue={setInicio}
-							error={hasErrors('inicio')}
-						/>
-					</View>
-					<View style={{ width: '48%' }}>
-						<TimePickerInput
-							date={finFull}
-							label="Hora de Fin"
-							value={fin}
-							setValue={setFin}
-							error={hasErrors('fin')}
-						/>
-					</View>
-				</View>
-				{hasErrors('fin') ? (
-					<Typography color='#CF6679'>
-						{horaErrorText}
-					</Typography>
-				) : (
-					null
-				)}
-
-				<View style={{ marginBottom: 10 }}>
-					{/* <Typography
+					<View style={{ marginBottom: 10 }}>
+						{/* <Typography
 						color={colors.ON_SURFACE_VARIANT}
 						style={[{ marginVertical: 10 }]}
 					>
 						Regla
 					</Typography> */}
-					<Select
-						label="Repetir"
-						items={localRules}
-						value={selectedRule}
-						setValue={setSelectedRule}
-					//error={hasErrors('repetir')}
-					/>
-					{/* <SelectDropdown
+						<Select
+							label="Repetir"
+							items={localRules}
+							value={selectedRule}
+							setValue={setSelectedRule}
+						//error={hasErrors('repetir')}
+						/>
+						{/* <SelectDropdown
 						defaultButtonText={dropText}
 						buttonStyle={styles.select_button}
 						ref={dropdownRef}
@@ -665,7 +693,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 							return item
 						}}
 					/> */}
-					{/* <Select
+						{/* <Select
 						label="Regla"
 						//items={rules} // oJO dejar este que los carga del back
 						items={localRules}
@@ -673,103 +701,105 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 						setValue={setSelectedRule}
 						error={hasErrors('selectedRule')}
 					/> */}
-				</View>
-				{selectedRule != 0 ?
-					<View>
-						<DatePickerInput
-							label="Fecha de Finalización"
-							value={fechaFin}
-							setValue={setFechaFin}
-							type='date'
-							error={hasErrors('fechaFin')}
-							date={fechaFin == '' ? date_param : fechaFin}
-						/>
-						{hasErrors('fechaFin') ? (
-							<Typography color='#CF6679' style={{ marginTop: 5 }}>
-								{fechaFinErrorText}
-							</Typography>
-						) : null}
 					</View>
-					: <></>}
-				{isDetails ?
-					(
-						<>
-							<Button
-								style={{ alignItems: 'center', marginVertical: 16 }}
-								onPress={handleUpdate}
-							>
-								{(newLoadingUpdate) ? (
-									<ActivityIndicator size="small" color="white" />
-								) : (
-									<Typography color="#ffffff">Actualizar</Typography>
-								)}
-							</Button>
-							<Button
-								color="error"
-								style={{ alignItems: 'center' }}
-								onPress={deleteEvent}
-							>
-								<Typography color="#ffffff">Eliminar</Typography>
-							</Button>
-						</>
-					) :
-					(
-						<>
-							<Button
-								style={{ alignItems: 'center', marginVertical: 16 }}
-								onPress={handleAdd}
-							>
-								{(newLoadingCreate) ? (
-									<ActivityIndicator size="small" color="white" />
-								) : (
-									<Typography color="#ffffff">Adicionar</Typography>
-								)}
-							</Button>
-						</>
-					)}
-				<AwesomeAlert
-					show={showAlertAw}
-					title={alertTitle}
-					message={alertMessage}
-					closeOnTouchOutside={false}
-					closeOnHardwareBackPress={false}
-					showCancelButton={true}
-					showConfirmButton={true}
-					cancelText="Cancelar"
-					confirmText="Eliminar"
-					confirmButtonColor={Colors.COLORS.ERROR}
-					onCancelPressed={() => {
-						setShowAlert(false)
-					}}
-					onConfirmPressed={() => {
-						doDelete()
-					}}
-				/>
-			</>
-			{displayLoading ? (
-                <View style={styles.loadingAccept}>
-                    <ActivityIndicator size={50} color={colors.PRIMARY} />
-                </View>
-            ) : (null)}
-			{/* )
+					{selectedRule != 0 ?
+						<View>
+							<DatePickerInput
+								label="Fecha de Finalización"
+								value={fechaFin}
+								setValue={setFechaFin}
+								type='date'
+								error={hasErrors('fechaFin')}
+								date={fechaFin == '' ? date_param : fechaFin}
+							/>
+							{hasErrors('fechaFin') ? (
+								<Typography color='#CF6679' style={{ marginTop: 5 }}>
+									{fechaFinErrorText}
+								</Typography>
+							) : null}
+						</View>
+						: <></>}
+					{isDetails ?
+						(
+							<>
+								<Button
+									style={{ alignItems: 'center', marginVertical: 16 }}
+									onPress={handleUpdate}
+								>
+									{(newLoadingUpdate) ? (
+										<ActivityIndicator size="small" color="white" />
+									) : (
+										<Typography color="#ffffff">Actualizar</Typography>
+									)}
+								</Button>
+								<Button
+									color="error"
+									style={{ alignItems: 'center' }}
+									onPress={deleteEvent}
+								>
+									<Typography color="#ffffff">Eliminar</Typography>
+								</Button>
+							</>
+						) :
+						(
+							<>
+								<Button
+									style={{ alignItems: 'center', marginVertical: 16 }}
+									onPress={handleAdd}
+								>
+									{(newLoadingCreate) ? (
+										<ActivityIndicator size="small" color="white" />
+									) : (
+										<Typography color="#ffffff">Adicionar</Typography>
+									)}
+								</Button>
+							</>
+						)}
+					<AwesomeAlert
+						show={showAlertAw}
+						title={alertTitle}
+						message={alertMessage}
+						closeOnTouchOutside={false}
+						closeOnHardwareBackPress={false}
+						showCancelButton={true}
+						showConfirmButton={true}
+						cancelText="Cancelar"
+						confirmText="Eliminar"
+						confirmButtonColor={Colors.COLORS.ERROR}
+						onCancelPressed={() => {
+							setShowAlert(false)
+						}}
+						onConfirmPressed={() => {
+							doDelete()
+						}}
+					/>
+				</>
+				{displayLoading ? (
+					<View style={styles.loadingAccept}>
+						<ActivityIndicator size={50} color={colors.PRIMARY} />
+					</View>
+				) : (null)}
+				{/* )
 			} */}
-		</View >
+			</View >
+		</>
+
 	)
 }
 
 const styles = StyleSheet.create({
 	loadingAccept: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        backgroundColor: 'rgba(52, 52, 52, 0.5)',
-        zIndex: 5,
-        elevation: 3,
-    },
+		justifyContent: 'center',
+		alignItems: 'center',
+		position: 'absolute',
+		top: 0,
+		right: 0,
+		bottom: 0,
+		left: 0,
+		backgroundColor: 'rgba(52, 52, 52, 0.5)',
+		zIndex: 5,
+		elevation: 3,
+	},
 	select_button: {
 		width: '100%',
 		backgroundColor: Theme.LIGHT.BACKGROUND,

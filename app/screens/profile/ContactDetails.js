@@ -6,22 +6,38 @@ import { user } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
 import { Typography } from '../../components'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { useState, useEffect } from 'react'
 
 const ContactDetails = ({ navigation }) => {
     const user_state = useSelector(user)
+    const [userInfo, setUserInfo] = useState(user_state)
     const { colors } = useTheme()
 
-    const avatar = user_state.avatar
+    //console.log(user_state)
+    console.log("userInfo.avatar", userInfo.avatar)
+
+    useEffect(() => {
+        setUserInfo(user_state)
+    }, [user_state])
+
+    const avatar = userInfo.avatar
         ? {
-            uri: user_state.avatar.url,
+            uri: userInfo.avatar.url,
         }
         : require('../../../assets/user_avatar.png')
 
     const handleEditarProfile = () => {
         navigation.navigate('EditarProfile', {
-            user_id: user_state.id,
-            user_firstName: `${user_state.firstName}`,
-            user_lastName: `${user_state.lastName}`,
+            user_id: userInfo.id,
+            user_firstName: `${userInfo.firstName}`,
+            user_lastName: `${userInfo.lastName}`,
+            user_avatarURL: `${userInfo.avatar?.url}`,
+        })
+    }
+
+    const handleEditAddress = (address) => {
+        navigation.navigate('EditAddressScreen', {
+            address: address
         })
     }
 
@@ -29,6 +45,17 @@ const ContactDetails = ({ navigation }) => {
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
             {alert}
             <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
+                <View style={styles.editIcon}>
+                    <TouchableOpacity>
+                        <FontAwesome
+                            style={styles.headerRight}
+                            name="edit"
+                            color={colors.ON_SURFACE}
+                            size={22}
+                            onPress={() => handleEditarProfile()}
+                        />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.headerContainer}>
                     <View style={styles.header}>
                         <Image backgroundColor='white' source={avatar} style={styles.avatar} />
@@ -37,23 +64,13 @@ const ContactDetails = ({ navigation }) => {
 						</Typography> */}
                     </View>
                 </View>
-                <View style={styles.editIcon}>
-                    <TouchableOpacity>
-                        <FontAwesome
-                            style={styles.headerRight}
-                            name="edit"
-                            color={colors.ON_SURFACE}
-                            size={20}
-                            onPress={() => handleEditarProfile()}
-                        />
-                    </TouchableOpacity>
-                </View>
+
                 <View style={styles.seccion}>
                     <Typography style={styles.seccionTitle} >
                         Nombre:
                     </Typography>
                     <Typography style={{ color: colors.ON_SURFACE }}>
-                        {user_state.firstName}
+                        {userInfo.firstName}
                     </Typography>
                 </View>
                 <View style={styles.seccion}>
@@ -61,7 +78,7 @@ const ContactDetails = ({ navigation }) => {
                         Apellidos:
                     </Typography>
                     <Typography style={{ color: colors.ON_SURFACE }}>
-                        {user_state.lastName}
+                        {userInfo.lastName}
                     </Typography>
                 </View>
                 <View style={styles.seccion}>
@@ -69,50 +86,90 @@ const ContactDetails = ({ navigation }) => {
                         Correo:
                     </Typography>
                     <Typography style={{ color: colors.ON_SURFACE }}>
-                        {user_state.email}
+                        {userInfo.email}
                     </Typography>
                 </View>
             </View>
             <View style={styles.headerContainer}>
-                <Typography>
+                <Typography bold>
                     DIRECCIONES
                 </Typography>
             </View>
             {
-                user_state.addresses.map((address, index) => {
+                userInfo.addresses.map((address, index) => {
                     return (
                         <View key={index} style={[styles.card, { backgroundColor: colors.SURFACE, marginTop: 10, paddingTop: 5, }]}>
+                            <View style={styles.seccionCorner}>
+                                {address.isDefaultBillingAddress ? (
+                                    <Typography bold>Dirección de facturación</Typography>
+                                ) : (
+                                    null
+                                )}
+                                {address.isDefaultShippingAddress ? (
+                                    <Typography bold>Dirección de entrega</Typography>
+                                ) : (
+                                    null
+                                )}
+                            </View>
+
                             <View style={styles.cardRow}>
                                 <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
                                     {address.firstName}
                                 </Typography>
                                 <Typography style={{ color: colors.ON_SURFACE }}>
-                                    {address.firstName}
+                                    {address.lastName}
                                 </Typography>
                             </View>
                             <View style={styles.cardRow}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Calle:
+                                </Typography>
                                 <Typography style={{ color: colors.ON_SURFACE }}>
                                     {address.streetAddress1}
                                 </Typography>
                             </View>
                             <View style={styles.cardRow}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Municipio:
+                                </Typography>
                                 <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
                                     {address.city}
+                                </Typography>
+                            </View>
+                            <View style={styles.cardRow}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Provincia:
                                 </Typography>
                                 <Typography style={{ color: colors.ON_SURFACE }}>
                                     {address.countryArea}
                                 </Typography>
                             </View>
+                            <View style={{ flexDirection: 'row', marginTop: 3 }}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    País:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {address.country.country}
+                                </Typography>
+                            </View>
                             <View style={styles.cardRow}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Código postal:
+                                </Typography>
                                 <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
                                     {address.postalCode}
                                 </Typography>
                             </View>
-                            <View style={styles.cardRow}>
-                                <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
-                                    {address.country.country}
-                                </Typography>
-                            </View>
+                            {/* <View style={styles.addressEdit}>
+                                <TouchableOpacity>
+                                    <FontAwesome
+                                        name="edit"
+                                        color={colors.ON_SURFACE}
+                                        size={22}
+                                        onPress={() => handleEditAddress(address)}
+                                    />
+                                </TouchableOpacity>
+                            </View> */}
                         </View>
                     )
                 })
@@ -138,14 +195,18 @@ const ContactDetails = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
+    addressEdit: {
+        marginTop: 15
+    },
     cardRow: {
         flexDirection: 'row',
         marginTop: 3,
     },
     editIcon: {
         position: 'absolute',
-        top: 18,
-        right: 0,
+        top: 15,
+        //right: 0,
+        left: 15
     },
     seccionTitle: {
         color: Colors.COLORS.ON_SURFACE,
@@ -168,7 +229,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
     },
     headerRight: {
-        marginRight: 20
+        marginRight: 20,
     },
     card: {
         flexDirection: 'column',
@@ -194,8 +255,12 @@ const styles = StyleSheet.create({
         borderColor: Colors.COLORS.PRIMARY
     },
     seccion: {
-        marginVertical: 6,
         flexDirection: 'row',
+    },
+    seccionCorner: {
+        flexDirection: 'row',
+        marginBottom: 5,
+        justifyContent: 'space-between'
     }
 })
 

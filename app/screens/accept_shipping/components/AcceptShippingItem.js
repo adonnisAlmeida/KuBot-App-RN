@@ -5,20 +5,20 @@ import { useTheme } from '@react-navigation/native'
 import { Typography } from '../../../components'
 import Theme from '../../../constants/Theme'
 import moment from 'moment'
-import { orderStatusDisplay } from '../../../utils/CommonFunctions'
+import { getCurrencySimbol, orderStatusDisplay } from '../../../utils/CommonFunctions'
 
 moment.locale('es')
 
 const AcceptShippingItem = ({
-    select_order,
-    navigation,
-    ...props
+	select_order,
+	navigation,
+	...props
 }) => {
-    const { dark, colors } = useTheme()
+	const { dark, colors } = useTheme()
 
-    return (
-        <TouchableOpacity {...props}>
-            <View
+	return (
+		<TouchableOpacity {...props}>
+			<View
 				style={[dark ? styles.cardDark : styles.card]}
 			>
 				<View style={styles.card_details}>
@@ -36,29 +36,38 @@ const AcceptShippingItem = ({
 						>
 							Orden # {select_order.number}
 						</Typography>
-						<Typography color={colors.ON_SURFACE}>
-							<Typography bold color={colors.ON_SURFACE}>
-								Fecha:
-							</Typography>{' '}
-							{moment(select_order.created).format('YYYY-MM-DD')}
-						</Typography>
-						<Typography color={colors.ON_SURFACE}>
-							<Typography bold color={colors.ON_SURFACE}>
-								Estado:
-							</Typography>{' '}
-							{orderStatusDisplay(select_order.status).toUpperCase()}
-						</Typography>
-						<Typography color={colors.ON_SURFACE}>
-							<Typography bold color={colors.ON_SURFACE}>
-								Lugar del envío:
-							</Typography>{' '}
-							{select_order.shippingAddress?.streetAddress1}
-						</Typography>
+						<View>
+							<Typography bold>
+								Dirección de Envío:
+							</Typography>
+							<Typography style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+								{select_order.shippingAddress.city +
+									', ' + select_order.shippingAddress.countryArea +
+									', ' + select_order.shippingAddress.country.country +
+									', ' + select_order.shippingAddress.postalCode}
+							</Typography>
+							<View style={{ flexDirection: 'row' }}>
+								<Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+									Distancia (kms):
+								</Typography>
+								<Typography color={colors.ON_SURFACE}>
+									{select_order.getDistance}
+								</Typography>
+							</View>
+							<View style={{ flexDirection: 'row' }}>
+								<Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+									Costo de envío:
+								</Typography>
+								<Typography color={colors.ON_SURFACE}>
+									{select_order.shippingPrice.gross.amount} {getCurrencySimbol(select_order.shippingPrice.gross.currency)}	
+								</Typography>
+							</View>
+						</View>
 					</View>
 				</View>
 			</View>
-        </TouchableOpacity>
-    )
+		</TouchableOpacity>
+	)
 }
 
 /* AcceptShippingItem.propTypes = {

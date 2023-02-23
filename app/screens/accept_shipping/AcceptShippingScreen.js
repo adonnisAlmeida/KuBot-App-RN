@@ -4,10 +4,14 @@ import { Loading, NetworkError } from '../../components'
 import AcceptShippingList from './components/AcceptShippingList'
 import { useState } from 'react'
 import { useLazyQuery } from '@apollo/client'
-import { ORDERS_LIST } from '../../graphql/orders'
+import { ACCEPT_ORDERS_LIST, ORDERS_LIST } from '../../graphql/orders'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect } from 'react'
 import { setAcceptShipping } from '../../redux/accept_shipping/accept_shippingSlice'
+import { FloatingAction } from 'react-native-floating-action'
+import Colors from '../../constants/Colors'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { useTheme } from '@react-navigation/native'
 
 const test_orders = [
     {
@@ -6613,10 +6617,11 @@ const AcceptShippingScreen = ({ route, navigation }) => {
     const [endCursor, setEndCursor] = useState("")
     const dispatch = useDispatch()
     const userStore = useSelector(state => state.userlogin)
-    const acceptShippingStore = useSelector(state =>state.accepShipping)
+    const acceptShippingStore = useSelector(state => state.accepShipping)
     const carrierID = userStore.carrierInfo.serverId;
+    const { colors } = useTheme()
 
-    const [getOrdersList, { loading, error, data }] = useLazyQuery(ORDERS_LIST, {
+    const [getOrdersList, { loading, error, data }] = useLazyQuery(ACCEPT_ORDERS_LIST, {
         onCompleted: (data) => {
             if (data.orders.pageInfo.hasNextPage) {
                 setHasNextPage(data.orders.pageInfo.hasNextPage)
@@ -6655,7 +6660,7 @@ const AcceptShippingScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         setLoadingApp(true)
-        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '', freeOrder: true } })
+        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
     }, [])
 
     useEffect(() => {
@@ -6669,7 +6674,7 @@ const AcceptShippingScreen = ({ route, navigation }) => {
     const loadMore = () => {
         if (hasNextPage) {
             setLoadingScroll(true)
-            getOrdersList({ variables: { /* carrier: carrierID, */  after: endCursor, before: '', freeOrder: true } })
+            getOrdersList({ variables: { /* carrier: carrierID, */  after: endCursor, before: '' } })
         } else {
             console.log(`No hay datos para cargar`)
         }
@@ -6677,13 +6682,41 @@ const AcceptShippingScreen = ({ route, navigation }) => {
 
     const reloadApp = () => {
         setLoadingApp(true)
-        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '', freeOrder: true } })
+        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
     }
 
     const doRefresh = () => {
         setRefreshing(true)
-        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '', freeOrder: true } })
+        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
     }
+
+    const actionIcon = (name) => {
+		return (
+			<FontAwesome
+				name={name}
+				size={20}
+				color={colors.SURFACE}
+			/>
+		)
+	}
+
+    const actionsTrash = [
+		{
+			text: "Actualizar",
+			icon: actionIcon('refresh'),
+			name: "bt_update",
+			position: 1,
+			color: Colors.COLORS.PRIMARY
+		}
+	];
+
+    const doAction = (action) => {
+		switch (action) {
+			case 'bt_update':
+				doRefresh()
+				break;
+		}
+	}
 
     if (loadingApp) return <Loading />
 
@@ -6694,14 +6727,25 @@ const AcceptShippingScreen = ({ route, navigation }) => {
                     <NetworkError accion={reloadApp} />
                 ) :
                 (
-                    <AcceptShippingList
-                        navigation={navigation}
-                        orders_list={orders}
-                        doRefresh={doRefresh}
-                        loadMore={loadMore}
-                        renderLoader={renderLoader}
-                        refreshing={refreshing}
-                    />
+                    <>
+                        <AcceptShippingList
+                            navigation={navigation}
+                            orders_list={orders}
+                            doRefresh={doRefresh}
+                            loadMore={loadMore}
+                            renderLoader={renderLoader}
+                            refreshing={refreshing}
+                        />
+                        <FloatingAction
+                            color={Colors.COLORS.PRIMARY}
+                            floatingIcon={actionIcon('trash')}
+                            overrideWithAction={true}
+                            actions={actionsTrash}
+                            onPressItem={name => {
+                                doAction(name)
+                            }}
+                        />
+                    </>
                 )}
         </View>
     )

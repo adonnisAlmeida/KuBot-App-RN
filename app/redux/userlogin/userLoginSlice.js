@@ -27,8 +27,10 @@ export const userLoginSlice = createSlice({
 				state.isLogin = user != null
 			})
 			.addCase(setCarrierInfo.fulfilled, (state, action) => {
-				const carrierInfo = action.payload
-				state.carrierInfo = carrierInfo
+				state.carrierInfo = action.payload
+			})
+			.addCase(setCarrierInfoOtro.fulfilled, (state, action) => {
+				state.carrierInfo = action.payload
 			})
 			.addCase(getCarrierInfo.fulfilled, (state, action) => {
 				const carrierInfo = action.payload
@@ -46,6 +48,7 @@ export const logout = createAsyncThunk('userlogin/logout', service.logout)
 export const getUser = createAsyncThunk('userlogin/getUser', service.getUser)
 export const setUser = createAsyncThunk('userlogin/setUser', service.setUser)
 export const setCarrierInfo = createAsyncThunk('setcarrierinfo/setUser', service.setCarrierInfo)
+export const setCarrierInfoOtro = createAsyncThunk('setCarrierInfoOtro/setUser', service.setCarrierInfoOtro)
 export const getCarrierInfo = createAsyncThunk('getcarrierinfo/setUser', service.getCarrierInfo)
 
 export default userLoginSlice.reducer

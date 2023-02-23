@@ -20,6 +20,7 @@ import SellersScreen from './sellers/SellersScreen'
 import SellerDetailsScreen from './sellers/SellerDetailsScreen'
 import AcceptShippingScreen from './accept_shipping/AcceptShippingScreen'
 import AcceptShippingDetailsScreen from './accept_shipping/AcceptShippingDetailsScreen'
+import EditAddressScreen from './profile/EditAddressScreen'
 
 export default {
 	ONBOARDING: {
@@ -167,4 +168,11 @@ export default {
 		icon: 'sort-alpha-asc',
 		drawer: false,
 	},
+	/* EDIT_ADDRESS_FORM: {
+		component: EditAddressScreen,
+		title: 'Editar dirección',
+		name: 'EditAddressScreen',
+		icon: 'sort-alpha-asc',
+		drawer: false,
+	}, */
 }

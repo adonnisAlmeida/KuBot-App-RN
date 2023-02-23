@@ -104,7 +104,7 @@ mutation shipmentDeliveredPackageImage($id: ID!, $images: [Upload!]) {
 
 export const ORDERS_LIST = gql`
 	query Orders($carrier: Int, $after: String!, $before: String!, $freeOrder: Boolean) {
-		orders(first: 30, carrier: $carrier, after: $after, before: $before, freeOrder: $freeOrder) {
+		orders(first: 100, carrier: $carrier, after: $after, before: $before, freeOrder: $freeOrder) {
 			edges {
 				node {
 					id
@@ -131,11 +131,96 @@ export const ORDERS_LIST = gql`
 	}
 `
 
+export const ACCEPT_ORDERS_LIST = gql`
+	query Orders($carrier: Int, $after: String!, $before: String!) {
+		orders(first: 100, carrier: $carrier, after: $after, before: $before, freeOrder: true) {
+			edges {
+				node {
+					id
+					number
+					shippingPrice{
+						currency
+						gross{
+						  currency
+						  amount
+						}
+						net{
+						  currency
+						  amount
+						}
+						tax{
+						  currency
+						  amount
+						}
+					}
+					getDistance
+					shippingAddress{
+						city
+						postalCode
+						countryArea
+						country{
+						country
+						code
+						}
+					}
+				}
+			}
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				startCursor
+				endCursor
+			}
+		}
+	}
+`
+
+export const ACCEPT_ORDER_ID = gql`
+	query Product($id: ID!) {
+		order(id: $id) {
+			id
+			number
+			created
+			shippingPrice{
+				currency
+				gross{
+				  currency
+				  amount
+				}
+				net{
+				  currency
+				  amount
+				}
+				tax{
+				  currency
+				  amount
+				}
+			}
+			getDistance
+			allDimensions
+			weight{
+				unit
+				value
+			}
+			shippingAddress{
+				city
+				postalCode
+				countryArea
+				country{
+				country
+				code
+				}
+			}
+		}
+	}
+`
+
 export const ORDER_ID = gql`
 	query Product($id: ID!) {
 		order(id: $id) {
 			id
 			status
+			created
 			shippingStatus
 			allDimensions
 			events{

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform, Image, Modal, TouchableWithoutFeedback } from 'react-native'
+import { View, Text, Dimensions, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform, Image, Modal, TouchableWithoutFeedback, ImageBackground, TextInput, KeyboardAvoidingView, SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Button, Typography } from '../../../../components'
 import { useTheme } from '@react-navigation/native'
@@ -6,8 +6,9 @@ import moment from 'moment'
 import { orderShippingStatusDisplay, orderStatusDisplay, pagoAmigable } from '../../../../utils/CommonFunctions'
 import Colors from '../../../../constants/Colors'
 import Feather from 'react-native-vector-icons/Feather'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { FloatingAction } from 'react-native-floating-action'
 import { useMutation } from '@apollo/client'
@@ -16,6 +17,8 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { ReactNativeFile } from "apollo-upload-client";
 import { useDispatch, useSelector } from 'react-redux'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../redux/messenger_orders/messenger_ordersSlice'
+import AwesomeAlert from 'react-native-awesome-alerts'
+import { MONTH_NAMES, MONTH_NAMES_SHORT, DAY_NAMES, DAY_NAMES_SHORT, } from '../../../../constants/Other'
 
 moment.locale('es')
 
@@ -30,10 +33,15 @@ const DetailsNavView = ({ navigation, route }) => {
     const [shippingStatus, setShippingStatus] = useState(data.order.shippingStatus)
     const [gifSource, setGifSource] = useState(null)
     const [showModal, setShowModal] = useState(false)
-    const [modalTarget, setModalTarget] = useState(false)
+    const [uploadingImage, setUploadingImage] = useState(false)
     const [reload, setReload] = useState(false)
+    const [description, setDescription] = useState('')
+    const [modalTarget, setModalTarget] = useState('')
+    const [imageURI, setImageURI] = useState(null)
+    const [vistaPrevia, setVistaPrevia] = useState(null)
     let hasNote = false
     const { colors } = useTheme()
+    
 
     const dispatch = useDispatch()
 
@@ -141,12 +149,17 @@ const DetailsNavView = ({ navigation, route }) => {
             data.order.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
             setReload(!reload)
             if (Platform.OS === 'android') {
-                ToastAndroid.show('Se actualizo l imagen signatureImages.', ToastAndroid.LONG)
+                ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
             }
+            setUploadingImage(false)
         },
         onError: () => {
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Ha ocurrido un error adicionado la imagen de firma.', ToastAndroid.LONG)
+            }
             console.log('Error subiendo imagen >> ', errorSignature)
             console.log('Error subiendo imagen dataSignature >> ', dataSignature)
+            setUploadingImage(false)
         }
     })
 
@@ -155,13 +168,18 @@ const DetailsNavView = ({ navigation, route }) => {
             console.log("CREOO LA IMAGEN >> ", dataPackage)
             data.order.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
             setReload(!reload)
+            setUploadingImage(false)
             if (Platform.OS === 'android') {
-                ToastAndroid.show('Se actualizo l imagen packageImages.', ToastAndroid.LONG)
+                ToastAndroid.show('Se adicionó la imagen de paquete correctamente.', ToastAndroid.LONG)
             }
         },
         onError: () => {
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Ha ocurrido un error adicionado la imagen de paquete.', ToastAndroid.LONG)
+            }
             console.log('Error subiendo imagen >> ', errorPackage)
             console.log('Error subiendo imagen dataPackage >> ', dataPackage)
+            setUploadingImage(false)
         }
     })
 
@@ -429,7 +447,7 @@ const DetailsNavView = ({ navigation, route }) => {
     }
 
     /** Prueba camara */
-    const openCamera = async () => {
+    const openCamera = async (modalTarget) => {
         setShowModal(false)
         var options = {
             mediaType: 'photo',
@@ -466,82 +484,105 @@ const DetailsNavView = ({ navigation, route }) => {
         }
     }
 
-    const openGalery = async () => {
-        setShowModal(false)
+    const openGalery = async (modalTarget) => {
+        //setShowModal(false)
         var options = {
             mediaType: 'photo',
         };
 
         const picker_result = await launchImageLibrary(options);
         if (!picker_result.didCancel) {
-            let allImages = []
-
-            if (picker_result.assets.length > 1) {
-                picker_result.assets.map((i, index) => {
-                    let file = new ReactNativeFile({
-                        uri: i.uri,
-                        name: i.fileName,
-                        type: i.type,
-                    });
-                    allImages.push(file)
-                })
-
-                if (modalTarget == 'SIGNATURE') {
-                    try {
-                        await signatureImages({
-                            variables: { id: data.order.id, images: allImages }
-                        })
-                        console.log("OKOKOK")
-                    } catch (e) {
-                        console.log("KKKKK")
-                    }
-                } else if (modalTarget == 'PACKAGE') {
-                    try {
-                        await packageImages({
-                            variables: { id: data.order.id, images: allImages }
-                        })
-                        console.log("OKOKOK")
-                    } catch (e) {
-                        console.log("KKKKK")
-                    }
+            const file = new ReactNativeFile({
+                uri: picker_result.assets[0].uri,
+                name: picker_result.assets[0].fileName,
+                type: picker_result.assets[0].type,
+            });
+            setVistaPrevia({ uri: picker_result.assets[0].uri, })
+            console.log("modalTarget ", modalTarget)
+            setModalTarget(modalTarget)
+            setImageURI(file)
+            setShowModal(true)
+            /* if (modalTarget == 'SIGNATURE') {
+                try {
+                    await signatureImages({
+                        variables: { id: data.order.id, images: file }
+                    })
+                    console.log("OKOKOK")
+                } catch (e) {
+                    console.log("KKKKK")
                 }
-            } else {
-                const file = new ReactNativeFile({
-                    uri: picker_result.assets[0].uri,
-                    name: picker_result.assets[0].fileName,
-                    type: picker_result.assets[0].type,
-                });
-                if (modalTarget == 'SIGNATURE') {
-                    try {
-                        await signatureImages({
-                            variables: { id: data.order.id, images: file }
-                        })
-                        console.log("OKOKOK")
-                    } catch (e) {
-                        console.log("KKKKK")
-                    }
-                } else if (modalTarget == 'PACKAGE') {
-                    try {
-                        await packageImages({
-                            variables: { id: data.order.id, images: file }
-                        })
-                        console.log("OKOKOK")
-                    } catch (e) {
-                        console.log("KKKKK")
-                    }
+            } else if (modalTarget == 'PACKAGE') {
+                try {
+                    await packageImages({
+                        variables: { id: data.order.id, images: file }
+                    })
+                    console.log("OKOKOK")
+                } catch (e) {
+                    console.log("KKKKK")
                 }
-
-            }
+            } */
         }
     }
 
+    const sendImage = async () => {
+        setUploadingImage(true)
+        if (modalTarget == 'SIGNATURE') {
+            try {
+                await signatureImages({
+                    variables: { id: data.order.id, images: imageURI }
+                })
+                //console.log("OKOKOK")
+            } catch (e) {
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Ha ocurrido un error adicionado la imagen de firma.', ToastAndroid.LONG)
+                }
+                //console.log("KKKKK")
+            }
+        } else if (modalTarget == 'PACKAGE') {
+            try {
+                await packageImages({
+                    variables: { id: data.order.id, images: imageURI }
+                })
+                //console.log("OKOKOK")
+            } catch (e) {
+                console.log("KKKKK", e)
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Ha ocurrido un error adicionado la imagen de paquete. TRY', ToastAndroid.LONG)
+                }
+            }
+        }
+
+        /* setTimeout(() => {
+            setShowModal(false)
+            setUploadingImage(false)
+        }, 2000); */
+        /* console.log('Deacuerdo a guardar la imgen')
+        console.log('Modal target >> ', modalTarget)
+        console.log('Image File >> ', imageURI)
+        console.log('Description >> ', description) */
+        //antes mostrar cargando
+        setShowModal(false)
+        setUploadingImage(false)
+    }
+
     const addSignatureImage = () => {
-        setModalTarget('SIGNATURE')
-        setShowModal(true)
+        openGalery('SIGNATURE')
+        //setShowModal(true)
     }
     const addPackageImage = () => {
-        setModalTarget('PACKAGE')
-        setShowModal(true)
+        openGalery('PACKAGE')
+        //setShowModal(true)
+    }
+
+    const printCreated = (date) => {
+        let output = 'ff'
+        let dateObject = new Date(date)
+        output = DAY_NAMES[dateObject.getDay()] +
+            ' ' + dateObject.getDate() +
+            ' de ' + MONTH_NAMES[dateObject.getMonth()] +
+            ' del ' + dateObject.getFullYear()
+
+        return output
     }
 
     /** Fin Prueba camara */
@@ -554,19 +595,90 @@ const DetailsNavView = ({ navigation, route }) => {
                 animationType="fade"
                 onRequestClose={() => setShowModal(false)}
             >
-                <TouchableOpacity
+                {/* <TouchableOpacity
+                    style={styles.cancelIcon}
+                    onPress={() => setShowModal(false)}
+                >
+                    <Ionicons
+                        name='close-outline'
+                        size={40}
+                        color='rgba(255,255,255,0.9)'
+                    />
+                </TouchableOpacity> */}
+                <View
+                    behavior={"padding"} style={styles.centeredView}
+                // style={styles.centeredView}
+                //onPressOut={() => setConfirmModal(false)}
+                >
+
+                    {/* <TouchableOpacity
+                        style={styles.okIcon}
+                        onPress={() => sendImage()}
+                    >
+                        <Ionicons
+                            name='checkmark-outline'
+                            size={40}
+                            color={Colors.COLORS.SUCCESS}
+                        />
+                    </TouchableOpacity> */}
+                    <ImageBackground
+                        resizeMode='contain'
+                        //resizeMethod='auto'
+                        style={styles.vistaPrevia}
+                        source={vistaPrevia}
+                    //Descripción (opcional)
+                    />
+                    <KeyboardAvoidingView
+                        behavior="position"
+                        style={styles.textInputContainer}
+                        keyboardVerticalOffset={-60}
+                    // style={styles.centeredView}
+                    //onPressOut={() => setConfirmModal(false)}
+                    >
+                        <TextInput
+                            style={styles.commentInput}
+                            autoComplete='off'
+                            placeholder='Descripción (opcional)'
+                            multiline={true}
+                            placeholderTextColor='rgba(255,255,255,0.7)'
+                            onChangeText={text => setDescription(text)}
+                        />
+                        {uploadingImage ? (
+                            <ActivityIndicator
+                                style={styles.aIndicator}
+                                color={Colors.COLORS.SUCCESS}
+                                size='large'
+                            />
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.okInputIcon}
+                                onPress={() => sendImage()}
+                            >
+
+                                <Ionicons
+                                    name='ios-checkmark-circle-outline'
+                                    size={40}
+                                    color={Colors.COLORS.SUCCESS}
+                                />
+                            </TouchableOpacity>
+                        )}
+                    </KeyboardAvoidingView>
+
+
+                </View>
+                {/* <TouchableOpacity
                     style={styles.centeredView}
                     onPressOut={() => setShowModal(false)}
                 >
                     <TouchableWithoutFeedback>
                         <View style={styles.selectModal}>
-                            {/* <TouchableOpacity onPress={() => openCamera()}>
+                            <TouchableOpacity onPress={() => openCamera()}>
                                 <FontAwesome
                                     name="camera-retro"
                                     color={colors.PRIMARY}
                                     size={35}
                                 />
-                            </TouchableOpacity> */}
+                            </TouchableOpacity>
                             <TouchableOpacity onPress={() => openGalery()}>
                                 <FontAwesome
                                     name="photo"
@@ -576,7 +688,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             </TouchableOpacity>
                         </View>
                     </TouchableWithoutFeedback>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </Modal>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
@@ -588,6 +700,14 @@ const DetailsNavView = ({ navigation, route }) => {
                             {orderStatusDisplay(data.order.status).toUpperCase()}
                         </Typography>
                     </View>
+                    {/* <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
+                        <Typography h3 style={{ marginVertical: 6 }}>
+                            Creada el:
+                        </Typography>
+                        <Typography color={colors.ON_SURFACE}>
+                            {printCreated(data.order.created)}
+                        </Typography>
+                    </View> */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
                         <View>
                             <Typography h3 style={{ marginVertical: 10 }}>
@@ -684,13 +804,21 @@ const DetailsNavView = ({ navigation, route }) => {
                                     Imágenes de la firma
                                 </Typography>
                                 <TouchableOpacity onPress={() => addSignatureImage()} >
+                                    <MaterialIcons
+                                        style={styles.headerRight}
+                                        name="add-photo-alternate"
+                                        color={colors.ON_SURFACE}
+                                        size={26}
+                                    />
+                                </TouchableOpacity>
+                                {/* <TouchableOpacity onPress={() => addSignatureImage()} >
                                     <FontAwesome
                                         style={styles.headerRight}
                                         name="edit"
                                         color={colors.ON_SURFACE}
                                         size={22}
                                     />
-                                </TouchableOpacity>
+                                </TouchableOpacity> */}
                             </View>
                             <ScrollView
                                 showsHorizontalScrollIndicator={true}
@@ -724,11 +852,11 @@ const DetailsNavView = ({ navigation, route }) => {
                                     Imágenes del paquete
                                 </Typography>
                                 <TouchableOpacity onPress={() => addPackageImage()} >
-                                    <FontAwesome
+                                    <MaterialIcons
                                         style={styles.headerRight}
-                                        name="edit"
+                                        name="add-photo-alternate"
                                         color={colors.ON_SURFACE}
-                                        size={22}
+                                        size={26}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -842,20 +970,22 @@ const DetailsNavView = ({ navigation, route }) => {
                 </View>
                 <Typography></Typography>
             </ScrollView >
-            {(data.order.shippingStatus === 'LOST' || data.order.shippingStatus === 'NO_STATUS' ||
-                shippingStatus === 'LOST' || shippingStatus === 'NO_STATUS' ||
-                shippingStatus === 'REJECTED' || shippingStatus === 'REJECTED' ||
-                shippingStatus === 'DELIVERED' || shippingStatus === 'DELIVERED' ||
-                shippingStatus === 'ACCEPTED_CARRIER' || shippingStatus === 'ACCEPTED_CARRIER') ? null :
-                (
-                    <FloatingAction
-                        color={Colors.COLORS.PRIMARY}
-                        actions={actionsButton}
-                        onPressItem={name => {
-                            doAction(name)
-                        }}
-                    />
-                )
+
+            {
+                (data.order.shippingStatus === 'LOST' || data.order.shippingStatus === 'NO_STATUS' ||
+                    shippingStatus === 'LOST' || shippingStatus === 'NO_STATUS' ||
+                    shippingStatus === 'REJECTED' || shippingStatus === 'REJECTED' ||
+                    shippingStatus === 'DELIVERED' || shippingStatus === 'DELIVERED' ||
+                    shippingStatus === 'ACCEPTED_CARRIER' || shippingStatus === 'ACCEPTED_CARRIER') ? null :
+                    (
+                        <FloatingAction
+                            color={Colors.COLORS.PRIMARY}
+                            actions={actionsButton}
+                            onPressItem={name => {
+                                doAction(name)
+                            }}
+                        />
+                    )
             }
             {
                 displayLoading ? (
@@ -869,11 +999,56 @@ const DetailsNavView = ({ navigation, route }) => {
 }
 
 const styles = StyleSheet.create({
+    aIndicator: {
+        position: 'absolute',
+        right: 14,
+        top: 9,
+    },
+    cancelIcon: {
+        //position: 'absolute',
+        /* left: 16,
+        top: 16, */
+        //marginLeft: 16,
+        //marginTop: 16,
+        zIndex: 5,
+        //backgroundColor: 'red'
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    okIcon: {
+        position: 'absolute',
+        right: 16,
+        top: 16,
+    },
+    okInputIcon: {
+        position: 'absolute',
+        right: 10,
+        top: 6,
+    },
+    textInputContainer: {
+        width: '100%',
+        //marginBottom: -100
+        //backgroundColor: 'blue',
+    },
+    commentInput: {
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        borderRadius: 100,
+        paddingHorizontal: 20,
+        marginHorizontal: 5,
+        height: 55,
+        color: '#fff',
+        paddingRight: 60,
+    },
+    vistaPrevia: {
+        marginTop: 10,
+        //marginHorizontal: 10,
+        height: Dimensions.get('window').height * 0.75,
+        width: '100%'
+    },
     centeredView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#00000099'
+        backgroundColor: 'rgba(0,0,0,0.6)'
     },
     selectModal: {
         flexDirection: 'row',

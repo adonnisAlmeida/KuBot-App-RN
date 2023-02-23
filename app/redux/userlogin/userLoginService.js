@@ -7,6 +7,7 @@ export default {
 	logout,
 	setCarrierInfo,
 	getCarrierInfo,
+	setCarrierInfoOtro,
 }
 
 function login(user) {
@@ -18,6 +19,11 @@ function setCarrierInfo(carrier) {
 	const carrierInfo = carrier.carriers.edges[0].node
 	AsyncStorage.setItem('@carrierInfo', JSON.stringify(carrierInfo))
 	return carrierInfo
+}
+
+function setCarrierInfoOtro(carrier) {
+	AsyncStorage.setItem('@carrierInfo', JSON.stringify(carrier))
+	return carrier
 }
 
 async function getCarrierInfo() {

@@ -282,6 +282,37 @@ export function currencySimbol(currency) {
     }
 }
 
+export const cyrb53 = (str, seed = 0) => {
+    let h1 = 0xdeadbeef ^ seed,
+        h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+};
+
+export const getCurrencySimbol = (param) => {
+    switch (param) {
+        case 'EUR':
+            return '€'
+        case 'USD':
+            return '$';
+        case 'CUC':
+            return '$';
+        case 'CUP':
+            return '$';
+
+        default:
+            return '$';
+    }
+}
+
 export function stringToColour(str) {
     var hash = 0;
     for (var i = 0; i < str.length; i++) {
@@ -331,8 +362,8 @@ const makeMonthlyRule = (key, item, restData) => {
     if (item.start && item.endRecurringPeriod) {
         let startFromated = moment(item.start).add(cont, 'M').format("YYYY-MM-DD")
         const endFromated = moment(item.endRecurringPeriod).add(1, 'd').format("YYYY-MM-DD")
-        console.log('startFromated', startFromated)
-        console.log('endFromated', endFromated)
+        /* console.log('startFromated', startFromated)
+        console.log('endFromated', endFromated) */
         while (startFromated <= endFromated) {
 
             cont += 1
@@ -400,18 +431,18 @@ const makeDailyRule = (key, item, restData) => {
 }
 
 export function applyRules(newData, restData) {
-    console.log('applyRules')
+    //console.log('applyRules')
     Object.entries(newData).forEach(([key, value]) => {
-        console.log('bject.entries(newData).forEach(([key, value]) => {')
+        //console.log('bject.entries(newData).forEach(([key, value]) => {')
         value.map((item, index) => {
-            console.log('value.map((item, index) => {')
+            //console.log('value.map((item, index) => {')
             if (item.rule == null) {
-                console.log('if (item.rule == null) {')
+                //console.log('if (item.rule == null) {')
                 if (restData[key]) {
-                    console.log('if (restData[key]) {')
+                    //console.log('if (restData[key]) {')
                     restData[key].push(item)
                 } else {
-                    console.log('if (restData[key]) { elseeee')
+                    //console.log('if (restData[key]) { elseeee')
                     restData[key] = []
                     restData[key].push(item)
                 }

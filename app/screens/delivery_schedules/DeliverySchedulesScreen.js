@@ -62,7 +62,7 @@ const otherData = {
 	}
 }
 
-export default function DeliverySchedulesScreen({ navigation }) {
+export default function DeliverySchedulesScreen({ navigation, route }) {
 	const { dark, colors } = useTheme()
 	const [loadingApp, setLoadingApp] = useState(false)
 	const [day, setDay] = useState(moment().format('YYYY-MM-DD'))
@@ -71,9 +71,8 @@ export default function DeliverySchedulesScreen({ navigation }) {
 	const [alertMessage, setAlertMessage] = useState(null)
 	const [alertTitle, setAlertTitle] = useState(null)
 	const [showAlertAw, setShowAlert] = useState(false)
+	const [refreshing, setRefreshing] = useState(false)
 	const dispatch = useDispatch()
-
-
 
 	const actionIcon = (name) => {
 		return (
@@ -109,7 +108,8 @@ export default function DeliverySchedulesScreen({ navigation }) {
 
 	const [getDeliverySchedule, { loading, error, data }] = useLazyQuery(GET_DELIVERY_SCHEDULE, {
 		onCompleted: (data) => {
-			console.log('TERMINOO >> ', data.events.edges)
+			//console.log('TERMINOO >> ', data.events.edges)
+			console.log("EJECUTOOOOOOOOOOO")
 			const todo = data.events.edges
 			dispatch(setDeliberySchedulesSource(todo))
 			/* const groupedItems = todo.reduce((results, item) => {
@@ -124,10 +124,12 @@ export default function DeliverySchedulesScreen({ navigation }) {
 			setMyDeliverySchedule(result)
 			dispatch(setDeliberySchedules(result)) */
 			setLoadingApp(false)
+			setRefreshing(false)
 		},
 		onError: () => {
 			console.log('Error listando los eventos >> ', error)
 			setLoadingApp(false)
+			setRefreshing(false)
 		},
 		fetchPolicy: "no-cache"
 	})
@@ -153,15 +155,34 @@ export default function DeliverySchedulesScreen({ navigation }) {
 		getDeliverySchedule({ variables: { carrierServerId: carrierID } })
 	}, [])
 
+	useEffect(() => {
+		console.log("CAMIO LOS DATOS DE AGENDA")
+		setRefreshing(false)
+	}, [myDeliverySchedule])
+
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('focus', () => {
+			// do something
+			let makeReload = route.params?.makeReload
+			console.log("ENTRO navigation.addListener ", makeReload)
+			if(makeReload == 'KAKA'){
+				console.log('Hello World!')
+			}
+			//setRefreshing(true)
+			//getDeliverySchedule({ variables: { carrierServerId: carrierID } })
+		});
+		return unsubscribe;
+	}, [navigation]);
+
 
 
 	/* useEffect(() => {
 		setMyDeliverySchedule(deliveryScheduleState.list)
 	}, [deliveryScheduleState.list]) */
 	useEffect(() => {
-		console.log('DESDE LA FUENTE >> ', deliveryScheduleState.source)
+		//console.log('DESDE LA FUENTE >> ', deliveryScheduleState.source)
 		if (deliveryScheduleState.source.length > 0) {
-			console.log('DESDE LA FUENTE >> ENTROOO', deliveryScheduleState.source.length)
+			//console.log('DESDE LA FUENTE >> ENTROOO', deliveryScheduleState.source.length)
 			const groupedItems = deliveryScheduleState.source.reduce((results, item) => {
 				const from = moment(item.node.start).format('YYYY-MM-DD')
 				const stringKey = from.toString()
@@ -169,8 +190,10 @@ export default function DeliverySchedulesScreen({ navigation }) {
 					(results[stringKey] = results[stringKey] || []).push(item.node)
 				return results
 			}, {})
-			console.log('groupedItems >> ', groupedItems)
+			//console.log('groupedItems >> ', groupedItems)
 			let result = applyRules(groupedItems, {})
+			//console.log("ESte groupedItems >> ", groupedItems)
+			//console.log("ESte es con la regla aplicada >> ", result)
 			setMyDeliverySchedule(result)
 			dispatch(setDeliberySchedules(result))
 		} else {
@@ -199,6 +222,11 @@ export default function DeliverySchedulesScreen({ navigation }) {
 		],
 	})
 
+	const doRefresh = () => {
+		setRefreshing(true)
+		getDeliverySchedule({ variables: { carrierServerId: carrierID } })
+	}
+
 	const deleteDay = (item) => {
 		setEventToDelete(item)
 		/* setAlertMessage(`Esta seguro que desea eliminar el evento de horario "${item.title}"`)
@@ -213,7 +241,8 @@ export default function DeliverySchedulesScreen({ navigation }) {
 				navigation.navigate('DeliverySchedulesFormScreen', { date: day })
 				break;
 			case 'bt_update':
-				getDeliverySchedule({ variables: { carrierServerId: carrierID } })
+				doRefresh()
+				//getDeliverySchedule({ variables: { carrierServerId: carrierID } })
 				break;
 		}
 	}
@@ -231,7 +260,7 @@ export default function DeliverySchedulesScreen({ navigation }) {
 		if (loadingApp) setLoadingApp(false)
 	}, 2000)
 
-	if (loading || loadingApp) return <Loading />
+	if (loadingApp) return <Loading />
 
 	return (
 		<View style={styles.container}>
@@ -242,7 +271,15 @@ export default function DeliverySchedulesScreen({ navigation }) {
 				(
 					<>
 						{alert}
-						<Agenda navigation={navigation} data={myDeliverySchedule} selectedDay={day} deleteDay={deleteDay} setDay={setDay} />
+						<Agenda
+							navigation={navigation}
+							data={myDeliverySchedule}
+							selectedDay={day}
+							deleteDay={deleteDay}
+							setDay={setDay}
+							doRefresh={doRefresh}
+							refreshing={refreshing}
+						/>
 						<FloatingAction
 							color={Colors.COLORS.PRIMARY}
 							actions={actionsButton}
