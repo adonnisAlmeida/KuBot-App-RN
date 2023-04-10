@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux'
 import { removeAcceptShipping } from '../../redux/accept_shipping/accept_shippingSlice'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { MONTH_NAMES, DAY_NAMES } from '../../constants/Other'
-import { getCurrencySimbol } from '../../utils/CommonFunctions'
+import { getCurrencySimbol, printCreated } from '../../utils/CommonFunctions'
 
 
 moment.locale('es')
@@ -32,7 +32,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
         fetchPolicy: "no-cache"
     })
 
-    const printCreated = (date) => {
+    /* const printCreated = (date) => {
         let output = 'ff'
         let dateObject = new Date(date)
         output = DAY_NAMES[dateObject.getDay()] +
@@ -41,7 +41,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
             ' del ' + dateObject.getFullYear()
 
         return output
-    }
+    } */
 
     const autoLoad = () => {
         getOrderDetail({
@@ -63,7 +63,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                             dispatch(removeAcceptShipping(orderDetails.order.id))
                             setDisplayLoading(false)
                             if (Platform.OS === 'android') {
-                                ToastAndroid.show('Envío aceptado correctamente.', ToastAndroid.LONG)
+                                ToastAndroid.show('Envío aceptado correctamente. Ahora puede acceder a los detalles de la orden desde el menú “Orden de Mensajero”', ToastAndroid.LONG)
                             }
                             navigation.goBack()
                         }
@@ -209,7 +209,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
             <AwesomeAlert
                 show={showAlertAw}
                 title="Aceptar Envío"
-                message="¿Esta seguro de aceptar este envío?"
+                message="¿Está seguro de aceptar este envío?"
                 closeOnTouchOutside={true}
                 closeOnHardwareBackPress={true}
                 showCancelButton={true}

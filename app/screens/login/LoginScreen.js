@@ -1,4 +1,4 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 import {
 	ActivityIndicator,
 	Keyboard,
@@ -7,6 +7,8 @@ import {
 	StyleSheet,
 	View,
 	Platform,
+	TouchableOpacity,
+	ScrollView,
 } from 'react-native'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { useTheme } from '@react-navigation/native'
@@ -17,23 +19,25 @@ import { TOKEN_CREATE, GET_CARRIER_BY_USER_EMAIL } from '../../graphql/login'
 import { login, setCarrierInfo } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
 import { ComplexAnimationBuilder } from 'react-native-reanimated'
-import { useEffect } from 'react'
+
 import Pushy from 'pushy-react-native';
-import { useState } from 'react'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 export default function LoginScreen({ navigation }) {
 	const dispatch = useDispatch()
 	const { colors } = useTheme()
 
-	const [email, setEmail] = React.useState('')
-	const [loadingButton, setLoadingButton] = React.useState(false)
-	const [password, setPassword] = React.useState('')
-	const [errors, setErrors] = React.useState([])
-	const [errorLogin, setErrorLogin] = React.useState(false)
-	const [errorMessage, setErrorMessage] = React.useState("")
-	const [token, setToken] = React.useState(null)
+	const [email, setEmail] = useState('')
+	const [loadingButton, setLoadingButton] = useState(false)
+	const [password, setPassword] = useState('')
+	const [errors, setErrors] = useState([])
+	const [errorLogin, setErrorLogin] = useState(false)
+	const [isSecure, setIsSecure] = useState(true)
+	const [secureIcon, setSecureIcon] = useState('eye')
+	const [errorMessage, setErrorMessage] = useState("")
+	const [token, setToken] = useState(null)
 	const [pushyToken, setPushyToken] = useState(null)
-	
+
 
 	const hasErrors = (key) => (errors.includes(key) ? styles.hasErrors : null)
 
@@ -54,6 +58,11 @@ export default function LoginScreen({ navigation }) {
 		});
 	}, [])
 
+	useEffect(() => {
+		setErrors([])
+		setErrorLogin(false)
+		setErrorMessage('')
+	}, [email, password])
 
 	const [tokenCreate, { loadingToken, errorToken, dataToken }] = useMutation(TOKEN_CREATE, {
 		onCompleted: (dataToken) => {
@@ -87,9 +96,24 @@ export default function LoginScreen({ navigation }) {
 	})
 
 	const handleLogin = (vEmail, vPassword) => {
-		setLoadingButton(true)
-		Keyboard.dismiss()
-		tokenCreate({ variables: { email: vEmail, password: vPassword } })
+		if (email == '') {
+			setErrors(['email'])
+			setErrorLogin(true)
+			setErrorMessage(`El correo es obligatorio.`)
+		} else {
+			setLoadingButton(true)
+			Keyboard.dismiss()
+			tokenCreate({ variables: { email: vEmail, password: vPassword } })
+		}
+	}
+
+	const changeSecure = () => {
+		setIsSecure(!isSecure)
+		if (isSecure) {
+			setSecureIcon('eye-slash')
+		} else {
+			setSecureIcon('eye')
+		}
 	}
 
 	/* React.useEffect(() => {
@@ -117,92 +141,120 @@ export default function LoginScreen({ navigation }) {
 		}
 	}, [token]) */
 
+
 	return (
 		<KeyboardAvoidingView
-			style={styles.login}
-			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			style={{ flex: 1, padding: 40, }}
+			behavior={Platform.OS === "ios" ? "padding" : "height"}
+			//style={{ flex: 1, backgroundColor: 'red' }}
+			keyboardVerticalOffset={10}
 		>
-			<View>
-				<Typography color={colors.ON_BACKGROUND} style={styles.title}>
-					Iniciar Sesión
-				</Typography>
-			</View>
-			<View style={{ marginTop: 100 }}>
-				<Typography
-					color={colors.ON_SURFACE_VARIANT}
-					style={{ marginVertical: 10 }}
-				>
-					Correo
-				</Typography>
-				<TextInput
-					keyboardType='email-address'
-					value={email}
-					style={[
-						styles.input,
-						hasErrors('email'),
-						{ color: colors.ON_BACKGROUND },
-					]}
-					onChangeText={(text) => setEmail(text)}
-				/>
-			</View>
-			<View style={{ marginTop: 20 }}>
-				<Typography
-					color={colors.ON_SURFACE_VARIANT}
-					style={{ marginVertical: 10 }}
-				>
-					Contraseña
-				</Typography>
-				<TextInput
-					secureTextEntry
-					value={password}
-					style={[
-						styles.input,
-						hasErrors('password'),
-						{ color: colors.ON_BACKGROUND },
-					]}
-					onChangeText={(text) => setPassword(text)}
-				/>
-			</View>
-			{
-				errorLogin ? (
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+			>
+				<View style={{ alignItems: 'center' }}>
+					<Typography color={colors.ON_BACKGROUND} style={styles.title}>
+						Iniciar Sesión
+					</Typography>
+				</View>
+				<View style={{ marginTop: 100 }}>
 					<Typography
-						color='#CF6679'
-						style={{ marginVertical: 10 }}
+						//color={colors.ON_SURFACE_VARIANT}
+						style={[hasErrors('email'), { marginVertical: 10 }]}
 					>
-						{errorMessage}
-					</Typography>) : (<></>)
-			}
-			<View style={{ marginTop: 50 }}>
-				<Button
-					style={{ alignItems: 'center', marginBottom: 10 }}
-					onPress={() => handleLogin(email, password)}
-				>
-					{(loadingToken || loadingButton) ? (
-						<ActivityIndicator size="small" color="white" />
-					) : (
-						<Typography color="#ffffff">Acceder</Typography>
-					)}
-				</Button>
-				<Button
-					style={{ alignItems: 'center' }}
-					color="trasparent"
-					onPress={() => navigation.navigate('Register')}
-				>
-					<Typography
-						color={colors.ON_SURFACE_VARIANT}
+						Correo
+					</Typography>
+					<TextInput
+						keyboardType='email-address'
+						value={email}
 						style={[
+							styles.input,
+							hasErrors('email'),
 							{
-								textDecorationLine: 'underline',
+								color: colors.ON_BACKGROUND,
+								borderBottomColor: '#8E8E8E',
+								borderBottomWidth: StyleSheet.hairlineWidth,
 							},
 						]}
+						onChangeText={(text) => setEmail(text)}
+					/>
+				</View>
+				<View style={{ marginTop: 20 }}>
+					<Typography
+						color={colors.ON_SURFACE_VARIANT}
+						style={[hasErrors('email'), { marginVertical: 10 }]}
 					>
-						Crear Cuenta
+						Contraseña
 					</Typography>
-				</Button>
-				<Typography>
-					Pushy.me Token {pushyToken}
-				</Typography>
-			</View>
+					<View style={{
+						flexDirection: 'row',
+						borderBottomColor: '#8E8E8E',
+						borderBottomWidth: StyleSheet.hairlineWidth,
+					}}>
+						<TextInput
+							secureTextEntry={isSecure}
+							value={password}
+							style={[
+								styles.input,
+								hasErrors('password'),
+								{ color: colors.ON_BACKGROUND, flex: 1 },
+							]}
+							onChangeText={(text) => setPassword(text)}
+						/>
+						<TouchableOpacity onPress={() => changeSecure()}>
+							<FontAwesome
+								style={{ marginTop: 10 }}
+								name={secureIcon}
+								size={24}
+							//color={colors.SURFACE}
+							/>
+						</TouchableOpacity>
+
+					</View>
+
+				</View>
+				{
+					errorLogin ? (
+						<Typography
+							color='#CF6679'
+							style={{ marginVertical: 10 }}
+						>
+							{errorMessage}
+						</Typography>) : (<></>)
+				}
+				<View style={{ marginTop: 50 }}>
+					<Button
+						style={{ alignItems: 'center', marginBottom: 10 }}
+						onPress={() => handleLogin(email, password)}
+					>
+						{(loadingToken || loadingButton) ? (
+							<ActivityIndicator size="small" color="white" />
+						) : (
+							<Typography color="#ffffff">Acceder</Typography>
+						)}
+					</Button>
+					<Button
+						style={{ alignItems: 'center' }}
+						color="trasparent"
+						onPress={() => navigation.navigate('Register')}
+					>
+						<Typography
+							color={colors.ON_SURFACE_VARIANT}
+							style={[
+								{
+									textDecorationLine: 'underline',
+								},
+							]}
+						>
+							Crear cuenta de mensajero en solo tres pasos.
+						</Typography>
+					</Button>
+				</View>
+				{/* <Typography>
+				Pushy.me Token {pushyToken}
+			</Typography> */}
+			</ScrollView>
+
 		</KeyboardAvoidingView>
 	)
 }
@@ -219,11 +271,10 @@ const styles = StyleSheet.create({
 	input: {
 		borderRadius: 0,
 		borderWidth: 0,
-		borderBottomColor: '#8E8E8E',
-		borderBottomWidth: StyleSheet.hairlineWidth,
 		height: 45,
 	},
 	hasErrors: {
 		borderBottomColor: '#CF6679',
+		color: '#CF6679',
 	},
 })

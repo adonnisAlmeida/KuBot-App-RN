@@ -6,6 +6,8 @@ export const TOKEN_CREATE = gql`
 			token
 			user {
 				id
+				isCarrier
+				serverId
 				firstName
 				lastName
 				addresses{
@@ -50,6 +52,26 @@ export const ACCOUNT_REGISTER = gql`
 			user {
 				firstName
         		lastName
+			}
+		}
+	}
+`
+
+export const CARRIER_REGISTER = gql`
+	mutation carrierRegister($input: CarrierCreateInput!) {
+		carrierRegister(input: { email: $email, password: $password }) {
+			errors{
+				field
+				message
+			}
+			carrierErrors{
+				field
+				message
+				code
+			}
+			carrier{
+				isActive
+				serverId
 			}
 		}
 	}

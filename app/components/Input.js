@@ -12,7 +12,7 @@ export default function Input({ label, value, setValue, error, ...props }) {
 			{label && (
 				<Typography
 					color={colors.ON_SURFACE_VARIANT}
-					style={[{ marginVertical: 10 }, error && styles.hasErrorLabel]}
+					style={[{ marginTop: 10 }, error && styles.hasErrorLabel]}
 				>
 					{label}
 				</Typography>

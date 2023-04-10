@@ -11,6 +11,8 @@ import { useTheme } from '@react-navigation/native'
 
 import Theme from '../../../constants/Theme'
 import { Typography } from '../../../components'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
 
 export default function ProductItem({ navigation, product }) {
 	const { dark, colors } = useTheme()
@@ -20,17 +22,22 @@ export default function ProductItem({ navigation, product }) {
 			? {
 				uri: product.images[0].url,
 			}
-			: require('../../../../assets/icon.png')
+			: require('../../../../assets/user_avatar.png')
 
 	return (
 		<TouchableWithoutFeedback
 			onPress={() => navigation.navigate('Product', { id: product.id })}
 		>
 			<View style={dark ? styles.cardDark : styles.card}>
-				<ImageBackground
+				<Image
 					style={styles.avatar}
 					imageStyle={styles.avatar}
 					source={avatar}
+					indicator={Progress.Pie}
+					indicatorProps={{
+						color: colors.PRIMARY,
+						borderWidth: 0,
+					}}
 				/>
 				<View style={styles.card_details}>
 					<View
@@ -111,6 +118,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	avatar: {
+		position: 'relative',
 		width: 42,
 		height: 42,
 		borderRadius: 62,

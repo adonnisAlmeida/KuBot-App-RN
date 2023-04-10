@@ -44,10 +44,12 @@ export default function MessengerOrdersList({
 
 	const onPressMessengerOrders = (messenger_orders) => {
 		if (selected.length > 0) onLongPressMessengerOrders(messenger_orders)
-		else
+		else {
+			console.log("ID DE LA ORDEN >> ", messenger_orders.id)
 			navigation.navigate('MessengerOrdersDetail', {
 				messenger_orders_id: messenger_orders.id,
 			})
+		}
 	}
 
 	const onDeleteMessengerOrders = () => {

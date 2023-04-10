@@ -7,6 +7,7 @@ import { holidays } from '../../constants/mock'
 import { addHolyDaysByUser } from '../../redux/holydays/holydaysSlice'
 import { CREATE_VACATION } from '../../graphql/holydays'
 import { useMutation } from '@apollo/client'
+import Colors from '../../constants/Colors'
 
 export default function HolidaysFormScreen({ navigation }) {
 	const [description, setDescription] = React.useState('')
@@ -98,6 +99,7 @@ export default function HolidaysFormScreen({ navigation }) {
 				/>
 			</View>
 			<Button
+				color={Colors.COLORS.WEB_BUTTON}
 				style={{ alignItems: 'center', marginVertical: 16 }}
 				onPress={() => handleAdd()}
 			>
@@ -108,11 +110,11 @@ export default function HolidaysFormScreen({ navigation }) {
 				)}
 			</Button>
 			<Button
-				color="error"
+				color={Colors.COLORS.SWITCH_OFF}
 				style={{ alignItems: 'center' }}
 				onPress={() => handleReset()}
 			>
-				<Typography color="#ffffff">Limpiar</Typography>
+				<Typography color="#000">Limpiar</Typography>
 			</Button>
 		</View>
 	)

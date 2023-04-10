@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { DrawerContentScrollView } from '@react-navigation/drawer'
 import { useTheme } from '@react-navigation/native'
-import { Image, TouchableOpacity, StyleSheet, View, Text, ImageBackground } from 'react-native'
+import { TouchableOpacity, StyleSheet, View, Text, ImageBackground } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 import { isDarkMode, setDarkMode } from '../redux/darkmode/darkModeSlice'
@@ -14,6 +14,8 @@ import {
 } from '../components/DrawerItem'
 import Screens from '../screens/index'
 import Colors from '../constants/Colors'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
 
 export default function CustomDrawerContent(props) {
 	const { colors } = useTheme()
@@ -40,7 +42,15 @@ export default function CustomDrawerContent(props) {
 					<View style={styles.header}>
 						<View>
 							<TouchableOpacity>
-								<Image source={avatar} style={styles.avatar} />
+								<Image
+									indicator={Progress.Pie}
+									indicatorProps={{
+										color: Colors.COLORS.PRIMARY,
+										borderWidth: 0,
+									}}
+									source={avatar}
+									imageStyle={styles.avatar}
+								/>
 							</TouchableOpacity>
 						</View>
 						<View style={styles.header_text}>
@@ -67,21 +77,34 @@ export default function CustomDrawerContent(props) {
 
 			<DrawerContentScrollView
 				{...props}
-				style={{ paddingTop: 5, paddingLeft: 8, paddingRight: 14, marginBottom: 130, borderBottomWidth: 1, borderTopWidth: 1 }}
+				style={{ paddingTop: 5, paddingLeft: 0, paddingRight: 14, marginBottom: 130, borderBottomWidth: 1, borderTopWidth: 1 }}
 			>
 				<View style={{ paddingTop: 10, paddingBottom: 20 }}>
 					{screens.map((screen, index) => {
 						if (screen.drawer && screen.name != 'Profile')
-							return (
-								<DrawerItem
-									title={screen.title}
-									icon={screen.icon}
-									key={index}
-									navigate={screen.name}
-									navigation={props.navigation}
-									focused={props.state.index === index ? true : false}
-								/>
-							)
+							if (user_state.isCarrier) {
+								return (
+									<DrawerItem
+										title={screen.title}
+										icon={screen.icon}
+										key={index}
+										navigate={screen.name}
+										navigation={props.navigation}
+										focused={props.state.index === index ? true : false}
+									/>
+								)
+							} else if (!screen.carrier_only) {
+								return (
+									<DrawerItem
+										title={screen.title}
+										icon={screen.icon}
+										key={index}
+										navigate={screen.name}
+										navigation={props.navigation}
+										focused={props.state.index === index ? true : false}
+									/>
+								)
+							}
 					})}
 				</View>
 			</DrawerContentScrollView>
@@ -90,7 +113,7 @@ export default function CustomDrawerContent(props) {
 					title="Perfil"
 					icon="user"
 					navigation={props.navigation}
-					focused={props.state.index === 2 ? true : false}
+					focused={props.state.index === 3 ? true : false}
 				/>
 				<DrawerItemLogout title="Cerrar sesión" icon="sign-out" />
 			</View>
@@ -126,6 +149,7 @@ const styles = StyleSheet.create({
 		right: -10,
 	},
 	avatar: {
+		position: 'relative',
 		height: 53,
 		width: 53,
 		borderRadius: 100,
@@ -136,6 +160,6 @@ const styles = StyleSheet.create({
 		width: '90%',
 		position: 'absolute',
 		bottom: 5,
-		left: 8,
+		left: 0,
 	},
 })

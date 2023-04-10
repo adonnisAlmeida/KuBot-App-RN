@@ -113,6 +113,7 @@ export const ORDERS_LIST = gql`
 					created
 					status
 					user {
+						userName
 						firstName
 						lastName
 					}
@@ -268,6 +269,7 @@ export const ORDER_ID = gql`
 			number
 			sellers{
 				user{
+					userName
 					avatar{
 						url
 						alt
@@ -292,6 +294,7 @@ export const ORDER_ID = gql`
 			created
 			status
 			user {
+				userName
 				avatar{
 					url
 					alt

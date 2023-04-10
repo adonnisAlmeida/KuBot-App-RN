@@ -42,7 +42,7 @@ export default function Agenda({ navigation, data, deleteDay, setDay, selectedDa
 	}
 
 	const customRenderList = (param) => {
-		console.log(`RENDER LIST >> `)
+		//console.log(`RENDER LIST >> `)
 		let datos = []
 		if (param.items[selectedDay] !== undefined) {
 			datos = param.items[selectedDay]
@@ -213,7 +213,7 @@ export default function Agenda({ navigation, data, deleteDay, setDay, selectedDa
 			}}
 			renderList={(param) => customRenderList(param)}
 			renderItem={(item, firstItemInDay) => {
-				console.log(`VA A RENDERIZAR ELEMNTOSSS >> ${firstItemInDay} `, item)
+				//console.log(`VA A RENDERIZAR ELEMNTOSSS >> ${firstItemInDay} `, item)
 				return (
 					<TouchableOpacity
 						style={[styles.card, { backgroundColor: colors.MODAL }]}

@@ -8,6 +8,12 @@ import {
 	Dimensions,
 	Linking,
 	Text,
+	TouchableOpacity,
+	Modal,
+	TouchableWithoutFeedback,
+	Platform,
+	ToastAndroid,
+	//Image,
 } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -22,6 +28,7 @@ import { setCarrierInfo, user } from '../../redux/userlogin/userLoginSlice'
 import { URL } from '../../constants/Other'
 import Pushy from 'pushy-react-native';
 import { GET_CARRIER_BY_USER_EMAIL } from '../../graphql/login'
+import Colors from '../../constants/Colors'
 
 const { width } = Dimensions.get('window')
 
@@ -33,7 +40,7 @@ export default function HomeScreen({ navigation }) {
 
 	const [getCarrierByUserEmail, { loading, error, data }] = useLazyQuery(GET_CARRIER_BY_USER_EMAIL, {
 		onCompleted: (data) => {
-			console.log('A CARGAR DATOS DEL CARRIER >> ', data)
+			//console.log('A CARGAR DATOS DEL CARRIER >> ', data)
 			dispatch(setCarrierInfo(data))
 		},
 		onError: (error) => {
@@ -48,7 +55,7 @@ export default function HomeScreen({ navigation }) {
 		Pushy.register().then(async (deviceToken) => {
 			// Display an alert with device token
 			setPushyToken(deviceToken)
-			console.log('Pushy device token: ' + deviceToken);
+			//console.log('Pushy device token: ' + deviceToken);
 
 			// Send the token to your backend server via an HTTP GET request
 			//await fetch('https://your.api.hostname/register/device?token=' + deviceToken);
@@ -68,7 +75,7 @@ export default function HomeScreen({ navigation }) {
 				<FontAwesome
 					style={styles.headerRight}
 					name="user-circle-o"
-					color={colors.ON_SURFACE}
+					color={'#fff'}
 					size={20}
 					onPress={() => navigation.navigate('Profile')}
 				/>
@@ -125,9 +132,16 @@ export default function HomeScreen({ navigation }) {
 				]}
 			>
 				<View style={styles.hola_text}>
-					<Typography h3 color="#ffffff">
-						{pushyToken ? 'Pushy.me Token ' + pushyToken : 'Error en Pushy.me Token'}
-					</Typography>
+					{user_state.isCarrier ? (
+						<Typography h3 color="#ffffff">
+							{pushyToken ? 'Pushy.me Token ' + pushyToken : 'Error en Pushy.me Token'}
+						</Typography>
+					) : (
+						<Typography h3 bold color="#ffffff">
+							Su solicitud de cuenta para mensajero está siendo procesada.
+						</Typography>
+					)}
+
 				</View>
 			</LinearGradient>
 		)
@@ -220,6 +234,11 @@ export default function HomeScreen({ navigation }) {
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				{hello()}
+				<TouchableOpacity onPress={() => navigation.navigate("PruebasScreen")}>
+					<Typography>
+						Pruebas View
+					</Typography>
+				</TouchableOpacity>
 				{product()}
 				{pushyTokenComponent()}
 				{recent()}

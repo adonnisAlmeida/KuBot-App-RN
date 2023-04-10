@@ -9,7 +9,7 @@ export default function Header(props) {
 	const navigation = useNavigation()
 	const { dark, colors } = useTheme()
 
-	const header_text = [styles.header_text, { color: colors.text }]
+	const header_text = [styles.header_text, { color: '#fff' }]
 
 	return (
 		<View style={styles.header}>
@@ -23,8 +23,9 @@ export default function Header(props) {
 				onPress={() => navigation.openDrawer()}
 			>
 				<Image
-					style={{ width: 15, height: 14 }}
-					source={dark ? MENU_DARK : MENU_LIGTH}
+					style={{ width: 16, height: 15 }}
+					source={MENU_DARK}
+					//source={dark ? MENU_DARK : MENU_LIGTH}
 				/>
 			</TouchableOpacity>
 		</View>

@@ -29,8 +29,9 @@ export default function MessengerOrdersDetailScreen({ route, navigation, ...prop
 			//console.log('On complete >> ', data)
 		},
 		onError: () => {
-			console.log('ERROR cargando orden >> ', error)
+			console.log('ERROR cargando orden >> ', error.errors)
 			console.log('ERROR cargando orden data var >> ', data)
+			console.log('ERROR cargando orden networkStatus >> ', networkStatus)
 		},
 		fetchPolicy: "no-cache"
 	})

@@ -10,6 +10,7 @@ import clientsSlice from './clients/clientsSlice'
 import sellersSlice from './sellers/sellersSlice'
 import accept_shippingSlice from './accept_shipping/accept_shippingSlice'
 import messenger_ordersSlice from './messenger_orders/messenger_ordersSlice'
+import messagesSlice from './messages/messagesSlice'
 
 export default configureStore({
 	reducer: {
@@ -23,5 +24,6 @@ export default configureStore({
 		sellers: sellersSlice,
 		accepShipping: accept_shippingSlice,
 		messengerOrders: messenger_ordersSlice,
+		messages: messagesSlice
 	},
 })

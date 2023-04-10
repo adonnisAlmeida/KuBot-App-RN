@@ -24,6 +24,7 @@ import {
 import { ADD_DELIVERY_ZONES, DELIVERY_ZONES } from '../../graphql/deliveryAreas'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import AwesomeAlert from 'react-native-awesome-alerts'
+import Colors from '../../constants/Colors'
 
 
 export default function DeliveryAreasFormScreen({ navigation }) {
@@ -441,7 +442,7 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 						})}
 					</ScrollView>
 					<View style={{ marginTop: 16 }}>
-						<Button style={{ alignItems: 'center' }} onPress={() => guardar()}>
+						<Button color={Colors.COLORS.WEB_BUTTON} style={{ alignItems: 'center' }} onPress={() => guardar()}>
 							<Typography color="#ffffff">Guardar</Typography>
 						</Button>
 					</View>

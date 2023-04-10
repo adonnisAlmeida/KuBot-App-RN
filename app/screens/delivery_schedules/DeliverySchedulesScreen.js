@@ -109,7 +109,7 @@ export default function DeliverySchedulesScreen({ navigation, route }) {
 	const [getDeliverySchedule, { loading, error, data }] = useLazyQuery(GET_DELIVERY_SCHEDULE, {
 		onCompleted: (data) => {
 			//console.log('TERMINOO >> ', data.events.edges)
-			console.log("EJECUTOOOOOOOOOOO")
+			//console.log("EJECUTOOOOOOOOOOO")
 			const todo = data.events.edges
 			dispatch(setDeliberySchedulesSource(todo))
 			/* const groupedItems = todo.reduce((results, item) => {
@@ -156,7 +156,7 @@ export default function DeliverySchedulesScreen({ navigation, route }) {
 	}, [])
 
 	useEffect(() => {
-		console.log("CAMIO LOS DATOS DE AGENDA")
+		//console.log("CAMIO LOS DATOS DE AGENDA")
 		setRefreshing(false)
 	}, [myDeliverySchedule])
 
@@ -164,7 +164,7 @@ export default function DeliverySchedulesScreen({ navigation, route }) {
 		const unsubscribe = navigation.addListener('focus', () => {
 			// do something
 			let makeReload = route.params?.makeReload
-			console.log("ENTRO navigation.addListener ", makeReload)
+			//console.log("ENTRO navigation.addListener ", makeReload)
 			if(makeReload == 'KAKA'){
 				console.log('Hello World!')
 			}

@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { StatusBar, Text, View } from 'react-native'
 
 import Theme from '../constants/Theme'
-import { isLogin, getUser, getCarrierInfo } from '../redux/userlogin/userLoginSlice'
+import { isLogin, getUser, getCarrierInfo, user } from '../redux/userlogin/userLoginSlice'
 import { isDarkMode } from '../redux/darkmode/darkModeSlice'
 import { active, getOnboarding } from '../redux/onboarding/onboardingSlice'
 import Screens from '../screens/index'
@@ -20,31 +20,50 @@ const Drawer = createDrawerNavigator()
 const screens = Object.keys(Screens).map((key) => Screens[key])
 
 function DrawerNavigator(props) {
+	const user_state = useSelector(user)
 	return (
 		<Drawer.Navigator
 			screenOptions={{
 				headerStyle: {
 					backgroundColor: Colors.COLORS.PRIMARY,
 				},
+				headerTintColor: '#fff',
 			}}
 			style={{ flex: 1 }}
 			drawerContent={(props) => <CustomDrawerContent {...props} />}
 		>
 			{screens.map((screen, index) => {
-				if (screen.drawer === true)
-					return (
-						<Drawer.Screen
-							key={index}
-							name={screen.name}
-							component={screen.component}
-							options={{
-								title: screen.title,
-								headerShown: true,
-								headerTitle: (props) => <Header {...props} />,
-								headerLeft: false
-							}}
-						/>
-					)
+				if (screen.drawer === true) {
+					if (user_state.isCarrier) {
+						return (
+							<Drawer.Screen
+								key={index}
+								name={screen.name}
+								component={screen.component}
+								options={{
+									title: screen.title,
+									headerShown: true,
+									headerTitle: (props) => <Header {...props} />,
+									headerLeft: false
+								}}
+							/>
+						)
+					} else if (!screen.carrier_only) {
+						return (
+							<Drawer.Screen
+								key={index}
+								name={screen.name}
+								component={screen.component}
+								options={{
+									title: screen.title,
+									headerShown: true,
+									headerTitle: (props) => <Header {...props} />,
+									headerLeft: false
+								}}
+							/>
+						)
+					}
+				}
 			})}
 		</Drawer.Navigator>
 	)
@@ -68,7 +87,7 @@ export default function Navigation(props) {
 				backgroundColor={
 					Colors.COLORS.PRIMARY
 				}
-				barStyle={!darkmode ? 'dark-content' : 'light-content'}
+				barStyle={'light-content'}
 			/>
 			{/* <StatusBar
 				backgroundColor={
@@ -83,6 +102,7 @@ export default function Navigation(props) {
 
 function AppNavigation(props) {
 	const darkmode = useSelector(isDarkMode)
+	const user_state = useSelector(user)
 
 	return (
 		<NavigationContainer theme={darkmode ? Theme.ThemeDark : Theme.ThemeLight}>
@@ -92,6 +112,7 @@ function AppNavigation(props) {
 					headerStyle: {
 						backgroundColor: Colors.COLORS.PRIMARY,
 					},
+					headerTintColor: '#fff',
 				}}>
 				<Stack.Screen
 					name="DrawerNavigator"
@@ -100,7 +121,18 @@ function AppNavigation(props) {
 				/>
 				{screens.map((screen, index) => {
 					if (screen.drawer === false) {
-						return (
+						if (user_state.isCarrier) {
+							return (
+								<Stack.Screen
+									key={index}
+									name={screen.name}
+									component={screen.component}
+									options={{
+										title: screen.title,
+									}}
+								/>
+							)
+						} else if (!screen.carrier_only) {
 							<Stack.Screen
 								key={index}
 								name={screen.name}
@@ -109,7 +141,7 @@ function AppNavigation(props) {
 									title: screen.title,
 								}}
 							/>
-						)
+						}
 					}
 				})}
 			</Stack.Navigator>

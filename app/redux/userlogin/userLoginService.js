@@ -8,6 +8,7 @@ export default {
 	setCarrierInfo,
 	getCarrierInfo,
 	setCarrierInfoOtro,
+	setToken,
 }
 
 function login(user) {
@@ -47,4 +48,10 @@ function logout() {
 	} catch (e) {
 		console.log('Error', { e })
 	}
+}
+
+async function setToken(token) {
+	const data = await AsyncStorage.getItem('@userlogin')
+	await AsyncStorage.setItem('@sellers', JSON.stringify({token: token, ...data}))
+	return token
 }

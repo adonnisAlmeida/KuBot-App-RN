@@ -14,10 +14,10 @@ const MessengerOrdersDetailNav = ({ navigation, route, data }) => {
         <Tab.Navigator
             screenOptions={{
                 tabBarStyle: { backgroundColor: Colors.COLORS.PRIMARY },
-				tabBarIndicatorStyle: { backgroundColor: 'rgba(0,0,0,0.7)'},
-				tabBarLabelStyle: {fontWeight: "bold", fontSize: 16, textTransform: "none"},
-				tabBarActiveTintColor: "rgba(0,0,0,0.7)",
-				tabBarInactiveTintColor: "rgba(0,0,0,0.5)",
+                tabBarIndicatorStyle: { backgroundColor: '#fff' },
+                tabBarLabelStyle: { fontWeight: "bold", fontSize: 16, textTransform: "none" },
+                tabBarActiveTintColor: "#fff",
+                tabBarInactiveTintColor: "rgba(255,255,255,0.5)",
             }}>
             <Tab.Screen initialParams={{ data: data }} name="DetailsNavView" options={{ tabBarLabel: 'Detalles' }} component={DetailsNavView} />
             <Tab.Screen initialParams={{ data: data }} name="ProductsNavView" options={{ tabBarLabel: 'Productos' }} component={ProductsNavView} />

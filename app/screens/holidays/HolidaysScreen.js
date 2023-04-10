@@ -161,8 +161,8 @@ export default function HolidaysScreen({ navigation }) {
 		if (loadingApp) setLoadingApp(false)
 	}, 2000) */
 
-	if (loadingApp) return <Loading />
-	if (myHolyDays.length == 0 && loading) return <Loading />
+	if (loadingApp || loading) return <Loading />
+	//if (loading) return <Loading />
 
 	return (
 		<View style={{ flex: 1 }}>

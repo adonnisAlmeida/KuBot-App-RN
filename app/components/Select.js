@@ -41,6 +41,35 @@ export default function Select({ label, items, value, setValue, error, ...props 
 	)
 }
 
+export function SelectLine({ label, items, value, setValue, error, ...props }) {
+	const { colors } = useTheme()
+
+	return (
+		<React.Fragment>
+			
+				<Picker
+					themeVariant={'dark'}
+					selectedValue={value}
+					style={[
+						styles.select,
+						{ color: colors.ON_BACKGROUND, backgroundColor: 'red', height: 20 },
+						props.style,
+						error && styles.hasErrorsInput,
+					]}
+					onValueChange={(itemValue, itemIndex) => {
+						setValue(itemValue)
+					}
+					}>
+					{
+						items.map((item, index) => {
+							return <Picker.Item key={index} themeVariant={'dark'} label={item.nameSpanish} value={item.serverId} />
+						})
+					}
+				</Picker>
+		</React.Fragment>
+	)
+}
+
 const styles = StyleSheet.create({
 	underline: {
 		borderBottomColor: '#8E8E8E',

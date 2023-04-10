@@ -1,4 +1,4 @@
-import { View, Text, Dimensions, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform, Image, Modal, TouchableWithoutFeedback, ImageBackground, TextInput, KeyboardAvoidingView, SafeAreaView } from 'react-native'
+import { View, Text, Dimensions, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform, Modal, TouchableWithoutFeedback, ImageBackground, TextInput, KeyboardAvoidingView, SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Button, Typography } from '../../../../components'
 import { useTheme } from '@react-navigation/native'
@@ -19,6 +19,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../redux/messenger_orders/messenger_ordersSlice'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { MONTH_NAMES, MONTH_NAMES_SHORT, DAY_NAMES, DAY_NAMES_SHORT, } from '../../../../constants/Other'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
 
 moment.locale('es')
 
@@ -41,7 +43,7 @@ const DetailsNavView = ({ navigation, route }) => {
     const [vistaPrevia, setVistaPrevia] = useState(null)
     let hasNote = false
     const { colors } = useTheme()
-    
+
 
     const dispatch = useDispatch()
 
@@ -718,7 +720,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             </Typography>
                         </View>
                         <View>
-                            <Image backgroundColor='white' source={gifSource} style={{ height: 30, width: 30, marginTop: 10 }} />
+                            <Image backgroundColor='white' source={gifSource} imageStyle={{ height: 30, width: 30, position: 'relative', marginTop: 10 }} />
                         </View>
                     </View>
                 </View>
@@ -731,7 +733,11 @@ const DetailsNavView = ({ navigation, route }) => {
                             onPress={() => navigation.navigate('ClientDetails', { client: data.order.user })}
                         >
                             <Typography color={colors.primary}>
-                                {data.order.user.firstName + ' ' + data.order.user.lastName}
+                                {data.order.user.firstName? (
+                                    data.order.user.firstName + ' ' + data.order.user.lastName
+                                ): (
+                                    data.order.user.userName
+                                )}
                             </Typography>
                         </TouchableOpacity>
                     ) : (
@@ -829,7 +835,15 @@ const DetailsNavView = ({ navigation, route }) => {
                                         data.order.signatureImagesDelivery.length > 0 ? (
                                             data.order.signatureImagesDelivery.map((photo, index) => (
                                                 <View key={index} style={{ marginRight: 8 }}>
-                                                    <Image source={{ uri: photo.image.url, }} style={{ height: 90, width: 90, resizeMode: 'contain' }} />
+                                                    <Image
+                                                        source={{ uri: photo.image.url, }}
+                                                        indicator={Progress.Pie}
+                                                        indicatorProps={{
+                                                            color: colors.PRIMARY,
+                                                            borderWidth: 0,
+                                                        }}
+                                                        imageStyle={{ height: 90, width: 90, position: 'relative', resizeMode: 'contain' }}
+                                                    />
                                                 </View>
                                             ))
                                         ) : (
@@ -869,7 +883,15 @@ const DetailsNavView = ({ navigation, route }) => {
                                         data.order.packageImagesDelivery.length > 0 ? (
                                             data.order.packageImagesDelivery.map((photo, index) => (
                                                 <View key={index} style={{ marginRight: 8 }}>
-                                                    <Image source={{ uri: photo.image.url, }} style={{ height: 90, width: 90, resizeMode: 'contain' }} />
+                                                    <Image
+                                                        source={{ uri: photo.image.url, }}
+                                                        indicator={Progress.Pie}
+                                                        indicatorProps={{
+                                                            color: colors.PRIMARY,
+                                                            borderWidth: 0,
+                                                        }}
+                                                        imageStyle={{ height: 90, width: 90, position: 'relative', resizeMode: 'contain' }}
+                                                    />
                                                 </View>
                                             ))
                                         ) : (

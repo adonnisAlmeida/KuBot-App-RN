@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, StatusBar, StyleSheet, TextInput, ToastAndroid, View } from 'react-native'
+import { ActivityIndicator, Modal, StatusBar, StyleSheet, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import {
 	Typography,
 	Button,
@@ -22,38 +22,22 @@ import { addDeliberySchedulesSource, delivery_schedules_list, delivery_schedules
 import { applyRules, stringToColour } from '../../utils/CommonFunctions'
 import SelectDropdown from 'react-native-select-dropdown'
 import Theme from '../../constants/Theme'
+import { printCreated } from '../../utils/CommonFunctions'
+import { TimePickerInputLineal } from '../../components/DatePickerInput'
+import { SelectLine } from '../../components/Select'
+import MySelect from '../../components/MySelect'
 moment.locale('es')
 
 const localRules = [
 	{
-		"id": "UnVsZrg0",
-		"name": "Never",
-		"nameSpanish": "Única vez",
-		"label": "Única vez",
-		"description": "Repeat never",
-		"frequency": "NEVER",
-		"serverId": 5,
-		"value": 5
-	},
-	{
-		"id": "UnVsZTo0",
-		"name": "Daily",
-		"nameSpanish": "A diario",
-		"label": "A diario",
-		"description": "Repeat daily",
-		"frequency": "DAILY",
-		"serverId": 4,
-		"value": 4
-	},
-	{
-		"id": "UnVsZToz",
-		"name": "Weekly",
-		"nameSpanish": "Semanalmente",
-		"label": "Semanalmente",
-		"description": "Repeat weekly",
-		"frequency": "WEEKLY",
-		"serverId": 3,
-		"value": 3
+		"id": "UnVsZTox",
+		"name": "Yearly",
+		"nameSpanish": "Anualmente",
+		"label": "Anualmente",
+		"description": "Repeat yearly",
+		"frequency": "YEARLY",
+		"serverId": 1,
+		"value": 1
 	},
 	{
 		"id": "UnVsZToy",
@@ -66,14 +50,34 @@ const localRules = [
 		"value": 2
 	},
 	{
-		"id": "UnVsZTox",
-		"name": "Yearly",
-		"nameSpanish": "Anualmente",
-		"label": "Anualmente",
-		"description": "Repeat yearly",
-		"frequency": "YEARLY",
-		"serverId": 1,
-		"value": 1
+		"id": "UnVsZToz",
+		"name": "Weekly",
+		"nameSpanish": "Semanalmente",
+		"label": "Semanalmente",
+		"description": "Repeat weekly",
+		"frequency": "WEEKLY",
+		"serverId": 3,
+		"value": 3
+	},
+	{
+		"id": "UnVsZTo0",
+		"name": "Daily",
+		"nameSpanish": "A diario",
+		"label": "A diario",
+		"description": "Repeat daily",
+		"frequency": "DAILY",
+		"serverId": 4,
+		"value": 4
+	},
+	{
+		"id": "UnVsZrg0",
+		"name": "Never",
+		"nameSpanish": "Única vez",
+		"label": "Única vez",
+		"description": "Repeat never",
+		"frequency": "NEVER",
+		"serverId": 5,
+		"value": 5
 	},
 ]
 const localRulesOther = ["Nunca", "Anualmente", "Mensualmente", "Semanalmente", "A diario"]
@@ -85,6 +89,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	let event_details = route.params?.event
 	const [loadingApp, setLoadingApp] = useState(false)
 	const [isDetails, setIsDetails] = useState(false)
+	const [canUpdate, setCanUpdate] = useState(true)
 	const [titulo, setTitulo] = useState('Evento creado desde la App')
 	const [eventId, setEventId] = useState(null)
 	//const [dropText, setDropText] = useState('Seleccione una regla')
@@ -93,11 +98,13 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	const [descripcion, setDescripcion] = useState('')
 	const [inicioFull, setInicioFull] = useState(null)
 	const [inicio, setInicio] = useState('')
+	const [inicioNoHuman, setInicioNoHuman] = useState(null)
+	const [finNoHuman, setFinNoHuman] = useState(null)
 	const [finFull, setFinFull] = useState(null)
 	const [fin, setFin] = useState('')
 	const [fechaFin, setFechaFin] = useState('')
 	const [fechaFinErrorText, setFechaFinErrorText] = useState('')
-	const [selectedRule, setSelectedRule] = useState(0) // 0 porque es el serverId de la regla nunca que no esta creada en el back
+	const [selectedRule, setSelectedRule] = useState(5) // 5 porque es el serverId de la regla nunca que no esta creada en el back
 	const [rules, setRules] = useState([])
 	const [errors, setErrors] = useState([])
 	const { colors } = useTheme()
@@ -108,6 +115,12 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	const [newLoadingUpdate, setNewLoadingUpdate] = useState(false)
 	const [displayLoading, setDisplayLoading] = useState(false)
 	const [horaErrorText, setHoraErrorText] = useState('')
+	const [editModal, setEditModal] = useState(false)
+	const [deleteModal, setDeleteModal] = useState(false)
+	const [updateModal, setUpdateModal] = useState(false)
+	const [selectedAction, setSelectedAction] = useState(0)
+	const [toastMessage, setToastMessage] = useState('')
+	const [isUpdateHalf, setIsUpdateHalf] = useState(false)
 	const dispatch = useDispatch()
 
 	//console.log('date Param >> ', date_param)
@@ -147,62 +160,116 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	})
 
 	const doDelete = () => {
-		if (eventServerId) {
+		/* if (eventServerId) {
 			setShowAlert(false)
 			setDisplayLoading(true)
 			console.log("eventServerId ", eventServerId)
 			deleteDeliverySchedules({ variables: { id: eventServerId } })
+		} */
+		if (eventServerId) {
+			switch (selectedAction) {
+				case 1: // este y eventos futuros
+					const dateArray = date_param.split("-");
+					setDisplayLoading(true)
+					setDeleteModal(false)
+					setToastMessage("Evento Eliminado correctamente")
+					updateDeliverySchedule({
+						variables: {
+							id: eventId,
+							start: inicioNoHuman,
+							end: finNoHuman,
+							endRecurringPeriod: new Date(dateArray[0], dateArray[1] - 1, dateArray[2] - 1),
+							description: descripcion,
+							title: titulo,
+							rule: (selectedRule == 0) ? null : selectedRule,
+						}
+					})
+					break;
+				case 2: // todos los eventos
+					setDisplayLoading(true)
+					setDeleteModal(false)
+					console.log("ELIMINAR EVENTO >> eventServerId ", eventServerId)
+					deleteDeliverySchedules({ variables: { id: eventServerId } })
+					break;
+				case 0: // por defecto este no debe ocurrir
+
+					break;
+
+				default:
+					break;
+			}
 		}
 	}
 
 	const deleteEvent = () => {
-		setAlertMessage(`¿Esta seguro que desea eliminar el evento de horario?`)
-		setAlertTitle('¿Estás seguro?')
-		setShowAlert(true)
+		setDeleteModal(true)
 	}
 
-	/* useEffect(() => {
-		console.log("delivery_schedules_source >", schedules_source)
-	},[schedules_source]) */
+	const updateEvent = () => {
+		setUpdateModal(true)
+	}
+
+	const doUpdate = () => {
+		if (eventServerId) {
+			switch (selectedAction) {
+				case 1: // modifica todos los eventos de la serie
+					setDisplayLoading(true)
+					setToastMessage("Evento actualizado correctamente")
+					handleUpdate()
+					break;
+				case 2: // modificar este y los futuros
+					setIsUpdateHalf(true)
+					setDisplayLoading(true)
+					setToastMessage("Evento actualizado correctamente")
+					updateDeliverySchedule({
+						variables: {
+							id: eventId,
+							start: inicioNoHuman,
+							end: finNoHuman,
+							endRecurringPeriod: new Date(dateArray[0], dateArray[1] - 1, dateArray[2] - 1),
+							description: descripcion,
+							title: titulo,
+							rule: (selectedRule == 0) ? null : selectedRule,
+						}
+					})
+					break;
+				case 0: // por defecto este no debe ocurrir
+
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
 
 	const userStore = useSelector(state => state.userlogin)
 	const carrierID = userStore.carrierInfo.serverId;
 
-	/* const [getDeliveryScheduleRules, { loading, error, data }] = useLazyQuery(GET_DELIVERY_SCHEDULE_RULES, {
-		onCompleted: (data) => {
-			const dataRules = data.rules.edges
-			let ruleShow = []
-			dataRules.map((item, index) => {
-				ruleShow.push(item.node)
-			})
-			ruleShow.push({
-				"id": "UnHrFllO",
-				"name": "Never",
-				"description": "Repeat never",
-				"frequency": "NEVER",
-				"serverId": 5
-			})
-			setLoadingApp(false)
-			setRules(ruleShow)
-		},
-		onError: () => {
-			setLoadingApp(false)
-		}
-	}) */
-
 	const [createDeliverySchedule, { loadingCreate, errorCreate, dataCreate }] = useMutation(CREATE_DELIVERY_SCHEDULE, {
 		onCompleted: (dataCreate) => {
-			let eventCreated = {
-				"node": dataCreate.eventCreate.event
+			if (dataCreate.eventCreate.event) {
+				let eventCreated = {
+					"node": dataCreate.eventCreate.event
+				}
+				/* console.log("dataCreate.eventCreate.event >> ", dataCreate.eventCreate.event)
+				console.log("dataCreate.eventCreate.event >> ", dataCreate.eventCreate)
+				console.log("dataCreate.eventCreate.event >> ", dataCreate.eventCreate.error) */
+				dispatch(addDeliberySchedulesSource(eventCreated))
+				if (Platform.OS === 'android')
+					ToastAndroid.show(toastMessage, ToastAndroid.LONG)
+				setNewLoadingcreate(false)
+				handleReset()
+				if (isUpdateHalf) {
+					setIsUpdateHalf(false)
+				}
+				navigation.navigate('DeliverySchedulesScreen', {
+					makeReload: 'KAKA',
+				})
+			}else{
+				if (Platform.OS === 'android')
+					ToastAndroid.show("Ha ocurrido un error", ToastAndroid.LONG)
 			}
-			dispatch(addDeliberySchedulesSource(eventCreated))
-			if (Platform.OS === 'android')
-				ToastAndroid.show('Se adicionó correctamente el horario de reparto.', ToastAndroid.LONG)
-			setNewLoadingcreate(false)
-			handleReset()
-			navigation.navigate('DeliverySchedulesScreen', {
-				makeReload: 'KAKA',
-			})
 		},
 		onError: (errorCreate) => {
 			setNewLoadingcreate(false)
@@ -216,126 +283,27 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				"node": dataUpdated.eventUpdate.event
 			}
 			dispatch(updateDeliberySchedulesSource(eventUpdated))
-			navigation.navigate('DeliverySchedulesScreen', {
-				makeReload: 'KAKA',
-			})
-			if (Platform.OS === 'android')
-				ToastAndroid.show('Se actualizó correctamente el horario de reparto.', ToastAndroid.LONG)
+			if (isUpdateHalf) {
+				handleAdd()
+			} else {
+				navigation.navigate('DeliverySchedulesScreen', {
+					makeReload: 'KAKA',
+				})
+				if (Platform.OS === 'android')
+					ToastAndroid.show(toastMessage, ToastAndroid.LONG)
 
-			handleReset()
+				handleReset()
+				setDisplayLoading(false)
+				setNewLoadingUpdate(false)
+			}
 
-			setNewLoadingUpdate(false)
 		},
 		onError: (errorUpdated) => {
 			console.log('ERRORRRRR ACTUALIZANDO EVENT >>> ', errorUpdated.message)
 			setNewLoadingUpdate(false)
+			setDisplayLoading(false)
 		}
 	})
-
-	/* const [createDeliverySchedule, { loadingCreate, errorCreate, dataCreate }] = useMutation(CREATE_DELIVERY_SCHEDULE, {
-		onCompleted: (dataCreate) => {
-			let eventCreated = dataCreate.eventCreate.event
-			const theKey = moment(eventCreated.start).format('YYYY-MM-DD')
-			let finalEvent = {}
-			finalEvent[theKey] = []
-			finalEvent[theKey].push(eventCreated)
-			console.log('finalEvent >>> ', finalEvent)
-			//let allEvents = applyRules(finalEvent, delivery_schedules)
-			let ruledEvents = applyRules(finalEvent, {})
-			var allEvents = {}
-			Object.entries(ruledEvents).forEach(([key, value]) => { // esto es porque se que solo tiene un elemento
-				Object.entries(delivery_schedules).forEach(([keyLocation, valueLocation]) => {
-					if (keyLocation === key) {
-						let others = []
-						valueLocation.map((key, value) => { others.push(value) })
-						//allEvents[keyLocation] = valueLocation
-						allEvents[keyLocation] = others
-						allEvents[keyLocation].push(value[0])
-					} else {
-						allEvents[keyLocation] = valueLocation
-					}
-				})
-			})
-			console.log('allEvents antes >>> ', allEvents)
-			allEvents = {
-				...ruledEvents,
-				...allEvents
-			};
-			console.log('allEvents >>> ', allEvents)
-			dispatch(setDeliberySchedules(allEvents))
-			if (Platform.OS === 'android')
-				ToastAndroid.show('Se adicionó el horario de reparto.', ToastAndroid.LONG)
-
-			handleReset()
-			navigation.navigate('DeliverySchedulesScreen')
-		},
-		onError: (errorCreate) => {
-			console.log('ERRORRRRR CREATING EVENT >>> ', errorCreate.message)
-		}
-	}) */
-
-	const prueba = () => {
-		let ruledEvents = {
-			"2022-11-02": [
-				{
-					"serverId": 97,
-				},
-			],
-			"2022-11-03": [
-				{
-					"serverId": 97,
-				},
-			],
-			"2022-10-04": [
-				{
-					"serverId": 97,
-				},
-			],
-		}
-		let delStorage = {
-			"2022-10-04": [
-				{
-					"serverId": 94,
-				},
-			],
-			"2022-10-05": [
-				{
-					"serverId": 94,
-				},
-			],
-			"2022-10-06": [
-				{
-					"serverId": 94,
-				},
-			],
-		}
-		let allEvents = {}
-		Object.entries(ruledEvents).forEach(([key, value]) => { // esto es porque se que solo tiene un elemento
-			Object.entries(delStorage).forEach(([keyLocation, valueLocation]) => {
-				if (keyLocation === key) {
-					console.log('IGUALES KEY')
-					allEvents[keyLocation] = valueLocation
-					allEvents[keyLocation].push(value[0])
-				} else {// si no esta creo la key
-					console.log(`DISTINTAS KEY  a guardar >> ${keyLocation} la otra ${key}`)
-					allEvents[keyLocation] = valueLocation
-				}
-			})
-		})
-
-		allEvents = {
-			...ruledEvents,
-			...allEvents
-		};
-
-		console.log('allEvents >> ', allEvents)
-	}
-
-	/* navigation.setOptions({
-		headerStyle: {
-			backgroundColor: stringToColour(localRules[selectedRule] ? localRules[selectedRule].name : 'Never') + '99'
-		},
-	}) */
 
 	useEffect(() => {
 		if (event_details) { // cuando es editar un evento
@@ -346,20 +314,23 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				setSelectedRule(event_details.rule.serverId)
 			}
 			setIsDetails(true)
+			setCanUpdate(false)
 			setTitulo(event_details.title)
 			setEventId(event_details.id)
 			setEventServerId(event_details.serverId)
 			setDescripcion(event_details.description)
 			let humanStart = moment(event_details.start).format('h:mm a')
 			setInicio(humanStart)
+			setInicioNoHuman(event_details.start)
 			let humanEnd = moment(event_details.end).format('h:mm a')
 			setFin(humanEnd)
+			setFinNoHuman(event_details.end)
 			let humanDateEnd = moment(event_details.endRecurringPeriod).format('YYYY-MM-DD')
 			setFechaFin(humanDateEnd)
 			let humaneventStart = moment(event_details.start).format('YYYY-MM-DD')
 			setEventStart(humaneventStart)
 			navigation.setOptions({
-				title: `Actualizar Evento`,
+				title: `Detalles del evento`,
 				/* headerStyle: {
 					backgroundColor: stringToColour(localRules[selectedRule] ? localRules[selectedRule].name : 'Never') + '40'
 				}, */
@@ -424,7 +395,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		//if (titulo.length == 0) error_data.push('titulo')
 		if (!inicio) error_data.push('inicio')
 		if (!fin) error_data.push('fin')
-		if (selectedRule != 0) {
+		if (selectedRule != 5) {
 			if (!fechaFin) error_data.push('fechaFin')
 		}
 		const myinicioArray = inicio.split(" ");
@@ -475,11 +446,16 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 					start: inicioDate,
 					end: finDate,
 					title: titulo,
-					endRecurringPeriod: (selectedRule == 0) ? finDate : fechaFinOK,
-					rule: (selectedRule == 0) ? null : selectedRule,
+					endRecurringPeriod: (selectedRule == 5) ? finDate : fechaFinOK,
+					rule: (selectedRule == 5) ? null : selectedRule,
 					carrier: carrierID,
 				}
 			})
+			/* console.log("A Crear con >> ", {
+				start: inicioDate,
+				end: finDate,
+			})
+			setNewLoadingcreate(false) */
 			/* let test = new Date()
 			console.log(`A crear con start: ${inicioDate},
 			end: ${finDate},
@@ -498,7 +474,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		//if (titulo.length == 0) error_data.push('titulo')
 		if (!inicio) error_data.push('inicio')
 		if (!fin) error_data.push('fin')
-		if (selectedRule != 0) {
+		if (selectedRule != 5) {
 			if (!fechaFin) error_data.push('fechaFin')
 		}
 		let splitFechaFin = fechaFin.split("-");
@@ -529,6 +505,8 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		let eventStartSplit = eventStart.split("-");
 		const inicioDate = new Date(eventStartSplit[0], eventStartSplit[1] - 1, eventStartSplit[2], inicioArray[0], inicioArray[1]);
 		const finDate = new Date(eventStartSplit[0], eventStartSplit[1] - 1, eventStartSplit[2], finArray[0], finArray[1]);
+		const definitivoInicioOtro = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(inicioArray[0]), parseInt(inicioArray[1]))
+		const definitivoFinOtro = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(finArray[0]), parseInt(finArray[1]))
 		const definitivoInicio = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(inicioArray[0]) - 5, parseInt(inicioArray[1]))
 		const definitivoFin = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(finArray[0]) - 5, parseInt(finArray[1]))
 		if (inicioDate > fechaFinOK) {
@@ -549,13 +527,20 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				variables: {
 					id: eventId,
 					description: descripcion,
-					start: definitivoInicio,
-					end: definitivoFin,
+					start: definitivoInicioOtro,
+					end: definitivoFinOtro,
 					title: titulo,
-					endRecurringPeriod: (selectedRule == 0) ? null : fechaFinOK,
-					rule: (selectedRule == 0) ? null : selectedRule,
+					endRecurringPeriod: (selectedRule == 5) ? null : fechaFinOK,
+					rule: (selectedRule == 5) ? null : selectedRule,
 				}
 			})
+			/* console.log("Actualizar con esto >>> ", {
+				start: definitivoInicio,
+				end: definitivoFin,
+				startOtro: definitivoInicioOtro,
+				endOtro: definitivoFinOtro,
+			})
+			setNewLoadingUpdate(false) */
 		}
 	}
 
@@ -564,7 +549,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		setDescripcion('')
 		setInicio('')
 		setFin('')
-		setSelectedRule(localRules[0]) // OJO cambiar el locale por el rules
+		setSelectedRule(localRules[4]) // OJO cambiar el locale por el rules
 	}
 
 	const reloadApp = () => {
@@ -589,172 +574,307 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				) :
 				( */}
 				<>
-					{/* <View style={{ marginBottom: 5 }}>
-					<Input
-						label="Título"
-						value={titulo}
-						setValue={setTitulo}
-						error={hasErrors('titulo')}
-					/>
-				</View>
-				<View style={{ marginBottom: 5 }}>
-					<Input
-						label="Descripción"
-						value={descripcion}
-						setValue={setDescripcion}
-						error={hasErrors('descripcion')}
-					/>
-				</View> */}
-					{/* <View style={{ marginBottom: 5 }}>
-					<Input
-						label="Desde"
-						value="dessddd"
-						editable = {false}
-					/>
-				</View> */}
-					<View style={{ marginBottom: 5 }}>
+					<View style={{ flex: 1 }}>
+						{/* <View style={{ marginBottom: 5 }}>
+							{isDetails ? (
+								<>
+									<Typography bold>
+										Desde: {eventStart}
+									</Typography>
+								</>
+
+							) : (
+								<Typography bold>
+									Desde: {date_param}
+								</Typography>
+							)}
+
+						</View> */}
 						{isDetails ? (
-							<>
+							<View style={{
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								backgroundColor: '#fff',
+								paddingHorizontal: 16,
+								paddingVertical: 20,
+							}}>
 								<Typography>
-									Desde: {eventStart}
+									Desde
 								</Typography>
-								{/* <Typography>
-									SERVER ID: {eventServerId}
-								</Typography> */}
-							</>
-
+								<Typography>
+									{eventStart}
+								</Typography>
+							</View>
 						) : (
-							<Typography>
-								Desde: {date_param}
-							</Typography>
-						)}
-
-					</View>
-					<View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
-						<View style={{ width: '48%' }}>
-							<TimePickerInput
-								date={inicioFull}
-								label="Hora de Inicio"
-								value={inicio}
-								setValue={setInicio}
-								error={hasErrors('inicio')}
-							/>
-						</View>
-						<View style={{ width: '48%' }}>
-							<TimePickerInput
-								date={finFull}
-								label="Hora de Fin"
-								value={fin}
-								setValue={setFin}
-								error={hasErrors('fin')}
-							/>
-						</View>
-					</View>
-					{hasErrors('fin') ? (
-						<Typography color='#CF6679'>
-							{horaErrorText}
-						</Typography>
-					) : (
-						null
-					)}
-
-					<View style={{ marginBottom: 10 }}>
-						{/* <Typography
-						color={colors.ON_SURFACE_VARIANT}
-						style={[{ marginVertical: 10 }]}
-					>
-						Regla
-					</Typography> */}
-						<Select
-							label="Repetir"
-							items={localRules}
-							value={selectedRule}
-							setValue={setSelectedRule}
-						//error={hasErrors('repetir')}
-						/>
-						{/* <SelectDropdown
-						defaultButtonText={dropText}
-						buttonStyle={styles.select_button}
-						ref={dropdownRef}
-						defaultValue={selectedRule}
-						data={localRulesOther}
-						onSelect={(selectedItem, index) => {
-							console.log(selectedItem, index)
-							setSelectedRule(index)
-						}}
-						buttonTextAfterSelection={(selectedItem, index) => {
-							// text represented after item is selected
-							// if data array is an array of objects then return selectedItem.property to render after item is selected
-							return selectedItem
-						}}
-						rowTextForSelection={(item, index) => {
-							// text represented for each item in dropdown
-							// if data array is an array of objects then return item.property to represent item in dropdown
-							return item
-						}}
-					/> */}
-						{/* <Select
-						label="Regla"
-						//items={rules} // oJO dejar este que los carga del back
-						items={localRules}
-						value={selectedRule}
-						setValue={setSelectedRule}
-						error={hasErrors('selectedRule')}
-					/> */}
-					</View>
-					{selectedRule != 0 ?
-						<View>
-							<DatePickerInput
-								label="Fecha de Finalización"
-								value={fechaFin}
-								setValue={setFechaFin}
-								type='date'
-								error={hasErrors('fechaFin')}
-								date={fechaFin == '' ? date_param : fechaFin}
-							/>
-							{hasErrors('fechaFin') ? (
-								<Typography color='#CF6679' style={{ marginTop: 5 }}>
-									{fechaFinErrorText}
+							<View style={{
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								backgroundColor: '#fff',
+								paddingHorizontal: 16,
+								paddingVertical: 20,
+							}}>
+								<Typography>
+									Desde
 								</Typography>
-							) : null}
-						</View>
-						: <></>}
-					{isDetails ?
-						(
-							<>
-								<Button
-									style={{ alignItems: 'center', marginVertical: 16 }}
-									onPress={handleUpdate}
-								>
-									{(newLoadingUpdate) ? (
-										<ActivityIndicator size="small" color="white" />
-									) : (
-										<Typography color="#ffffff">Actualizar</Typography>
-									)}
-								</Button>
-								<Button
-									color="error"
-									style={{ alignItems: 'center' }}
-									onPress={deleteEvent}
-								>
-									<Typography color="#ffffff">Eliminar</Typography>
-								</Button>
-							</>
-						) :
-						(
-							<>
-								<Button
-									style={{ alignItems: 'center', marginVertical: 16 }}
-									onPress={handleAdd}
-								>
-									{(newLoadingCreate) ? (
-										<ActivityIndicator size="small" color="white" />
-									) : (
-										<Typography color="#ffffff">Adicionar</Typography>
-									)}
-								</Button>
-							</>
+								<Typography>
+									{date_param}
+								</Typography>
+							</View>
 						)}
+						<View style={{
+							backgroundColor: '#fff',
+							marginTop: 20,
+							paddingHorizontal: 16,
+						}}>
+							<View style={{
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingVertical: 10,
+							}}>
+								<TimePickerInputLineal
+									label="Hora de Inicio"
+									date={inicioFull}
+									value={inicio}
+									setValue={setInicio}
+									error={hasErrors('inicio')}
+								/>
+							</View>
+							<View style={{
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingVertical: 10,
+								borderTopColor: '#8E8E8E',
+								borderTopWidth: StyleSheet.hairlineWidth,
+							}}>
+								<TimePickerInputLineal
+									date={finFull}
+									label="Hora de Fin"
+									value={fin}
+									setValue={setFin}
+									error={hasErrors('fin')}
+								/>
+							</View>
+							{hasErrors('fin') ? (
+								<Typography color='#CF6679'>
+									{horaErrorText}
+								</Typography>
+							) : (
+								null
+							)}
+							{/* <View style={{
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingVertical: 10,
+								borderTopColor: '#8E8E8E',
+								borderTopWidth: StyleSheet.hairlineWidth,
+							}}>
+								<MySelect
+									label="Repetir"
+									items={localRules}
+									value={selectedRule}
+									setValue={setSelectedRule}
+								/>
+							</View> */}
+						</View>
+
+
+						<View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
+							<View style={{ width: '48%' }}>
+								{canUpdate ? (
+									<TimePickerInput
+										date={inicioFull}
+										label="Hora de Inicio"
+										value={inicio}
+										setValue={setInicio}
+										error={hasErrors('inicio')}
+									/>
+								) : (
+									<View style={{ marginVertical: 10 }}>
+										<Typography bold>Hora de Inicio:</Typography>
+										<Typography style={{
+											marginVertical: 10,
+											borderRadius: 0,
+											borderWidth: 0,
+											/* borderBottomColor: '#8E8E8E',
+											borderBottomWidth: StyleSheet.hairlineWidth, */
+											height: 30,
+										}}>{inicio}</Typography>
+									</View>
+								)}
+							</View>
+							<View style={{ width: '48%' }}>
+								{canUpdate ? (
+									<TimePickerInput
+										date={finFull}
+										label="Hora de Fin"
+										value={fin}
+										setValue={setFin}
+										error={hasErrors('fin')}
+									/>
+								) : (
+									<View style={{ marginVertical: 10 }}>
+										<Typography bold>Hora de Fin:</Typography>
+										<Typography style={{
+											marginVertical: 10,
+											borderRadius: 0,
+											borderWidth: 0,
+											/* borderBottomColor: '#8E8E8E',
+											borderBottomWidth: StyleSheet.hairlineWidth, */
+											height: 30,
+										}}>{fin}</Typography>
+									</View>
+								)}
+							</View>
+						</View>
+						{hasErrors('fin') ? (
+							<Typography color='#CF6679'>
+								{horaErrorText}
+							</Typography>
+						) : (
+							null
+						)}
+						<View style={{ marginBottom: 10 }}>
+							{canUpdate ? (
+								<Select
+									label="Repetir"
+									items={localRules}
+									value={selectedRule}
+									setValue={setSelectedRule}
+								/>
+							) : (
+								<View style={{ marginTop: -10 }}>
+									<Typography bold>Repetir:</Typography>
+									<Typography size={16} style={{
+										marginVertical: 10,
+										borderRadius: 0,
+										borderWidth: 0,
+										/* borderBottomColor: '#8E8E8E',
+										borderBottomWidth: StyleSheet.hairlineWidth, */
+										height: 30,
+									}}>{localRules[selectedRule - 1].label}</Typography>
+								</View>
+							)}
+							{selectedRule != 5 ?
+								<View>
+									{canUpdate ? (
+										<DatePickerInput
+											label="Fecha de Finalización"
+											value={fechaFin}
+											setValue={setFechaFin}
+											type='date'
+											error={hasErrors('fechaFin')}
+											date={fechaFin == '' ? date_param : fechaFin}
+										/>
+									) : (
+										<View style={{ marginVertical: 10 }}>
+											<Typography bold>Fecha de Finalización:</Typography>
+											<Typography style={{
+												marginTop: 10,
+												borderRadius: 0,
+												borderWidth: 0,
+												/* borderBottomColor: '#8E8E8E',
+												borderBottomWidth: StyleSheet.hairlineWidth, */
+												height: 30,
+											}}>{fechaFin}</Typography>
+										</View>
+									)}
+									{hasErrors('fechaFin') ? (
+										<Typography color='#CF6679' style={{ marginTop: 5 }}>
+											{fechaFinErrorText}
+										</Typography>
+									) : null}
+								</View>
+								: null}
+						</View>
+					</View>
+					<View>
+						{isDetails ?
+							(
+								canUpdate ? (
+									<View style={{
+										flexDirection: 'row',
+										justifyContent: 'space-between',
+										backgroundColor: '#fff',
+										padding: 16,
+										borderTopColor: '#8E8E8E',
+										borderTopWidth: StyleSheet.hairlineWidth,
+									}}>
+										<Button
+											color={'#e6e6e9'}
+											style={{ alignItems: 'center', width: '40%' }}
+											onPress={() => {
+												setCanUpdate(false)
+												setSelectedAction(0)
+											}}
+										//onPress={() => handleUpdate()}
+										>
+											<Typography color="#606060">Cancelar</Typography>
+										</Button>
+										<Button
+											color={Colors.COLORS.WEB_BUTTON}
+											style={{ alignItems: 'center', width: '40%' }}
+											onPress={() => doUpdate()}
+										>
+											<Typography color="#ffffff">Aceptar</Typography>
+										</Button>
+									</View>
+								) : (
+									<View style={{
+										flexDirection: 'row',
+										justifyContent: 'space-between',
+										backgroundColor: '#fff',
+										padding: 16,
+										borderTopColor: '#8E8E8E',
+										borderTopWidth: StyleSheet.hairlineWidth,
+									}}>
+										<Button
+											color={Colors.COLORS.WEB_BUTTON}
+											style={{ alignItems: 'center', width: '40%' }}
+											onPress={() => updateEvent()}
+										//onPress={() => handleUpdate()}
+										>
+											{(newLoadingUpdate) ? (
+												<ActivityIndicator size="small" color="white" />
+											) : (
+												<Typography color="#ffffff">Editar</Typography>
+											)}
+										</Button>
+										<Button
+											color="error"
+											style={{ alignItems: 'center', width: '40%' }}
+											onPress={() => deleteEvent()}
+										>
+											<Typography color="#ffffff">Eliminar</Typography>
+										</Button>
+									</View>
+								)
+
+							) :
+							(
+								<View style={{
+									backgroundColor: '#fff',
+									padding: 16,
+									borderTopColor: '#8E8E8E',
+									borderTopWidth: StyleSheet.hairlineWidth,
+								}}>
+									<Button
+										color={Colors.COLORS.WEB_BUTTON}
+										style={{ alignItems: 'center' }}
+										onPress={() => {
+											setToastMessage('Horario de reparto creado correctamente.')
+											handleAdd()
+										}}
+									>
+										{(newLoadingCreate) ? (
+											<ActivityIndicator size="small" color="white" />
+										) : (
+											<Typography color="#ffffff">Adicionar</Typography>
+										)}
+									</Button>
+								</View>
+							)}
+					</View>
+
 					<AwesomeAlert
 						show={showAlertAw}
 						title={alertTitle}
@@ -782,12 +902,185 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				{/* )
 			} */}
 			</View >
-		</>
+			<Modal
+				visible={deleteModal}
+				transparent={true}
+				animationType="slade"
+				onRequestClose={() => {
+					setDeleteModal(false)
+					setSelectedAction(0)
+				}}
+			>
+				<TouchableOpacity
+					style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', }}
+					onPressOut={() => {
+						setDeleteModal(false)
+						setSelectedAction(0)
+					}}
+				>
+					<View style={styles.modalContent}>
+						<View style={{
+							alignItems: 'center',
+							alignContent: 'center',
+							marginBottom: 20,
+							marginTop: 10
+						}}>
+							<Typography h2 color={'#000'}>¿Eliminar Evento?</Typography>
+						</View>
 
+						<View style={{ flex: 1 }}>
+							<TouchableOpacity
+								style={{
+									marginTop: 5,
+									paddingVertical: 5,
+								}}
+								onPress={() => setSelectedAction(1)}
+							>
+								<Typography h3
+									color={selectedAction == 1 ? Colors.COLORS.WEB_BUTTON : '#606060'}>
+									{selectedAction == 1 ? '>' : '  '} Este y eventos futuros
+								</Typography>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={{
+									marginTop: 10,
+									paddingVertical: 5,
+								}}
+								onPress={() => setSelectedAction(2)}
+							>
+								<Typography h3
+									color={selectedAction == 2 ? Colors.COLORS.WEB_BUTTON : '#606060'}
+								>
+									{selectedAction == 2 ? '>' : '  '} Todos los eventos
+								</Typography>
+							</TouchableOpacity>
+						</View>
+
+						<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+							<Button
+								color={'#e6e6e9'}
+								style={{ alignItems: 'center', width: '40%' }}
+								onPress={() => {
+									setDeleteModal(false)
+									setSelectedAction(0)
+								}}
+							>
+								<Typography color="#606060">Cancelar</Typography>
+							</Button>
+							<Button
+								color={Colors.COLORS.WEB_BUTTON}
+								style={{ alignItems: 'center', width: '40%' }}
+								onPress={() => doDelete()}
+							>
+								<Typography color="#fff">Aceptar</Typography>
+							</Button>
+						</View>
+
+					</View>
+				</TouchableOpacity>
+			</Modal>
+			<Modal
+				visible={updateModal}
+				transparent={true}
+				animationType="slade"
+				onRequestClose={() => {
+					setUpdateModal(false)
+					setSelectedAction(0)
+				}}
+			>
+				<TouchableOpacity
+					style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', }}
+					onPressOut={() => {
+						setUpdateModal(false)
+						setSelectedAction(0)
+					}}
+				>
+					<View style={[styles.modalContent, { height: 200, }]}>
+						<View style={{
+							alignItems: 'center',
+							alignContent: 'center',
+							marginBottom: 20,
+							marginTop: 10
+						}}>
+							<Typography h2 color={'#000'}>Detalles</Typography>
+						</View>
+
+						<View style={{ flex: 1 }}>
+							<TouchableOpacity
+								style={{
+									marginTop: 5,
+									paddingVertical: 5,
+								}}
+								onPress={() => {
+									setUpdateModal(false)
+									setSelectedAction(1)
+									setCanUpdate(true)
+								}}
+							>
+								<Typography h3>Modificar todos los eventos en la serie</Typography>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={{
+									marginTop: 15,
+									paddingVertical: 5,
+								}}
+								onPress={() => {
+									setUpdateModal(false)
+									setSelectedAction(2)
+									setCanUpdate(true)
+								}}
+							>
+								<Typography h3>Modificar este y todos los eventos futuros</Typography>
+							</TouchableOpacity>
+						</View>
+
+						{/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+							<Button
+								color={'#e6e6e9'}
+								style={{ alignItems: 'center', borderRadius: 10, padding: 10, paddingHorizontal: 25 }}
+								onPress={() => {
+									setUpdateModal(false)
+									setSelectedAction(0)
+								}}
+							>
+								<Typography h3 color="#606060">Cancelar</Typography>
+							</Button>
+							<Button
+								color={Colors.COLORS.WEB_BUTTON}
+								style={{ alignItems: 'center', borderRadius: 10, padding: 10, paddingHorizontal: 25 }}
+								//onPress={() => doDelete()}
+								onPress={() => {
+									setUpdateModal(false)
+									setCanUpdate(true)
+								}}
+							>
+								<Typography h3 color="#fff">Aceptar</Typography>
+							</Button>
+						</View> */}
+
+					</View>
+				</TouchableOpacity>
+			</Modal>
+		</>
 	)
 }
 
 const styles = StyleSheet.create({
+	modalContent: {
+		/* borderWidth: 1,
+		borderColor: '#000', */
+		borderBottomWidth: 0,
+		padding: 15,
+		paddingHorizontal: 25,
+		backgroundColor: '#FFF',
+		position: 'absolute',
+		bottom: 0,
+		left: 0,
+		right: 0,
+		height: 250,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+	},
 	loadingAccept: {
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -809,7 +1102,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		padding: 16,
+		//padding: 16,
 	},
 	text_area: {
 		height: 72,

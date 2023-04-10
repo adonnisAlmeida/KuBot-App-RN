@@ -21,6 +21,11 @@ import SellerDetailsScreen from './sellers/SellerDetailsScreen'
 import AcceptShippingScreen from './accept_shipping/AcceptShippingScreen'
 import AcceptShippingDetailsScreen from './accept_shipping/AcceptShippingDetailsScreen'
 import EditAddressScreen from './profile/EditAddressScreen'
+import MessagesScreen from './messages/MessagesScreen'
+import MessagesChatScreen from './messages/MessagesChatScreen'
+import NewMessageScreen from './messages/NewMessageScreen'
+import Pruebas from './home/Pruebas'
+import WriteMessageScreen from './messages/WriteMessageScreen'
 
 export default {
 	ONBOARDING: {
@@ -41,6 +46,45 @@ export default {
 		name: 'Home',
 		icon: 'home',
 		drawer: true,
+		carrier_only: false,
+	},
+	PRUEBAS: {
+		component: Pruebas,
+		title: 'Pruebas',
+		name: 'PruebasScreen',
+		icon: 'home',
+		drawer: false,
+		carrier_only: false,
+	},
+	MESSAGES: {
+		component: MessagesScreen,
+		title: 'Mensajes',
+		name: 'MessagesScreen',
+		icon: 'comments',
+		drawer: true,
+		carrier_only: true,
+	},
+	MESSAGES_CHAT: {
+		component: MessagesChatScreen,
+		title: 'Mensajes',
+		name: 'MessagesChatScreen',
+		icon: 'comments',
+		drawer: false,
+		carrier_only: true,
+	},
+	NEW_MESSAGE: {
+		component: NewMessageScreen,
+		title: 'Redactar Nuevo Mensaje',
+		name: 'NewMessageScreen',
+		drawer: false,
+		carrier_only: true,
+	},
+	WRITE_MESSAGE: {
+		component: WriteMessageScreen,
+		title: 'Redactar Mensaje',
+		name: 'WriteMessageScreen',
+		drawer: false,
+		carrier_only: true,
 	},
 	PRODUCTS: {
 		component: ProductsScreen,
@@ -48,6 +92,7 @@ export default {
 		name: 'Products',
 		icon: 'product-hunt',
 		drawer: true,
+		carrier_only: false,
 	},
 	PRODUCT: {
 		component: ProductScreen,
@@ -55,6 +100,7 @@ export default {
 		name: 'Product',
 		icon: 'navicon',
 		drawer: false,
+		carrier_only: false,
 	},
 	PROFILE: {
 		component: ProfileScreen,
@@ -62,6 +108,7 @@ export default {
 		name: 'Profile',
 		icon: 'user',
 		drawer: true,
+		carrier_only: false,
 	},
 	EDITAR_PROFILE: {
 		component: EditProfileScreen,
@@ -69,6 +116,7 @@ export default {
 		name: 'EditarProfile',
 		icon: 'edit',
 		drawer: false,
+		carrier_only: false,
 	},
 	HOLIDAYS: {
 		component: HolidaysScreen,
@@ -76,6 +124,7 @@ export default {
 		name: 'Holidays',
 		icon: 'plane',
 		drawer: true,
+		carrier_only: true,
 	},
 	HOLIDAYSFORM: {
 		component: HolidaysFormScreen,
@@ -83,6 +132,7 @@ export default {
 		name: 'HolidaysForm',
 		icon: 'plane',
 		drawer: false,
+		carrier_only: true,
 	},
 	ACCEPT_SHIPPING: {
 		component: AcceptShippingScreen,
@@ -90,6 +140,7 @@ export default {
 		name: 'AcceptShippingScreen',
 		icon: 'check-square-o',
 		drawer: true,
+		carrier_only: true,
 	},
 	ACCEPT_SHIPPING_DETAIL: {
 		component: AcceptShippingDetailsScreen,
@@ -97,6 +148,7 @@ export default {
 		name: 'AcceptShippingDetailsScreen',
 		icon: 'check-square-o',
 		drawer: false,
+		carrier_only: true,
 	},
 	MESSENGER_ORDERS: {
 		component: MessengerOrdersScreen,
@@ -104,6 +156,7 @@ export default {
 		name: 'MessengerOrders',
 		icon: 'envelope-open',
 		drawer: true,
+		carrier_only: true,
 	},
 	MESSENGER_ORDERS_DETAIL: {
 		component: MessengerOrdersDetailScreen,
@@ -111,6 +164,7 @@ export default {
 		name: 'MessengerOrdersDetail',
 		icon: 'sort-alpha-asc',
 		drawer: false,
+		carrier_only: true,
 	},
 	CLIENTS: {
 		component: ClientsScreen,
@@ -118,6 +172,7 @@ export default {
 		name: 'Clients',
 		icon: 'group',
 		drawer: true,
+		carrier_only: true,
 	},
 	CLIENT_DETAILS: {
 		component: ClientsDetailsScreen,
@@ -125,6 +180,7 @@ export default {
 		name: 'ClientDetails',
 		icon: 'group',
 		drawer: false,
+		carrier_only: true,
 	},
 	SELLERS: {
 		component: SellersScreen,
@@ -132,6 +188,7 @@ export default {
 		name: 'Sellers',
 		icon: 'group',
 		drawer: true,
+		carrier_only: true,
 	},
 	SELLER_DETAILS: {
 		component: SellerDetailsScreen,
@@ -139,6 +196,7 @@ export default {
 		name: 'SellerDetails',
 		icon: 'group',
 		drawer: false,
+		carrier_only: true,
 	},
 	DELIVERY_AREAS: {
 		component: DeliveryAreasScreen,
@@ -146,6 +204,7 @@ export default {
 		name: 'DeliveryAreas',
 		icon: 'location-arrow',
 		drawer: true,
+		carrier_only: true,
 	},
 	DELIVERY_AREAS_FORM: {
 		component: DeliveryAreasFormScreen,
@@ -153,6 +212,7 @@ export default {
 		name: 'DeliveryAreasForm',
 		icon: 'map',
 		drawer: false,
+		carrier_only: true,
 	},
 	DELIVERY_SCHEDULES: {
 		component: DeliverySchedulesScreen,
@@ -160,6 +220,7 @@ export default {
 		name: 'DeliverySchedulesScreen',
 		icon: 'sort-alpha-asc',
 		drawer: true,
+		carrier_only: true,
 	},
 	DELIVERY_SCHEDULES_FORM: {
 		component: DeliverySchedulesFormScreen,
@@ -167,6 +228,7 @@ export default {
 		name: 'DeliverySchedulesFormScreen',
 		icon: 'sort-alpha-asc',
 		drawer: false,
+		carrier_only: true,
 	},
 	/* EDIT_ADDRESS_FORM: {
 		component: EditAddressScreen,

@@ -8,13 +8,14 @@ import {
 	TextInput,
 	ScrollView,
 	TouchableOpacity,
-	Image,
 	Dimensions,
 	ActivityIndicator,
 	Modal,
 	TouchableWithoutFeedback,
 	ImageBackground,
 } from 'react-native'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { useTheme } from '@react-navigation/native'
 import { useMutation } from '@apollo/client'
@@ -171,13 +172,6 @@ export default function EditProfileScreen({ navigation, route }) {
 		userAvatarUpdate({
 			variables: { image: photoFile }
 		})
-		/* 
-		setTimeout(() => {
-			setActivity(false)
-			setConfirmModal(false)
-			setAvatarURL(vistaPrevia)
-		}, 2000);
-		console.log("send") */
 	}
 
 	const profilePhotoEdit = () => {
@@ -188,7 +182,9 @@ export default function EditProfileScreen({ navigation, route }) {
 		<ScrollView style={styles.container}>
 			<View style={styles.imageContainer}>
 				<View style={styles.editIcon}>
-					<TouchableOpacity onPress={() => profilePhotoEdit()} >
+					<TouchableOpacity
+						style={styles.whatButton}
+						onPress={() => profilePhotoEdit()} >
 						<FontAwesome
 							style={styles.buttonEdit}
 							name="edit"
@@ -198,15 +194,23 @@ export default function EditProfileScreen({ navigation, route }) {
 					</TouchableOpacity>
 				</View>
 				<View>
-					<Image source={avatarURL} style={styles.imageStyles} />
+					<Image
+						indicator={Progress.Pie}
+						indicatorProps={{
+							color: Colors.COLORS.PRIMARY,
+							borderWidth: 0,
+						}}
+						source={avatarURL}
+						imageStyle={styles.imageStyles}
+					/>
 				</View>
 			</View>
-			<View>
-				<Typography
+			<View style={{ marginBottom: 15 }}>
+				<Typography bold
 					color={colors.ON_SURFACE_VARIANT}
-					style={{ marginVertical: 10 }}
+				//style={{ marginVertical: 10 }}
 				>
-					Nombre
+					Nombre:
 				</Typography>
 				<TextInput
 					value={firstName}
@@ -218,12 +222,12 @@ export default function EditProfileScreen({ navigation, route }) {
 					onChangeText={(text) => setFirstName(text)}
 				/>
 			</View>
-			<View>
-				<Typography
+			<View style={{ marginBottom: 15 }}>
+				<Typography bold
 					color={colors.ON_SURFACE_VARIANT}
-					style={{ marginVertical: 10 }}
+				//style={{ marginVertical: 10 }}
 				>
-					Apellidos
+					Apellidos:
 				</Typography>
 				<TextInput
 					value={lastName}
@@ -236,6 +240,7 @@ export default function EditProfileScreen({ navigation, route }) {
 				/>
 			</View>
 			<Button
+				color={Colors.COLORS.WEB_BUTTON}
 				style={{ alignItems: 'center', marginVertical: 16 }}
 				onPress={() => handleEdit()}
 			>
@@ -326,6 +331,14 @@ export default function EditProfileScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+	whatButton: {
+		/* backgroundColor: Colors.COLORS.PRIMARY,
+		padding: 10,
+		borderRadius: 100,
+		position: 'absolute',
+		bottom: 10,
+		right: 30, */
+	},
 	topButtons: {
 		paddingHorizontal: 25,
 		flexDirection: 'row',
@@ -382,10 +395,13 @@ const styles = StyleSheet.create({
 		right: 0,
 	}, */
 	editIcon: {
+		backgroundColor: Colors.COLORS.PRIMARY,
+		padding: 10,
+		borderRadius: 100,
+		bottom: 10,
+		right: 80,
 		position: 'absolute',
-		top: 15,
 		//right: 0,
-		left: 15,
 		zIndex: 10
 	},
 	imageContainer: {
@@ -394,11 +410,13 @@ const styles = StyleSheet.create({
 		marginBottom: 20
 	},
 	imageStyles: {
+		position: 'relative',
 		resizeMode: 'contain',
 		marginTop: 10,
 		alignSelf: 'center',
-		width: '100%',
+		width: 200,
 		height: 200,
+		borderRadius: 100,
 		//backgroundColor: 'red'
 	},
 	container: {

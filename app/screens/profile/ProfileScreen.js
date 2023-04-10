@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { StyleSheet, ScrollView, View, Image } from 'react-native'
 import { useTheme } from '@react-navigation/native'
@@ -14,12 +14,14 @@ import { CUSTOMER_DELETE } from '../../graphql/customers'
 import Colors from '../../constants/Colors'
 import ContactDetails from './ContactDetails'
 import CarrierDetails from './CarrierDetails'
+import AwesomeAlert from 'react-native-awesome-alerts'
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function ProfileScreen({ navigation }) {
 	const { colors } = useTheme()
 	const dispatch = useDispatch()
+	const [showAlertAw, setShowAlert] = useState(false)
 	const user_state = useSelector(user)
 	const [customerDelete, result] = useMutation(CUSTOMER_DELETE)
 
@@ -74,9 +76,9 @@ export default function ProfileScreen({ navigation }) {
 				<FontAwesome
 					style={styles.headerRight}
 					name="sign-out"
-					color={colors.ON_SURFACE}
+					color={'#fff'}
 					size={22}
-					onPress={() => handleCerrarSesion()}
+					onPress={() => setShowAlert(true)}
 				/>
 			</View>
 		),
@@ -89,17 +91,46 @@ export default function ProfileScreen({ navigation }) {
 		: require('../../../assets/user_avatar.png')
 
 	return (
-		<Tab.Navigator
-			screenOptions={{
-				tabBarStyle: { backgroundColor: Colors.COLORS.PRIMARY },
-				tabBarIndicatorStyle: { backgroundColor: 'rgba(0,0,0,0.7)'},
-				tabBarLabelStyle: {fontWeight: "bold", fontSize: 16, textTransform: "none"},
-				tabBarActiveTintColor: "rgba(0,0,0,0.7)",
-				tabBarInactiveTintColor: "rgba(0,0,0,0.5)",
-			}}>
-			<Tab.Screen name="ContactDetailsNavView" options={{ tabBarLabel: 'Contacto', title: "PRUEBAA", }} component={ContactDetails} />
-			<Tab.Screen name="CarrierDetailsNavView" options={{ tabBarLabel: 'Mensajero' }} component={CarrierDetails} />
-		</Tab.Navigator>
+		<>
+			<Tab.Navigator
+				screenOptions={{
+					tabBarStyle: { backgroundColor: Colors.COLORS.PRIMARY },
+					tabBarIndicatorStyle: { backgroundColor: '#fff' },
+					tabBarLabelStyle: { fontWeight: "bold", fontSize: 16, textTransform: "none" },
+					tabBarActiveTintColor: "#fff",
+					tabBarInactiveTintColor: "rgba(255,255,255,0.5)",
+				}}>
+				<Tab.Screen name="ContactDetailsNavView" options={{ tabBarLabel: 'Contacto', title: "PRUEBAA", }} component={ContactDetails} />
+				{
+					user_state.isCarrier ? (
+						<Tab.Screen name="CarrierDetailsNavView" options={{ tabBarLabel: 'Mensajero' }} component={CarrierDetails} />
+					): (
+						null
+					)
+				}
+			</Tab.Navigator>
+			<AwesomeAlert
+                show={showAlertAw}
+                title="Cerrar sesión"
+                message="¿Está seguro de cerrar sesión?"
+                closeOnTouchOutside={true}
+                closeOnHardwareBackPress={true}
+                showCancelButton={true}
+                showConfirmButton={true}
+                cancelText="Cancelar"
+                confirmText="Aceptar"
+                confirmButtonColor="#F5365C"
+                onCancelPressed={() => {
+                    setShowAlert(false)
+                }}
+                onDismiss={() => {
+                    setShowAlert(false)
+                }}
+                onConfirmPressed={() => {
+                    handleCerrarSesion()
+                }}
+            />
+		</>
 	)
 }
 

@@ -1,8 +1,10 @@
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native'
+import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import React from 'react'
 import { Typography } from '../../../components'
 import { useTheme } from '@react-navigation/native'
 import Theme from '../../../constants/Theme'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
 
 const ClientItem = ({ navigation, client, ...props }) => {
     const { dark, colors } = useTheme()
@@ -31,11 +33,24 @@ const ClientItem = ({ navigation, client, ...props }) => {
                         <View style={{ flexDirection: 'row' }}>
                             <Image
                                 source={avatar}
-                                style={styles.image}
+                                imageStyle={styles.image}
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
                             />
                             <View style={{ marginLeft: 15, marginTop: 15 }}>
                                 <Typography bold color={colors.ON_SURFACE}>
-                                    {client.user.firstName} {client.user.lastName}
+                                    {client.user ? (
+                                        client.user.firstName ? (
+                                            client.user.firstName + " " + client.user.lastName
+                                        ) : (
+                                            client.user.userName
+                                        )
+                                    ) : (
+                                        "Invitado"
+                                    )}
                                 </Typography>
                             </View>
                         </View>
@@ -71,6 +86,7 @@ const styles = StyleSheet.create({
         borderRadius: Theme.SIZES.RADIUS,
     },
     image: {
+        position: 'relative',
         height: 50,
         width: 50,
         backgroundColor: Theme.LIGHT.BACKGROUND,

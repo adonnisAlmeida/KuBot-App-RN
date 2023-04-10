@@ -7,6 +7,7 @@ export const ORDERS_LIST_CLIENTS = gql`
 				node {
 					id
 					user {
+                        userName
                         id
                         avatar{
                             url
@@ -38,6 +39,7 @@ export const ORDERS_LIST_SELLERS = gql`
 					id
                     sellers{
                         user{
+                            userName
                             id
                             avatar{
                                 url

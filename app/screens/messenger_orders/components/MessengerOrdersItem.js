@@ -20,6 +20,28 @@ export default function MessengerOrdersItem({
 	const { dark, colors } = useTheme()
 	const styles_select = dark ? styles.selectDark : styles.select
 
+	const colorBonito = (estado) => {
+		switch (estado) {
+			case 'NO_STATUS':
+				return Colors.ORDER_STATUS.NO_STATUS
+			case 'ACCEPTED_CARRIER':
+				return Colors.ORDER_STATUS.ACCEPTED_CARRIER
+			case 'PICKED_UP_CARRIER':
+				return Colors.ORDER_STATUS.PICKED_UP_CARRIER
+			case 'IN_TRANSIT':
+				return Colors.ORDER_STATUS.IN_TRANSIT
+			case 'DELIVERED':
+				return Colors.ORDER_STATUS.DELIVERED
+			case 'REJECTED':
+				return Colors.ORDER_STATUS.REJECTED
+			case 'LOST':
+				return Colors.ORDER_STATUS.LOST
+
+			default:
+				return Colors.ORDER_STATUS.NO_STATUS
+		}
+	}
+
 	return (
 		<TouchableOpacity {...props}>
 			<View style={[dark ? styles.cardDark : styles.card, select && styles_select]}>
@@ -38,9 +60,13 @@ export default function MessengerOrdersItem({
 								style={{ marginBottom: 8 }}
 							>
 								{messenger_orders.user
-									? messenger_orders.user.firstName +
-									' ' +
-									messenger_orders.user.lastName
+									? (
+										messenger_orders.user.firstName? (
+											messenger_orders.user.firstName + ' ' + messenger_orders.user.lastName
+										): (
+											messenger_orders.user.userName
+										)
+									)
 									: 'Invitado'}
 							</Typography>
 							<Typography
@@ -76,7 +102,7 @@ export default function MessengerOrdersItem({
 						</View>
 					</View>
 				</View>
-				<View style={[styles.rightLine, { backgroundColor: stringToColour(messenger_orders.shippingStatus) }]}>
+				<View style={[styles.rightLine, { backgroundColor: colorBonito(messenger_orders.shippingStatus) }]}>
 				</View>
 			</View>
 		</TouchableOpacity>

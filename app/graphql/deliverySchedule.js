@@ -29,7 +29,7 @@ export const GET_DELIVERY_SCHEDULE = gql`
 export const UPDATE_DELIVERY_SCHEDULE = gql`
     mutation UpdateEvent(
         $id: ID!,
-        $description: String!,
+        $description: String,
         $start: DateTime,
         $end: DateTime,
         $title:String,

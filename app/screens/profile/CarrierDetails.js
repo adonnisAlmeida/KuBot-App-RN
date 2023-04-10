@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, ActivityIndicator, ImageBackground, Dimensions, Platform, ToastAndroid } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TouchableWithoutFeedback, ActivityIndicator, ImageBackground, Dimensions, Platform, ToastAndroid } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Typography } from '../../components'
 import { useTheme } from '@react-navigation/native'
@@ -11,6 +11,9 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useMutation } from '@apollo/client'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 import { BUST_PHOTO_UPDATE, CARRIER_UPDATE, PI_PHOTO_BACK_UPDATE, PI_PHOTO_FRONTAL_UPDATE } from '../../graphql/profile'
 import AwesomeAlert from 'react-native-awesome-alerts'
@@ -19,7 +22,7 @@ import { ReactNativeFile } from 'apollo-upload-client'
 const Sound = require('react-native-sound')
 
 const CarrierDetails = () => {
-    const { colors } = useTheme()
+    const { dark, colors } = useTheme()
     const [piPhotoFrontal, setPiPhotoFrontal] = useState(null)
     const [piPhotoBack, setPiPhotoBack] = useState(null)
     const [bustPhoto, setBustPhoto] = useState(null)
@@ -69,7 +72,7 @@ const CarrierDetails = () => {
             setConfirmModal(false)
             //setPiPhotoFrontal(vistaPrevia)
             if (Platform.OS === 'android')
-				ToastAndroid.show('Error actualizando foto delantera.', ToastAndroid.LONG)
+                ToastAndroid.show('Error actualizando foto delantera.', ToastAndroid.LONG)
             console.log('Error actalizando info de lcarrier >> ', error)
             console.log('Error actalizando info de data >> ', data)
         },
@@ -90,7 +93,7 @@ const CarrierDetails = () => {
             setActivity(false)
             setConfirmModal(false)
             if (Platform.OS === 'android')
-				ToastAndroid.show('Error actualizando foto trasera.', ToastAndroid.LONG)
+                ToastAndroid.show('Error actualizando foto trasera.', ToastAndroid.LONG)
             //setPiPhotoBack(vistaPrevia)
             console.log('Error actalizando info de lcarrier >> ', errorBust)
             console.log('Error actalizando info de data >> ', dataBust)
@@ -111,7 +114,7 @@ const CarrierDetails = () => {
             setActivity(false)
             setConfirmModal(false)
             if (Platform.OS === 'android')
-				ToastAndroid.show('Error actualizando foto de busto.', ToastAndroid.LONG)
+                ToastAndroid.show('Error actualizando foto de busto.', ToastAndroid.LONG)
             //setBustPhoto(vistaPrevia)
             console.log('Error actalizando info de lcarrier >> ', errorBust)
             console.log('Error actalizando info de data >> ', dataBust)
@@ -291,7 +294,17 @@ const CarrierDetails = () => {
                                     />
                                 </TouchableOpacity>
                             </View>
-                            <Image backgroundColor='white' source={piPhotoFrontal} style={styles.imageStyles} />
+                            <Image
+                                defaultSource={piPhotoBack}
+                                backgroundColor='white'
+                                source={piPhotoFrontal}
+                                imageStyle={styles.imageStyles}
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
+                            />
                         </View>
                     </View>
                     <View style={styles.imageRow}>
@@ -307,7 +320,16 @@ const CarrierDetails = () => {
                                     />
                                 </TouchableOpacity>
                             </View>
-                            <Image backgroundColor='white' source={piPhotoBack} style={styles.imageStyles} />
+                            <Image
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
+                                backgroundColor='white'
+                                source={piPhotoBack}
+                                imageStyle={styles.imageStyles}
+                            />
                         </View>
                     </View>
                     <View style={styles.imageRow}>
@@ -323,9 +345,72 @@ const CarrierDetails = () => {
                                     />
                                 </TouchableOpacity>
                             </View>
-                            <Image backgroundColor='white' source={bustPhoto} style={styles.imageStyles} />
+                            <Image
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
+                                backgroundColor='white'
+                                source={bustPhoto}
+                                imageStyle={styles.imageStyles}
+                            />
                         </View>
                     </View>
+                </View>
+                <View style={{ marginTop: 15, paddingVertical: 8, alignItems: 'center' }} >
+                    <Typography style={{color: Colors.COLORS.ON_SURFACE}} h3 bold>Calificación y opiniones:</Typography>
+                </View>
+                <View
+                    style={[styles.card, { backgroundColor: colors.SURFACE }]}
+                >
+                    <View style={{ flexDirection: 'row' }}>
+                        <Image
+                            backgroundColor='white'
+                            source={require('../../../assets/user_avatar.png')}
+                            imageStyle={styles.opinionAvatar}
+                            indicator={Progress.Pie}
+                            indicatorProps={{
+                                color: Colors.COLORS.PRIMARY,
+                                borderWidth: 0,
+                            }}
+                        />
+                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
+                            <View>
+                                <Typography style={{ color: '#333' }}>Samantha Lambert </Typography>
+                                <Typography style={{ color: '#828282' }}>22 de Febrero de 2023 </Typography>
+                            </View>
+                            <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
+                                <MaterialIcons
+                                    name='star'
+                                    size={20}
+                                    color={Colors.COLORS.WEB_START_ON}
+                                />
+                                <MaterialIcons
+                                    name='star'
+                                    size={20}
+                                    color={Colors.COLORS.WEB_START_ON}
+                                />
+                                <MaterialIcons
+                                    name='star-half'
+                                    size={20}
+                                    color={Colors.COLORS.WEB_START_ON}
+                                />
+                                <MaterialIcons
+                                    name='star-border'
+                                    size={20}
+                                    color={Colors.COLORS.WEB_START_OFF}
+                                />
+                                <MaterialIcons
+                                    name='star-border'
+                                    size={20}
+                                    color={Colors.COLORS.WEB_START_OFF}
+                                />
+                            </View>
+                        </View>
+                    </View>
+                    <Typography style={{ marginTop: 10, color: Colors.COLORS.ON_SURFACE, }} bold>buena</Typography>
+                    <Typography style={{ color: '#333' }}>Muy buena</Typography>
                 </View>
                 <Typography></Typography>
             </ScrollView>
@@ -379,6 +464,14 @@ const CarrierDetails = () => {
 }
 
 const styles = StyleSheet.create({
+    opinionAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 100,
+        position: 'relative',
+        marginRight: 8,
+
+    },
     topButtons: {
         paddingHorizontal: 25,
         flexDirection: 'row',
@@ -442,6 +535,7 @@ const styles = StyleSheet.create({
         height: 200,
     },
     imageStyles: {
+        position: 'relative',
         resizeMode: 'contain',
         marginTop: 10,
         alignSelf: 'center',

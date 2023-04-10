@@ -1,8 +1,11 @@
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native'
+import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import React from 'react'
 import { Typography } from '../../../components'
 import { useTheme } from '@react-navigation/native'
 import Theme from '../../../constants/Theme'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
+import Colors from '../../../constants/Colors'
 
 const SellerItem = ({ navigation, seller, ...props }) => {
     const { dark, colors } = useTheme()
@@ -13,7 +16,7 @@ const SellerItem = ({ navigation, seller, ...props }) => {
                 uri: seller.user.avatar.url,
             }
             : require('../../../../assets/user_avatar.png')
-            
+
     return (
         <TouchableOpacity {...props}
             onPress={() => navigation.navigate('SellerDetails', { seller: seller.user })}
@@ -32,22 +35,35 @@ const SellerItem = ({ navigation, seller, ...props }) => {
                         <View style={{ flexDirection: 'row' }}>
                             <Image
                                 source={avatar}
-                                style={styles.image}
+                                imageStyle={styles.image}
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: Colors.COLORS.PRIMARY,
+                                    borderWidth: 0,
+                                }}
                             />
                             <View style={{ marginLeft: 15, marginTop: 15 }}>
                                 <Typography bold color={colors.ON_SURFACE}>
-                                    {seller.user.firstName} {seller.user.lastName}
+                                    {seller.user ? (
+                                        seller.user.firstName ? (
+                                            seller.user.firstName + " " + seller.user.lastName
+                                        ) : (
+                                            seller.user.userName
+                                        )
+                                    ) : (
+                                        "Invitado"
+                                    )}
                                 </Typography>
                             </View>
                         </View>
-                        {/* <View style={{ marginTop: 10 }}>
+                        <View style={{ marginTop: 10 }}>
                             <Typography>
                                 {seller.user.addresses[0].streetAddress1}
                             </Typography>
                             <Typography>
                                 {seller.user.addresses[0].city}, {seller.user.addresses[0].country.country}
                             </Typography>
-                        </View> */}
+                        </View>
                     </View>
                 </View>
             </View>
@@ -72,6 +88,7 @@ const styles = StyleSheet.create({
         borderRadius: Theme.SIZES.RADIUS,
     },
     image: {
+        position: 'relative',
         height: 50,
         width: 50,
         backgroundColor: Theme.LIGHT.BACKGROUND,

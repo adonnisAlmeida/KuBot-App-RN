@@ -255,7 +255,10 @@ const EditAddressScreen = ({ navigation, route }) => {
                         onChangeText={(text) => setCompanyName(text)}
                     />
                 </View>
-                <Button style={{ alignItems: 'center', marginVertical: 16 }} onPress={() => handleUpdateAddress()}>
+                <Button
+                    color={Colors.COLORS.WEB_BUTTON}
+                    style={{ alignItems: 'center', marginVertical: 16 }} onPress={() => handleUpdateAddress()}
+                >
                     {activity ? (
                         <ActivityIndicator />
                     ) : (

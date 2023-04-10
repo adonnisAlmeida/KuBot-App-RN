@@ -1,10 +1,12 @@
 import React from 'react'
-import { StyleSheet, View, Text, ScrollView, Image } from 'react-native'
+import { StyleSheet, View, Text, ScrollView } from 'react-native'
 import { useQuery } from '@apollo/client'
 import { useTheme } from '@react-navigation/native'
 
 import Loading from '../../components/Loading'
 import { PRODUCTO_ID } from '../../graphql/product'
+import Image from 'react-native-image-progress';
+import * as Progress from 'react-native-progress';
 
 export default function ProductScreen({ route, navigation, ...props }) {
 	const { colors } = useTheme()
@@ -28,7 +30,15 @@ export default function ProductScreen({ route, navigation, ...props }) {
 
 	return (
 		<ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-			<Image source={avatar} style={styles.avatar} />
+			<Image
+				source={avatar}
+				imageStyle={styles.avatar}
+				indicator={Progress.Pie}
+				indicatorProps={{
+					color: colors.PRIMARY,
+					borderWidth: 0,
+				}}
+			/>
 			<Text style={{ color: colors.ON_BACKGROUND, marginVertical: 10 }}>
 				Información
 			</Text>
@@ -120,6 +130,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 8,
 	},
 	avatar: {
+		position: 'relative',
 		alignSelf: 'center',
 		width: 124,
 		height: 124,
