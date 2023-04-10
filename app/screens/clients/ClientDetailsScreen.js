@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image as RNImage } from 'react-native'
 import React, { useState } from 'react'
 import { Typography } from '../../components'
 import Theme from '../../constants/Theme'
@@ -30,10 +30,10 @@ const ClientDetailsScreen = ({ navigation, route }) => {
                     <Ionicons
                         name='arrow-back'
                         size={24}
-                        color={colors.SURFACE}
+                        color='#fff'
                         style={{ marginTop: 4 }}
                     />
-                    <Image source={avatar} style={styles.image} />
+                    <RNImage source={avatar} style={styles.image} />
                 </TouchableOpacity>
             </View>
         ),

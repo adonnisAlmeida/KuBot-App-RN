@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image as RNImage } from 'react-native'
 import React, { useState } from 'react'
 import { Typography } from '../../components'
 import Theme from '../../constants/Theme'
@@ -36,7 +36,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                         color={colors.SURFACE}
                         style={{ marginTop: 4 }}
                     />
-                    <Image source={avatar} style={styles.image} />
+                    <RNImage source={avatar} style={styles.image} />
                 </TouchableOpacity>
             </View>
         ),
