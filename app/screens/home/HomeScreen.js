@@ -234,11 +234,11 @@ export default function HomeScreen({ navigation }) {
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				{hello()}
-				<TouchableOpacity onPress={() => navigation.navigate("PruebasScreen")}>
+				{/* <TouchableOpacity onPress={() => navigation.navigate("PruebasScreen")}>
 					<Typography>
 						Pruebas View
 					</Typography>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 				{product()}
 				{pushyTokenComponent()}
 				{recent()}

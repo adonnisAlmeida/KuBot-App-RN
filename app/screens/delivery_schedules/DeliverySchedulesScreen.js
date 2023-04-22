@@ -108,7 +108,7 @@ export default function DeliverySchedulesScreen({ navigation, route }) {
 
 	const [getDeliverySchedule, { loading, error, data }] = useLazyQuery(GET_DELIVERY_SCHEDULE, {
 		onCompleted: (data) => {
-			//console.log('TERMINOO >> ', data.events.edges)
+			console.log('TERMINOO >> ', data.events.edges)
 			//console.log("EJECUTOOOOOOOOOOO")
 			const todo = data.events.edges
 			dispatch(setDeliberySchedulesSource(todo))

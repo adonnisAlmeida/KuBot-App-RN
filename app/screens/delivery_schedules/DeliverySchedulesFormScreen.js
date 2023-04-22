@@ -14,16 +14,16 @@ import { useTheme } from '@react-navigation/native'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CREATE_DELIVERY_SCHEDULE, DELETE_DELIVERY_SCHEDULE, GET_DELIVERY_SCHEDULE_RULES, UPDATE_DELIVERY_SCHEDULE } from '../../graphql/deliverySchedule'
 import { useDispatch, useSelector } from 'react-redux'
-import moment from 'moment'
+import moment from 'moment';
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { GET_DELIVERY_SCHEDULE } from '../../graphql/deliverySchedule'
 import Colors from '../../constants/Colors'
 import { addDeliberySchedulesSource, delivery_schedules_list, delivery_schedules_source, getDeliberySchedules, removeDeliberySchedulesSource, setDeliberySchedules, setDeliberySchedulesSource, updateDeliberySchedulesSource } from '../../redux/deliberyschedules/deliberyschedulesSlice'
-import { applyRules, stringToColour } from '../../utils/CommonFunctions'
+import { addDays, applyRules, stringToColour } from '../../utils/CommonFunctions'
 import SelectDropdown from 'react-native-select-dropdown'
 import Theme from '../../constants/Theme'
 import { printCreated } from '../../utils/CommonFunctions'
-import { TimePickerInputLineal } from '../../components/DatePickerInput'
+import { TimePickerInputLineal, DatePickerInputLineal } from '../../components/DatePickerInput'
 import { SelectLine } from '../../components/Select'
 import MySelect from '../../components/MySelect'
 moment.locale('es')
@@ -87,7 +87,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	const dateArray = date_param.split("-");
 	//console.log('date_param >> ', date_param)
 	let event_details = route.params?.event
+	const [item, setItem] = useState(localRules[4])
 	const [loadingApp, setLoadingApp] = useState(false)
+	const [deleteActive, setDeleteActive] = useState(false)
 	const [isDetails, setIsDetails] = useState(false)
 	const [canUpdate, setCanUpdate] = useState(true)
 	const [titulo, setTitulo] = useState('Evento creado desde la App')
@@ -123,7 +125,13 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	const [isUpdateHalf, setIsUpdateHalf] = useState(false)
 	const dispatch = useDispatch()
 
-	//console.log('date Param >> ', date_param)
+	/* console.log('date Param >> ', date_param)
+	console.log('printCreated >> ', printCreated(date_param))
+	console.log('isDetails >> ', isDetails)
+	console.log('eventStart >> ', eventStart)
+	console.log(' new Date(2022, 0, 24); >> ', new Date(2024, 0, 24))
+	console.log('event_details?.endRecurringPeriod >> ', event_details?.endRecurringPeriod) */
+
 
 	let delivery_schedules = useSelector(delivery_schedules_list)
 	let schedules_source = useSelector(delivery_schedules_source)
@@ -160,16 +168,16 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	})
 
 	const doDelete = () => {
-		/* if (eventServerId) {
-			setShowAlert(false)
-			setDisplayLoading(true)
-			console.log("eventServerId ", eventServerId)
-			deleteDeliverySchedules({ variables: { id: eventServerId } })
-		} */
+		console.log('Entro eliminar')
 		if (eventServerId) {
 			switch (selectedAction) {
 				case 1: // este y eventos futuros
-					const dateArray = date_param.split("-");
+
+					/* const dateArray = date_param.split("-");
+					let jajaja = new Date(date_param)
+					console.log(new Date(dateArray[0], dateArray[1] - 1, dateArray[2] - 1))
+					console.log(jajaja)
+					console.log(addDays(new Date(date_param), -1)) */
 					setDisplayLoading(true)
 					setDeleteModal(false)
 					setToastMessage("Evento Eliminado correctamente")
@@ -178,7 +186,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 							id: eventId,
 							start: inicioNoHuman,
 							end: finNoHuman,
-							endRecurringPeriod: new Date(dateArray[0], dateArray[1] - 1, dateArray[2] - 1),
+							endRecurringPeriod: addDays(new Date(date_param), -1),
 							description: descripcion,
 							title: titulo,
 							rule: (selectedRule == 0) ? null : selectedRule,
@@ -202,37 +210,97 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 	}
 
 	const deleteEvent = () => {
+		if (selectedRule == 5) {
+			setSelectedAction(2)
+			setDeleteActive(true)
+		}
 		setDeleteModal(true)
 	}
 
 	const updateEvent = () => {
-		setUpdateModal(true)
+		if (selectedRule != 5) {
+			setUpdateModal(true)
+		} else {
+			setSelectedAction(1)
+			setCanUpdate(true)
+		}
 	}
 
 	const doUpdate = () => {
 		if (eventServerId) {
 			switch (selectedAction) {
 				case 1: // modifica todos los eventos de la serie
-					setDisplayLoading(true)
+					//setDisplayLoading(true)
 					setToastMessage("Evento actualizado correctamente")
 					handleUpdate()
 					break;
 				case 2: // modificar este y los futuros
-					setIsUpdateHalf(true)
-					setDisplayLoading(true)
-					setToastMessage("Evento actualizado correctamente")
-					updateDeliverySchedule({
-						variables: {
-							id: eventId,
-							start: inicioNoHuman,
-							end: finNoHuman,
-							endRecurringPeriod: new Date(dateArray[0], dateArray[1] - 1, dateArray[2] - 1),
-							description: descripcion,
-							title: titulo,
-							rule: (selectedRule == 0) ? null : selectedRule,
+					{
+						let error_data = []
+						//if (descripcion.length == 0) error_data.push('descripcion')
+						//if (titulo.length == 0) error_data.push('titulo')
+						if (!inicio) error_data.push('inicio')
+						if (!fin) error_data.push('fin')
+						if (selectedRule != 5) {
+							if (!fechaFin) error_data.push('fechaFin')
 						}
-					})
-					break;
+						let splitFechaFin = fechaFin.split("-");
+						const myinicioArray = inicio.split(" ");
+						const inicioArray = myinicioArray[0].split(":");
+						const myfinArray = fin.split(" ");
+						const finArray = myfinArray[0].split(":");
+						//const dateArray = date_param.split("-");
+						if (myinicioArray[1] == 'pm') {
+							if (inicioArray[0] != '12') {
+								inicioArray[0] = parseInt(inicioArray[0]) + 12
+							}
+						} else if (myinicioArray[1] == 'am') {
+							if (inicioArray[0] == '12') {
+								inicioArray[0] = '00'
+							}
+						}
+						if (myfinArray[1] == 'pm') {
+							if (finArray[0] != '12') {
+								finArray[0] = parseInt(finArray[0]) + 12
+							}
+						} else if (myfinArray[1] == 'am') {
+							if (finArray[0] == '12') {
+								finArray[0] = '00'
+							}
+						}
+						let eventStartSplit = eventStart.split("-");
+						const inicioDate = new Date(eventStartSplit[0], eventStartSplit[1] - 1, eventStartSplit[2], inicioArray[0], inicioArray[1]);
+						const finDate = new Date(eventStartSplit[0], eventStartSplit[1] - 1, eventStartSplit[2], finArray[0], finArray[1]);
+						const definitivoInicioOtro = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(inicioArray[0]), parseInt(inicioArray[1]))
+						const definitivoFinOtro = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(finArray[0]), parseInt(finArray[1]))
+						const definitivoInicio = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(inicioArray[0]) - 5, parseInt(inicioArray[1]))
+						const definitivoFin = new Date(parseInt(eventStartSplit[0]), parseInt(eventStartSplit[1]) - 1, parseInt(eventStartSplit[2]), parseInt(finArray[0]) - 5, parseInt(finArray[1]))
+						if (definitivoInicio >= definitivoFin) {
+							error_data.push('inicio')
+							error_data.push('fin')
+							setHoraErrorText('La hora de inicio debe ser menor a la de fin.')
+						}
+
+						if (error_data.length > 0) {
+							setErrors(error_data)
+						} else {
+							setIsUpdateHalf(true)
+							setDisplayLoading(true)
+							setToastMessage("Evento actualizado correctamente")
+							updateDeliverySchedule({
+								variables: {
+									id: eventId,
+									start: event_details.start,
+									end: event_details.end,
+									endRecurringPeriod: addDays(new Date(date_param), -1),
+									description: descripcion,
+									title: titulo,
+									rule: (event_details.rule == null) ? null : event_details.rule.serverId,
+								}
+							})
+						}
+						break;
+					}
 				case 0: // por defecto este no debe ocurrir
 
 					break;
@@ -259,6 +327,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				if (Platform.OS === 'android')
 					ToastAndroid.show(toastMessage, ToastAndroid.LONG)
 				setNewLoadingcreate(false)
+				setDisplayLoading(false)
 				handleReset()
 				if (isUpdateHalf) {
 					setIsUpdateHalf(false)
@@ -266,13 +335,14 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				navigation.navigate('DeliverySchedulesScreen', {
 					makeReload: 'KAKA',
 				})
-			}else{
+			} else {
 				if (Platform.OS === 'android')
 					ToastAndroid.show("Ha ocurrido un error", ToastAndroid.LONG)
 			}
 		},
 		onError: (errorCreate) => {
 			setNewLoadingcreate(false)
+			setDisplayLoading(false)
 			console.log('ERRORRRRR CREATING EVENT >>> ', errorCreate.message)
 		}
 	})
@@ -307,9 +377,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 
 	useEffect(() => {
 		if (event_details) { // cuando es editar un evento
-			console.log('EVENT Details >> ', event_details)
+			//console.log('EVENT Details >> ', event_details)
 			if (event_details.rule == null) {
-				setSelectedRule(0)
+				setSelectedRule(5)
 			} else {
 				setSelectedRule(event_details.rule.serverId)
 			}
@@ -325,18 +395,25 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 			let humanEnd = moment(event_details.end).format('h:mm a')
 			setFin(humanEnd)
 			setFinNoHuman(event_details.end)
-			let humanDateEnd = moment(event_details.endRecurringPeriod).format('YYYY-MM-DD')
-			setFechaFin(humanDateEnd)
+			if (event_details.endRecurringPeriod == null) {
+				setFechaFin('')
+			} else {
+				let humanDateEnd = moment(event_details.endRecurringPeriod).add(1, 'days').format('YYYY-MM-DD')
+				setFechaFin(humanDateEnd)
+			}
 			let humaneventStart = moment(event_details.start).format('YYYY-MM-DD')
 			setEventStart(humaneventStart)
 			navigation.setOptions({
 				title: `Detalles del evento`,
-				/* headerStyle: {
-					backgroundColor: stringToColour(localRules[selectedRule] ? localRules[selectedRule].name : 'Never') + '40'
-				}, */
 			})
 		}
 	}, [])
+
+	useEffect(() => {
+		navigation.setOptions({
+			title: canUpdate ? 'Editar evento' : 'Detalles del evento',
+		})
+	}, [canUpdate])
 
 	useEffect(() => {
 		let fechaFinOK = new Date(fechaFin)
@@ -387,20 +464,48 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		setHoraErrorText('')
 	}, [fin])
 
+	const cancelButton = () => {
+		setCanUpdate(false)
+		setSelectedAction(0)
+		if (event_details.rule == null) {
+			setSelectedRule(5)
+		} else {
+			setSelectedRule(event_details.rule.serverId)
+		}
+		let humanStart = moment(event_details.start).format('h:mm a')
+		setInicio(humanStart)
+		setInicioNoHuman(event_details.start)
+		let humanEnd = moment(event_details.end).format('h:mm a')
+		setFin(humanEnd)
+		setFinNoHuman(event_details.end)
+		let humanDateEnd = moment(event_details.endRecurringPeriod).format('YYYY-MM-DD')
+		setFechaFin(humanDateEnd)
+	}
+
 	const hasErrors = (key) => errors.includes(key)
 
 	const handleAdd = () => {
+		console.log("HANDLE ADD")
 		let error_data = []
 		//if (descripcion.length == 0) error_data.push('descripcion')
 		//if (titulo.length == 0) error_data.push('titulo')
 		if (!inicio) error_data.push('inicio')
 		if (!fin) error_data.push('fin')
-		if (selectedRule != 5) {
+		/* if (selectedRule != 5) {
 			if (!fechaFin) error_data.push('fechaFin')
-		}
+		} */
 		const myinicioArray = inicio.split(" ");
-		let fechaFinOK = new Date(fechaFin)
-		fechaFinOK.setDate(fechaFinOK.getDate() + 1);
+		/* if (fechaFin == null) {
+			var fechaFinOK = new Date(2024, 0, 24)
+		} else {
+			var fechaFinOK = new Date(fechaFin)
+		} */
+		if(fechaFin == ''){
+			var fechaFinOK = new Date(2024, 0, 24)
+		}else{
+			var fechaFinOK = new Date(fechaFin)
+		}
+		//fechaFinOK.setDate(fechaFinOK.getDate());
 		const inicioArray = myinicioArray[0].split(":");
 		const myfinArray = fin.split(" ");
 		const finArray = myfinArray[0].split(":");
@@ -426,6 +531,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		const inicioDate = new Date(dateArray[0], dateArray[1] - 1, dateArray[2], inicioArray[0], inicioArray[1]);
 		const finDate = new Date(dateArray[0], dateArray[1] - 1, dateArray[2], finArray[0], finArray[1]);
 		if (inicioDate > fechaFinOK) {
+			console.log("AQUIIII >> ", inicioDate)
+			console.log("AQUIIII >> ", fechaFinOK)
+			console.log("AQUIIII >> ", inicioDate > fechaFinOK)
 			error_data.push('fechaFin') // no es necesario porque pueden ser de dias diferentes
 			setFechaFinErrorText("Fecha de finalización tiene que ser mayor a la de inicio.")
 		}
@@ -440,13 +548,14 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		} else {
 			setErrors([])
 			setNewLoadingcreate(true)
+			setDisplayLoading(true)
 			createDeliverySchedule({
 				variables: {
 					description: descripcion,
 					start: inicioDate,
 					end: finDate,
 					title: titulo,
-					endRecurringPeriod: (selectedRule == 5) ? finDate : fechaFinOK,
+					endRecurringPeriod: (selectedRule == 5) ? null : (fechaFin == '')? null: fechaFinOK,
 					rule: (selectedRule == 5) ? null : selectedRule,
 					carrier: carrierID,
 				}
@@ -474,12 +583,18 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		//if (titulo.length == 0) error_data.push('titulo')
 		if (!inicio) error_data.push('inicio')
 		if (!fin) error_data.push('fin')
-		if (selectedRule != 5) {
+		/* if (selectedRule != 5) {
 			if (!fechaFin) error_data.push('fechaFin')
-		}
+		} */
 		let splitFechaFin = fechaFin.split("-");
 		const myinicioArray = inicio.split(" ");
-		const fechaFinOK = new Date(splitFechaFin[0], splitFechaFin[1] - 1, splitFechaFin[2], 18, 59, 59)
+		if (fechaFin == '') {
+			var fechaFinOK = new Date(2024, 0, 24)
+		} else {
+			var fechaFinOK = new Date(fechaFin)
+		}
+
+		//const fechaFinOK = new Date(splitFechaFin[0], splitFechaFin[1] - 1, splitFechaFin[2], 18, 59, 59)
 		const inicioArray = myinicioArray[0].split(":");
 		const myfinArray = fin.split(" ");
 		const finArray = myfinArray[0].split(":");
@@ -522,6 +637,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		if (error_data.length > 0) {
 			setErrors(error_data)
 		} else {
+			setDisplayLoading(true)
 			setNewLoadingUpdate(true)
 			updateDeliverySchedule({
 				variables: {
@@ -530,7 +646,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 					start: definitivoInicioOtro,
 					end: definitivoFinOtro,
 					title: titulo,
-					endRecurringPeriod: (selectedRule == 5) ? null : fechaFinOK,
+					endRecurringPeriod: (selectedRule == 5) ? null : (fechaFin == '') ? null : fechaFinOK,
 					rule: (selectedRule == 5) ? null : selectedRule,
 				}
 			})
@@ -590,6 +706,26 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 							)}
 
 						</View> */}
+						<View style={{
+							flexDirection: 'row',
+							justifyContent: 'space-between',
+							backgroundColor: '#fff',
+							paddingHorizontal: 16,
+							paddingVertical: 20,
+						}}>
+							{isDetails ? (
+								<Typography>
+									Inicio del evento
+								</Typography>
+							) : (
+								<Typography>
+									Desde
+								</Typography>
+							)}
+							<Typography>
+								{isDetails ? printCreated(moment(eventStart)) : printCreated(moment(date_param))}
+							</Typography>
+						</View>
 						{isDetails ? (
 							<View style={{
 								flexDirection: 'row',
@@ -597,88 +733,149 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 								backgroundColor: '#fff',
 								paddingHorizontal: 16,
 								paddingVertical: 20,
+								borderTopColor: '#8E8E8E',
+								borderTopWidth: StyleSheet.hairlineWidth,
 							}}>
 								<Typography>
-									Desde
+									Día seleccionado
 								</Typography>
 								<Typography>
-									{eventStart}
+									{printCreated(moment(date_param))}
 								</Typography>
 							</View>
 						) : (
-							<View style={{
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								backgroundColor: '#fff',
-								paddingHorizontal: 16,
-								paddingVertical: 20,
-							}}>
-								<Typography>
-									Desde
-								</Typography>
-								<Typography>
-									{date_param}
-								</Typography>
-							</View>
+							null
 						)}
 						<View style={{
 							backgroundColor: '#fff',
 							marginTop: 20,
 							paddingHorizontal: 16,
 						}}>
-							<View style={{
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								paddingVertical: 10,
-							}}>
-								<TimePickerInputLineal
-									label="Hora de Inicio"
-									date={inicioFull}
-									value={inicio}
-									setValue={setInicio}
-									error={hasErrors('inicio')}
-								/>
-							</View>
-							<View style={{
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								paddingVertical: 10,
-								borderTopColor: '#8E8E8E',
-								borderTopWidth: StyleSheet.hairlineWidth,
-							}}>
-								<TimePickerInputLineal
-									date={finFull}
-									label="Hora de Fin"
-									value={fin}
-									setValue={setFin}
-									error={hasErrors('fin')}
-								/>
-							</View>
-							{hasErrors('fin') ? (
+							{canUpdate ? (
+								<View style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 10,
+								}}>
+									<TimePickerInputLineal
+										label="Hora de Inicio"
+										date={inicioFull}
+										value={inicio}
+										setValue={setInicio}
+										error={hasErrors('inicio')}
+									/>
+								</View>
+							) : (
+								<View style={{
+									//backgroundColor: 'red',
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 20,
+								}}>
+									<Typography>Hora de Inicio</Typography>
+									<Typography>{inicio}</Typography>
+								</View>
+							)}
+							{canUpdate ? (
+								<View style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 10,
+									borderTopColor: '#8E8E8E',
+									borderTopWidth: StyleSheet.hairlineWidth,
+								}}>
+									<TimePickerInputLineal
+										date={finFull}
+										label="Hora de Fin"
+										value={fin}
+										setValue={setFin}
+										error={hasErrors('fin')}
+									/>
+								</View>
+							) : (
+								<View style={{
+									//backgroundColor: 'red',
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 20,
+									borderTopColor: '#8E8E8E',
+									borderTopWidth: StyleSheet.hairlineWidth,
+								}}>
+									<Typography>Hora de Fin</Typography>
+									<Typography>{fin}</Typography>
+								</View>
+							)}
+							{/* {hasErrors('fin') ? (
 								<Typography color='#CF6679'>
 									{horaErrorText}
 								</Typography>
 							) : (
 								null
+							)} */}
+							{canUpdate ? (
+								<View style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 10,
+									borderTopColor: '#8E8E8E',
+									borderTopWidth: StyleSheet.hairlineWidth,
+								}}>
+									<MySelect
+										label="Repetir"
+										items={localRules}
+										value={selectedRule}
+										setValue={setSelectedRule}
+										setItem={setItem}
+									/>
+								</View>
+							) : (
+								<View style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 20,
+									borderTopColor: '#8E8E8E',
+									borderTopWidth: StyleSheet.hairlineWidth,
+								}}>
+									<Typography>Repetir</Typography>
+									<View style={[
+										{
+											flexDirection: 'row',
+											justifyContent: 'space-between',
+											alignContent: 'center',
+											alignItems: 'center',
+										},
+									]}>
+										<View style={{
+											height: 10,
+											width: 10,
+											borderRadius: 100,
+											backgroundColor: localRules[selectedRule - 1] ? stringToColour(localRules[selectedRule - 1]?.name) + '99' : 'transparent',
+											marginRight: 10
+										}} />
+										<Typography>{localRules[selectedRule - 1]?.label}</Typography>
+									</View>
+								</View>
 							)}
-							{/* <View style={{
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								paddingVertical: 10,
-								borderTopColor: '#8E8E8E',
-								borderTopWidth: StyleSheet.hairlineWidth,
-							}}>
-								<MySelect
-									label="Repetir"
-									items={localRules}
-									value={selectedRule}
-									setValue={setSelectedRule}
-								/>
-							</View> */}
+							{selectedRule != 5 ? (
+								<View style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingVertical: 10,
+									borderTopColor: '#8E8E8E',
+									borderTopWidth: StyleSheet.hairlineWidth,
+								}}>
+									<DatePickerInputLineal
+										label="Fecha de Finalización"
+										value={fechaFin}
+										setValue={setFechaFin}
+										type='date'
+										error={hasErrors('fechaFin')}
+										date={fechaFin == '' ? date_param : fechaFin}
+									/>
+								</View>
+							) : (null)}
 						</View>
-
-
-						<View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
+						{/* <View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
 							<View style={{ width: '48%' }}>
 								{canUpdate ? (
 									<TimePickerInput
@@ -695,8 +892,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 											marginVertical: 10,
 											borderRadius: 0,
 											borderWidth: 0,
-											/* borderBottomColor: '#8E8E8E',
-											borderBottomWidth: StyleSheet.hairlineWidth, */
+											
 											height: 30,
 										}}>{inicio}</Typography>
 									</View>
@@ -718,8 +914,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 											marginVertical: 10,
 											borderRadius: 0,
 											borderWidth: 0,
-											/* borderBottomColor: '#8E8E8E',
-											borderBottomWidth: StyleSheet.hairlineWidth, */
+											
 											height: 30,
 										}}>{fin}</Typography>
 									</View>
@@ -748,13 +943,11 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 										marginVertical: 10,
 										borderRadius: 0,
 										borderWidth: 0,
-										/* borderBottomColor: '#8E8E8E',
-										borderBottomWidth: StyleSheet.hairlineWidth, */
 										height: 30,
-									}}>{localRules[selectedRule - 1].label}</Typography>
+									}}>{selectedRule == 0 ? localRules[4]?.label : localRules[selectedRule - 1]?.label}</Typography>
 								</View>
 							)}
-							{selectedRule != 5 ?
+							{selectedRule != 0 ?
 								<View>
 									{canUpdate ? (
 										<DatePickerInput
@@ -772,8 +965,6 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 												marginTop: 10,
 												borderRadius: 0,
 												borderWidth: 0,
-												/* borderBottomColor: '#8E8E8E',
-												borderBottomWidth: StyleSheet.hairlineWidth, */
 												height: 30,
 											}}>{fechaFin}</Typography>
 										</View>
@@ -785,7 +976,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 									) : null}
 								</View>
 								: null}
-						</View>
+						</View> */}
 					</View>
 					<View>
 						{isDetails ?
@@ -802,10 +993,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 										<Button
 											color={'#e6e6e9'}
 											style={{ alignItems: 'center', width: '40%' }}
-											onPress={() => {
-												setCanUpdate(false)
-												setSelectedAction(0)
-											}}
+											onPress={() => cancelButton()}
 										//onPress={() => handleUpdate()}
 										>
 											<Typography color="#606060">Cancelar</Typography>
@@ -833,11 +1021,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 											onPress={() => updateEvent()}
 										//onPress={() => handleUpdate()}
 										>
-											{(newLoadingUpdate) ? (
-												<ActivityIndicator size="small" color="white" />
-											) : (
-												<Typography color="#ffffff">Editar</Typography>
-											)}
+											<Typography color="#ffffff">Editar</Typography>
 										</Button>
 										<Button
 											color="error"
@@ -865,11 +1049,11 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 											handleAdd()
 										}}
 									>
-										{(newLoadingCreate) ? (
+										{/* {(newLoadingCreate) ? (
 											<ActivityIndicator size="small" color="white" />
-										) : (
-											<Typography color="#ffffff">Adicionar</Typography>
-										)}
+										) : ( */}
+										<Typography color="#ffffff">Adicionar</Typography>
+										{/* )} */}
 									</Button>
 								</View>
 							)}
@@ -908,6 +1092,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 				animationType="slade"
 				onRequestClose={() => {
 					setDeleteModal(false)
+					setDeleteActive(false)
 					setSelectedAction(0)
 				}}
 			>
@@ -915,26 +1100,31 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 					style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', }}
 					onPressOut={() => {
 						setDeleteModal(false)
+						setDeleteActive(false)
 						setSelectedAction(0)
 					}}
 				>
-					<View style={styles.modalContent}>
-						<View style={{
-							alignItems: 'center',
-							alignContent: 'center',
-							marginBottom: 20,
-							marginTop: 10
-						}}>
-							<Typography h2 color={'#000'}>¿Eliminar Evento?</Typography>
-						</View>
-
+				</TouchableOpacity>
+				<View style={[styles.modalContent, { height: selectedRule == 5 ? 150 : 250, }]}>
+					<View style={{
+						alignItems: 'center',
+						alignContent: 'center',
+						marginBottom: 20,
+						marginTop: 10
+					}}>
+						<Typography h2 color={'#000'}>{selectedRule != 5 ? '¿Eliminar?' : '¿Eliminar este evento?'}</Typography>
+					</View>
+					{selectedRule != 5 ? (
 						<View style={{ flex: 1 }}>
 							<TouchableOpacity
 								style={{
 									marginTop: 5,
 									paddingVertical: 5,
 								}}
-								onPress={() => setSelectedAction(1)}
+								onPress={() => {
+									setDeleteActive(true)
+									setSelectedAction(1)
+								}}
 							>
 								<Typography h3
 									color={selectedAction == 1 ? Colors.COLORS.WEB_BUTTON : '#606060'}>
@@ -946,7 +1136,10 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 									marginTop: 10,
 									paddingVertical: 5,
 								}}
-								onPress={() => setSelectedAction(2)}
+								onPress={() => {
+									setDeleteActive(true)
+									setSelectedAction(2)
+								}}
 							>
 								<Typography h3
 									color={selectedAction == 2 ? Colors.COLORS.WEB_BUTTON : '#606060'}
@@ -955,29 +1148,34 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 								</Typography>
 							</TouchableOpacity>
 						</View>
-
-						<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-							<Button
-								color={'#e6e6e9'}
-								style={{ alignItems: 'center', width: '40%' }}
-								onPress={() => {
-									setDeleteModal(false)
-									setSelectedAction(0)
-								}}
-							>
-								<Typography color="#606060">Cancelar</Typography>
-							</Button>
-							<Button
-								color={Colors.COLORS.WEB_BUTTON}
-								style={{ alignItems: 'center', width: '40%' }}
-								onPress={() => doDelete()}
-							>
-								<Typography color="#fff">Aceptar</Typography>
-							</Button>
-						</View>
-
+					) : (
+						null
+					)}
+					<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+						<Button
+							color={'#e6e6e9'}
+							style={{ alignItems: 'center', width: '42%' }}
+							onPress={() => {
+								setDeleteModal(false)
+								setDeleteActive(false)
+								setSelectedAction(0)
+							}}
+						>
+							<Typography color="#606060">Cancelar</Typography>
+						</Button>
+						<Button
+							disabled={!deleteActive}
+							color={deleteActive ? Colors.COLORS.WEB_BUTTON : '#e6e6e9'}
+							//color={Colors.COLORS.WEB_BUTTON}
+							style={{ alignItems: 'center', width: '42%' }}
+							onPress={() => doDelete()}
+						>
+							<Typography color={deleteActive ? '#fff' : '#a4a4a4'}>Aceptar</Typography>
+						</Button>
 					</View>
-				</TouchableOpacity>
+
+				</View>
+
 			</Modal>
 			<Modal
 				visible={updateModal}
@@ -995,46 +1193,47 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 						setSelectedAction(0)
 					}}
 				>
-					<View style={[styles.modalContent, { height: 200, }]}>
-						<View style={{
-							alignItems: 'center',
-							alignContent: 'center',
-							marginBottom: 20,
-							marginTop: 10
-						}}>
-							<Typography h2 color={'#000'}>Detalles</Typography>
-						</View>
+				</TouchableOpacity>
+				<View style={[styles.modalContent, { height: 200, }]}>
+					<View style={{
+						alignItems: 'center',
+						alignContent: 'center',
+						marginBottom: 20,
+						marginTop: 10
+					}}>
+						<Typography h2 color={'#000'}>Detalles</Typography>
+					</View>
 
-						<View style={{ flex: 1 }}>
-							<TouchableOpacity
-								style={{
-									marginTop: 5,
-									paddingVertical: 5,
-								}}
-								onPress={() => {
-									setUpdateModal(false)
-									setSelectedAction(1)
-									setCanUpdate(true)
-								}}
-							>
-								<Typography h3>Modificar todos los eventos en la serie</Typography>
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={{
-									marginTop: 15,
-									paddingVertical: 5,
-								}}
-								onPress={() => {
-									setUpdateModal(false)
-									setSelectedAction(2)
-									setCanUpdate(true)
-								}}
-							>
-								<Typography h3>Modificar este y todos los eventos futuros</Typography>
-							</TouchableOpacity>
-						</View>
+					<View style={{ flex: 1 }}>
+						<TouchableOpacity
+							style={{
+								marginTop: 5,
+								paddingVertical: 5,
+							}}
+							onPress={() => {
+								setUpdateModal(false)
+								setSelectedAction(1)
+								setCanUpdate(true)
+							}}
+						>
+							<Typography h3>Modificar todos los eventos en la serie</Typography>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={{
+								marginTop: 15,
+								paddingVertical: 5,
+							}}
+							onPress={() => {
+								setUpdateModal(false)
+								setSelectedAction(2)
+								setCanUpdate(true)
+							}}
+						>
+							<Typography h3>Modificar este y todos los eventos futuros</Typography>
+						</TouchableOpacity>
+					</View>
 
-						{/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+					{/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 							<Button
 								color={'#e6e6e9'}
 								style={{ alignItems: 'center', borderRadius: 10, padding: 10, paddingHorizontal: 25 }}
@@ -1058,8 +1257,8 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 							</Button>
 						</View> */}
 
-					</View>
-				</TouchableOpacity>
+				</View>
+
 			</Modal>
 		</>
 	)
@@ -1071,7 +1270,7 @@ const styles = StyleSheet.create({
 		borderColor: '#000', */
 		borderBottomWidth: 0,
 		padding: 15,
-		paddingHorizontal: 25,
+		paddingHorizontal: 20,
 		backgroundColor: '#FFF',
 		position: 'absolute',
 		bottom: 0,

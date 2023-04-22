@@ -342,6 +342,11 @@ export function stringToColour(str) {
     return colour;
 }
 
+export const addDays = (date, days) => {
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
 const makeYearlyRule = (key, item, restData) => {
     if (restData[key]) {
         restData[key].push(item)
@@ -349,10 +354,16 @@ const makeYearlyRule = (key, item, restData) => {
         restData[key] = []
         restData[key].push(item)
     }
-    if (item.start && item.endRecurringPeriod) {
+    let end = null
+    if(item.endRecurringPeriod == null){
+        end = new Date(2024, 0, 24)
+    }else{
+        end = item.endRecurringPeriod
+    }
+    if (item.start) {
         let cont = 1
         let startFromated = moment(item.start).add(cont, 'y').format("YYYY-MM-DD")
-        const endFromated = moment(item.endRecurringPeriod).add(1, 'd').format("YYYY-MM-DD")
+        const endFromated = moment(end).add(1, 'd').format("YYYY-MM-DD")
         while (startFromated < endFromated) {
             cont += 1
             if (restData[startFromated]) {
@@ -375,9 +386,15 @@ const makeMonthlyRule = (key, item, restData) => {
         restData[key].push(item)
     }
     let cont = 1
-    if (item.start && item.endRecurringPeriod) {
+    let end = null
+    if(item.endRecurringPeriod == null){
+        end = new Date(2024, 0, 24)
+    }else{
+        end = item.endRecurringPeriod
+    }
+    if (item.start) {
         let startFromated = moment(item.start).add(cont, 'M').format("YYYY-MM-DD")
-        const endFromated = moment(item.endRecurringPeriod).add(1, 'd').format("YYYY-MM-DD")
+        const endFromated = moment(end).add(1, 'd').format("YYYY-MM-DD")
         /* console.log('startFromated', startFromated)
         console.log('endFromated', endFromated) */
         while (startFromated <= endFromated) {
@@ -403,10 +420,16 @@ const makeWeeklyRule = (key, item, restData) => {
         restData[key] = []
         restData[key].push(item)
     }
-    if (item.start && item.endRecurringPeriod) {
+    let end = null
+    if(item.endRecurringPeriod == null){
+        end = new Date(2024, 0, 24)
+    }else{
+        end = item.endRecurringPeriod
+    }
+    if (item.start) {
         let cont = 1
         let startFromated = moment(item.start).add(cont, 'w').format("YYYY-MM-DD")
-        const endFromated = moment(item.endRecurringPeriod).add(1, 'd').format("YYYY-MM-DD")
+        const endFromated = moment(end).add(1, 'd').format("YYYY-MM-DD")
         while (startFromated <= endFromated) {
             cont += 1
             if (restData[startFromated]) {
@@ -428,10 +451,19 @@ const makeDailyRule = (key, item, restData) => {
         restData[key] = []
         restData[key].push(item)
     }
-    if (item.start && item.endRecurringPeriod) {
+    let end = null
+    if(item.endRecurringPeriod == null){
+        end = new Date(2024, 0, 24)
+    }else{
+        end = item.endRecurringPeriod
+    }
+    if (item.start) {
         let cont = 1
         let startFromated = moment(item.start).add(cont, 'days').format("YYYY-MM-DD")
-        const endFromated = moment(item.endRecurringPeriod).format("YYYY-MM-DD")
+        const endFromated = moment(end).add(cont, 'days').format("YYYY-MM-DD")
+        console.log('Regla en diario startFromated ', startFromated)
+        console.log('Regla en diario endFromated ', endFromated)
+        console.log('Regla en diario end ', end)
         while (startFromated <= endFromated) {
             cont += 1
             if (restData[startFromated]) {

@@ -71,6 +71,7 @@ export default function Agenda({ navigation, data, deleteDay, setDay, selectedDa
 						onRefresh={onRefresh}
 					/>
 				}
+				keyExtractor={item => item.serverId}
 				renderItem={({ item, index, separators }) => (
 					<View style={{ flexDirection: 'row' }}>
 						{index == 0 ? (

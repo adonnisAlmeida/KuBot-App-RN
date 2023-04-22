@@ -91,6 +91,7 @@ export default function LoginScreen({ navigation }) {
 			setErrorLogin(true)
 			setErrorMessage(`Error de conexión >>> ${errorToken}`)
 			console.log('ERROR LOGIN >> ', errorToken)
+			console.log('ERROR LOGIN >> ', dataToken)
 		},
 		fetchPolicy: "no-cache"
 	})
