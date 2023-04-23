@@ -29,7 +29,8 @@ const styles = StyleSheet.create({
         borderRightWidth: 6,
         borderTopWidth: 6,
         borderRightColor: "transparent",
-        borderTopColor: 'rgba(45, 206, 138, 0.4)',
+        borderTopColor: '#94e7c4',
+        //borderTopColor: 'rgba(45, 206, 138, 0.4)',
     },
     messageTitle: {
         marginBottom: 6,
@@ -40,8 +41,8 @@ const styles = StyleSheet.create({
         //color: '#FFF'
     },
     messageContainer: {
-        //backgroundColor: '#3ee7cd',
-        backgroundColor: 'rgba(45, 206, 138, 0.4)',
+        backgroundColor: '#94e7c4',
+        //backgroundColor: 'rgba(45, 206, 138, 0.4)',
         borderRadius: 6,
         borderTopRightRadius: 0,
         padding: 4,

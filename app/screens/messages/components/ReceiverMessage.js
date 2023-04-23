@@ -49,7 +49,8 @@ const styles = StyleSheet.create({
         borderRightWidth: 6,
         borderTopWidth: 6,
         borderRightColor: "transparent",
-        borderTopColor: 'rgba(38, 165, 212, 0.3)',
+        borderTopColor: '#8fc6da',
+        //borderTopColor: 'rgba(38, 165, 212, 0.3)',
         transform: [{ rotate: "90deg" }],
     },
     image: {
@@ -68,7 +69,8 @@ const styles = StyleSheet.create({
     messageContent: {
     },
     messageContainer: {
-        backgroundColor: 'rgba(38, 165, 212, 0.3)',
+        backgroundColor: '#8fc6da',
+        //backgroundColor: 'rgba(38, 165, 212, 0.3)',
         borderRadius: 6,
         borderTopLeftRadius: 0,
         padding: 4,

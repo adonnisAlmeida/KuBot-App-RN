@@ -1,11 +1,13 @@
 import React from 'react'
-import { StyleSheet, TouchableOpacity, Text } from 'react-native'
+import { StyleSheet, TouchableOpacity, Text, View } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import Typography from './Typography'
 
 import moment from 'moment'
+import Colors from '../constants/Colors'
 moment.locale('es')
 
 export function TimePickerInput({ label, value, setValue, error, date = null, ...props }) {
@@ -124,6 +126,7 @@ export function DatePickerInputLineal({
 	error,
 	type = 'date',
 	date = null,
+	resetInput = () => console.log("Resetear Input"),
 	...props
 }) {
 	const { colors } = useTheme()
@@ -141,8 +144,13 @@ export function DatePickerInputLineal({
 	return (
 		<React.Fragment>
 			<TouchableOpacity
-			style={{flexDirection: 'row', justifyContent: 'space-between', flex: 1, paddingVertical: 10}}
-			onPress={() => setShowDatePicker(true)}>
+				style={{
+					flexDirection: 'row',
+					justifyContent: 'space-between',
+					flex: 1,
+					paddingVertical: 10,
+				}}
+				onPress={() => setShowDatePicker(true)}>
 				{label && (
 					<Typography
 						color={colors.ON_SURFACE_VARIANT}
@@ -151,17 +159,42 @@ export function DatePickerInputLineal({
 						{label}
 					</Typography>
 				)}
-				<Text
+				<View
 					style={[
 						//styles.input,
-						{ color: colors.ON_BACKGROUND },
+						{
+							color: colors.ON_BACKGROUND,
+							flexDirection: 'row',
+						},
 						props.style,
 						error && styles.hasErrorsInput,
 					]}
 				>
-					{value}
-				</Text>
+					<Typography>
+						{value}
+					</Typography>
+
+				</View>
 			</TouchableOpacity>
+			{type != "time" && value ? (
+				<TouchableOpacity
+					style={{
+						paddingLeft: 8,
+						paddingTop: 10,
+						//backgroundColor: 'blue'
+					}}
+					onPress={() => resetInput()}
+					hitSlop={{ x: 25, y: 15 }}
+				>
+					<Ionicons
+						name={'close-circle'}
+						size={20}
+						color={Colors.COLORS.WARNING}
+					/>
+				</TouchableOpacity>
+			) : (
+				null
+			)}
 			{type == "time" ? (
 				<DateTimePickerModal
 					is24Hour={false}

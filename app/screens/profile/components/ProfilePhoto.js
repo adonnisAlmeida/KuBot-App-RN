@@ -11,19 +11,30 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
 import { useMutation } from '@apollo/client'
 import { USER_AVATAR_UPDATE } from '../../../graphql/customers'
 import { ReactNativeFile } from 'apollo-upload-client'
-import { useDispatch } from 'react-redux'
-import { setUser } from '../../../redux/userlogin/userLoginSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUser, user } from '../../../redux/userlogin/userLoginSlice'
+import { useEffect } from 'react'
 
 const ProfilePhoto = ({ avatar, setAvatar }) => {
     const { colors } = useTheme()
-    const [avatarURL, setAvatarURL] = useState()
+    const [avatarURL, setAvatarURL] = useState(null)
     const [showModal, setShowModal] = useState(false)
     const [vistaPrevia, setVistaPrevia] = useState(null)
     const [confirmModal, setConfirmModal] = useState(false)
     const [errors, setErrors] = useState([])
     const [activity, setActivity] = useState(false)
     const [photoFile, setPhotoFile] = useState(null)
+    const user_state = useSelector(user)
     const dispatch = useDispatch()
+
+    useEffect(() => {
+        setAvatarURL(avatar)
+    }, [])
+    useEffect(() => {
+        setAvatarURL(avatar)
+    }, [avatar])
+
+    console.log(avatar)
 
     const [userAvatarUpdate, { loadingAvatar, errorAvatar, dataAvatar }] = useMutation(USER_AVATAR_UPDATE, {
         onCompleted: (dataAvatar) => {
@@ -111,7 +122,7 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
                         <TouchableOpacity onPress={() => profilePhotoEdit()}>
                             <Image
                                 backgroundColor='white'
-                                source={avatar}
+                                source={avatarURL}
                                 imageStyle={styles.avatar}
                                 indicator={Progress.Pie}
                                 indicatorProps={{

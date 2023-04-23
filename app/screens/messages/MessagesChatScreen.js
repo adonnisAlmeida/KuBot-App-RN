@@ -193,308 +193,209 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                     style={{ flex: 1 }}
                     keyboardVerticalOffset={90}
                 >
-                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                        <>
-                            {/* <View style={styles.actualDate}>
-                            <Typography>date aqui</Typography>
-                        </View> */}
-                            <FlatList
-                                data={allMessages}
-                                style={{ paddingLeft: 14, paddingHorizontal: 10 }}
-                                inverted={-1}
-                                //keyExtractor={item => item.id}
-                                renderItem={({ item, index }) => {
-                                    if (item.author.serverId == user_state.serverId) {
-                                        if (index > 0 && (new Date(allMessages[index - 1].createdAt).setHours(0, 0, 0, 0) != new Date(item.createdAt).setHours(0, 0, 0, 0))) {
-                                            if (index == allMessages.length - 1) {
-                                                return (
-                                                    <>
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
-                                                        </View>
-                                                        <SenderMessage key={index} message={item} />
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
-                                                        </View>
-                                                    </>
-                                                )
-                                            } else {
-                                                return (
-                                                    <>
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
-                                                        </View>
-                                                        <SenderMessage key={index} message={item} />
-                                                    </>
-                                                )
-                                            }
-                                        } else {
-                                            if (index == allMessages.length - 1) {
-                                                return (
-                                                    <>
-                                                        <SenderMessage key={index} message={item} />
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
-                                                        </View>
-                                                    </>
-                                                )
-                                            } else {
-                                                return (<SenderMessage key={index} message={item} />)
-                                            }
-                                        }
+                    <FlatList
+                        data={allMessages}
+                        style={{ paddingLeft: 14, paddingHorizontal: 10}}
+                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end',}}
+                        inverted={-1}
+                        //keyExtractor={item => item.id}
+                        renderItem={({ item, index }) => {
+                            if (item.author.serverId == user_state.serverId) { // Mensajes enviados
+                                if (index > 0 && (new Date(allMessages[index - 1].createdAt).setHours(0, 0, 0, 0) != new Date(item.createdAt).setHours(0, 0, 0, 0))) {
+                                    if (index == allMessages.length - 1) {
+                                        return (
+                                            <>
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                </View>
+                                                <SenderMessage key={index} message={item} />
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                </View>
+                                            </>
+                                        )
                                     } else {
-                                        if (index > 0 && (new Date(allMessages[index - 1].createdAt).setHours(0, 0, 0, 0) != new Date(item.createdAt).setHours(0, 0, 0, 0))) {
-                                            if (index == allMessages.length - 1) {
-                                                return (
-                                                    <>
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
-                                                        </View>
-                                                        <SenderMessage key={index} message={item} />
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
-                                                        </View>
-                                                    </>
-                                                )
-                                            } else {
-                                                return (
-                                                    <>
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
-                                                        </View>
-                                                        <ReceiverMessage key={index} message={item} />
-                                                    </>
-                                                )
-                                            }
-                                        } else {
-                                            if (index == allMessages.length - 1) {
-                                                return (
-                                                    <>
-                                                        <SenderMessage key={index} message={item} />
-                                                        <View style={styles.dateSeparator}>
-                                                            <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
-                                                        </View>
-                                                    </>
-                                                )
-                                            } else {
-                                                return (<ReceiverMessage key={index} message={item} />)
-                                            }
-                                        }
+                                        return (
+                                            <>
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                </View>
+                                                <SenderMessage key={index} message={item} />
+                                            </>
+                                        )
                                     }
-                                }}
-                            />
+                                } else {
+                                    if (index == allMessages.length - 1) {
+                                        return (
+                                            <>
+                                                <SenderMessage key={index} message={item} />
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                </View>
+                                            </>
+                                        )
+                                    } else {
+                                        return (<SenderMessage key={index} message={item} />)
+                                    }
+                                }
+                            } else { // Mensajes recividos
+                                if (index > 0 && (new Date(allMessages[index - 1].createdAt).setHours(0, 0, 0, 0) != new Date(item.createdAt).setHours(0, 0, 0, 0))) {
+                                    if (index == allMessages.length - 1) {
+                                        return (
+                                            <>
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                </View>
+                                                <ReceiverMessage key={index} message={item} />
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                </View>
+                                            </>
+                                        )
+                                    } else {
+                                        return (
+                                            <>
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                </View>
+                                                <ReceiverMessage key={index} message={item} />
+                                            </>
+                                        )
+                                    }
+                                } else {
+                                    if (index == allMessages.length - 1) {
+                                        return (
+                                            <>
+                                                <ReceiverMessage key={index} message={item} />
+                                                <View style={styles.dateSeparator}>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                </View>
+                                            </>
+                                        )
+                                    } else {
+                                        return (<ReceiverMessage key={index} message={item} />)
+                                    }
+                                }
+                            }
+                        }}
+                    />
+                    <View style={{
+                        paddingVertical: 8
+                    }}>
+                        {titleVisible ? (
                             <View style={{
-                                paddingVertical: 8
+                                paddingHorizontal: 10,
                             }}>
-                                {titleVisible ? (
-                                    <View style={{
-                                        paddingHorizontal: 10,
-                                    }}>
-                                        <TextInput
-                                            style={{
-                                                backgroundColor: '#fff',
-                                                borderRadius: 20,
-                                                marginBottom: 10,
-                                                paddingHorizontal: 15,
-                                            }}
-                                            placeholder='Título (opcional)'
-                                            onChangeText={setTitle}
-                                            //onSubmitEditing={sendMessage}
-                                            value={title}
-                                            multiline={true}
-                                        />
-                                    </View>
-                                ) : (null)}
-                                <View style={{
-                                    //backgroundColor: 'blue',
-                                    flexDirection: 'row',
-                                    //justifyContent: 'space-between',
-                                    marginHorizontal: 5,
-                                    alignItems: 'flex-end'
-                                }}>
-
-                                    <View style={{
-                                        //backgroundColor: 'orange',
-                                        //flexGrow: 1,
-                                        paddingHorizontal: 5,
-                                        flex: 1
-                                    }}>
-                                        <TextInput
-                                            style={{
-                                                backgroundColor: '#fff',
-                                                //backgroundColor: 'red',
-                                                borderRadius: 20,
-                                                paddingHorizontal: 10,
-                                                paddingLeft: 15,
-                                                paddingRight: 100,
-                                                //width: '50%',
-                                            }}
-                                            placeholder='Cuerpo'
-                                            onChangeText={setContent}
-                                            //onSubmitEditing={sendMessage}
-                                            value={content}
-                                            multiline={true}
-                                        />
-                                    </View>
-                                    <View style={{
-                                        //backgroundColor: 'red'
-                                        position: 'absolute',
-                                        bottom: 3,
-                                        right: sendVisible ? 60 : 11,
-                                    }}>
-                                        <TouchableOpacity
-                                            onPress={() => setTitleVisible(!titleVisible)}
-                                            style={{
-                                                backgroundColor: '#fff',
-                                                padding: 10,
-                                                borderRadius: 100
-                                            }}
-                                        >
-                                            <Fontisto
-                                                name="font"
-                                                color={Colors.COLORS.PRIMARY}
-                                                size={22}
-                                            />
-                                            <View style={{ position: 'absolute', bottom: 10, left: 5 }}>
-                                                <Feather
-                                                    name="plus"
-                                                    color={Colors.COLORS.PRIMARY}
-                                                    size={17}
-                                                />
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                    {sendVisible ? (
-                                        <View style={{
-                                            //backgroundColor: 'red'
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            right: 0
-                                        }}>
-                                            <TouchableOpacity
-                                                disabled={otroLoading}
-                                                onPress={() => sendMessage()}
-                                                style={{
-                                                    backgroundColor: '#fff',
-                                                    paddingLeft: 7,
-                                                    paddingTop: 7,
-                                                    paddingBottom: 7,
-                                                    marginRight: 15,
-                                                    borderRadius: 100
-                                                }}
-                                            >
-                                                {(loading) ? (
-                                                    <View style={{ marginBottom: 7, marginRight: 5 }}>
-                                                        <ActivityIndicator color={Colors.COLORS.PRIMARY} />
-                                                    </View>
-                                                ) : (
-                                                    <Ionicons
-                                                        name="send"
-                                                        color={Colors.COLORS.PRIMARY}
-                                                        size={31}
-                                                    />
-                                                )}
-                                            </TouchableOpacity>
-                                        </View>
-                                    ) : (null)}
-
-                                </View>
+                                <TextInput
+                                    style={{
+                                        backgroundColor: '#fff',
+                                        borderRadius: 20,
+                                        marginBottom: 10,
+                                        paddingHorizontal: 15,
+                                    }}
+                                    placeholder='Título (opcional)'
+                                    onChangeText={setTitle}
+                                    //onSubmitEditing={sendMessage}
+                                    value={title}
+                                    multiline={true}
+                                />
                             </View>
-                            {/* <View style={{
-                                paddingVertical: 8
+                        ) : (null)}
+                        <View style={{
+                            //backgroundColor: 'blue',
+                            flexDirection: 'row',
+                            //justifyContent: 'space-between',
+                            marginHorizontal: 5,
+                            alignItems: 'flex-end'
+                        }}>
+
+                            <View style={{
+                                //backgroundColor: 'orange',
+                                //flexGrow: 1,
+                                paddingHorizontal: 5,
+                                flex: 1
                             }}>
+                                <TextInput
+                                    style={{
+                                        backgroundColor: '#fff',
+                                        //backgroundColor: 'red',
+                                        borderRadius: 20,
+                                        paddingHorizontal: 10,
+                                        paddingLeft: 15,
+                                        paddingRight: 100,
+                                        //width: '50%',
+                                    }}
+                                    placeholder='Cuerpo'
+                                    onChangeText={setContent}
+                                    //onSubmitEditing={sendMessage}
+                                    value={content}
+                                    multiline={true}
+                                />
+                            </View>
+                            <View style={{
+                                //backgroundColor: 'red'
+                                position: 'absolute',
+                                bottom: 3,
+                                right: sendVisible ? 60 : 11,
+                            }}>
+                                <TouchableOpacity
+                                    onPress={() => setTitleVisible(!titleVisible)}
+                                    style={{
+                                        backgroundColor: '#fff',
+                                        padding: 10,
+                                        borderRadius: 100
+                                    }}
+                                >
+                                    <Fontisto
+                                        name="font"
+                                        color={Colors.COLORS.PRIMARY}
+                                        size={22}
+                                    />
+                                    <View style={{ position: 'absolute', bottom: 10, left: 5 }}>
+                                        <Feather
+                                            name="plus"
+                                            color={Colors.COLORS.PRIMARY}
+                                            size={17}
+                                        />
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                            {sendVisible ? (
                                 <View style={{
-                                    paddingHorizontal: 16,
-                                    alignItems: 'center'
+                                    //backgroundColor: 'red'
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    right: 0
                                 }}>
-                                    <TextInput
+                                    <TouchableOpacity
+                                        disabled={otroLoading}
+                                        onPress={() => sendMessage()}
                                         style={{
                                             backgroundColor: '#fff',
-                                            borderRadius: 20,
-                                            marginBottom: 10,
-                                            paddingHorizontal: 15,
-                                            width: '75%'
+                                            paddingLeft: 7,
+                                            paddingTop: 7,
+                                            paddingBottom: 7,
+                                            marginRight: 15,
+                                            borderRadius: 100
                                         }}
-                                        placeholder='Título (opcional)'
-                                        onChangeText={setTitle}
-                                        //onSubmitEditing={sendMessage}
-                                        value={title}
-                                        multiline={true}
-                                    />
-                                </View>
-                                <View style={{
-                                    //backgroundColor: 'blue',
-                                    flexDirection: 'row',
-                                    //justifyContent: 'space-between',
-                                    paddingHorizontal: 10,
-                                    alignItems: 'flex-end',
-                                }}>
-                                    <View style={{
-                                        //backgroundColor: 'red'
-                                    }}>
-                                        <TouchableOpacity
-                                            style={{
-                                                backgroundColor: Colors.COLORS.PRIMARY,
-                                                padding: 10,
-                                                borderRadius: 100
-                                            }}
-                                        >
-                                            <MaterialIcons
-                                                name="title"
-                                                color='#fff'
-                                                size={26}
-                                            />
-                                            <View style={{ position: 'absolute', bottom: 10, left: 5 }}>
-                                                <Feather
-                                                    name="plus"
-                                                    color='#fff'
-                                                    size={17}
-                                                />
+                                    >
+                                        {(loading) ? (
+                                            <View style={{ marginBottom: 7, marginRight: 5 }}>
+                                                <ActivityIndicator color={Colors.COLORS.PRIMARY} />
                                             </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={{
-                                        //backgroundColor: 'orange',
-                                        //flexGrow: 1,
-                                        paddingHorizontal: 5,
-                                        width: '75%',
-                                    }}>
-                                        <TextInput
-                                            style={{
-                                                backgroundColor: '#fff',
-                                                borderRadius: 20,
-                                                paddingHorizontal: 15,
-                                                width: '100%'
-                                            }}
-                                            placeholder='Cuerpo'
-                                            onChangeText={setContent}
-                                            //onSubmitEditing={sendMessage}
-                                            value={content}
-                                            multiline={true}
-                                        />
-                                    </View>
-                                    <View style={{
-                                        //backgroundColor: 'red'
-                                    }}>
-                                        <TouchableOpacity
-                                            style={{
-
-                                                backgroundColor: Colors.COLORS.PRIMARY,
-                                                padding: 10,
-                                                borderRadius: 100
-                                            }}
-                                        >
+                                        ) : (
                                             <Ionicons
                                                 name="send"
-                                                color='#fff'
-                                                size={25}
+                                                color={Colors.COLORS.PRIMARY}
+                                                size={31}
                                             />
-                                        </TouchableOpacity>
-                                    </View>
+                                        )}
+                                    </TouchableOpacity>
                                 </View>
-                            </View> */}
-                        </>
-                    </TouchableWithoutFeedback>
+                            ) : (null)}
+
+                        </View>
+                    </View>
                     <Modal
                         visible={messageModal}
                         transparent={true}

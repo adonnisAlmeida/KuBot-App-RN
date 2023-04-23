@@ -36,7 +36,7 @@ const DAY_NAMES = [
 	'Domingo',
 	'Lunes',
 	'Martes',
-	'Miercoles',
+	'Miércoles',
 	'Jueves',
 	'Viernes',
 	'Sábado',

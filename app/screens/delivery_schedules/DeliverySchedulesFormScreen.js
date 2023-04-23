@@ -478,8 +478,12 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		let humanEnd = moment(event_details.end).format('h:mm a')
 		setFin(humanEnd)
 		setFinNoHuman(event_details.end)
-		let humanDateEnd = moment(event_details.endRecurringPeriod).format('YYYY-MM-DD')
-		setFechaFin(humanDateEnd)
+		if (event_details.endRecurringPeriod == null) {
+			setFechaFin('')
+		} else {
+			let humanDateEnd = moment(event_details.endRecurringPeriod).format('YYYY-MM-DD')
+			setFechaFin(humanDateEnd)
+		}
 	}
 
 	const hasErrors = (key) => errors.includes(key)
@@ -500,9 +504,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 		} else {
 			var fechaFinOK = new Date(fechaFin)
 		} */
-		if(fechaFin == ''){
+		if (fechaFin == '') {
 			var fechaFinOK = new Date(2024, 0, 24)
-		}else{
+		} else {
 			var fechaFinOK = new Date(fechaFin)
 		}
 		//fechaFinOK.setDate(fechaFinOK.getDate());
@@ -555,7 +559,7 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 					start: inicioDate,
 					end: finDate,
 					title: titulo,
-					endRecurringPeriod: (selectedRule == 5) ? null : (fechaFin == '')? null: fechaFinOK,
+					endRecurringPeriod: (selectedRule == 5) ? null : (fechaFin == '') ? null : fechaFinOK,
 					rule: (selectedRule == 5) ? null : selectedRule,
 					carrier: carrierID,
 				}
@@ -856,23 +860,47 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 									</View>
 								</View>
 							)}
+
 							{selectedRule != 5 ? (
-								<View style={{
-									flexDirection: 'row',
-									justifyContent: 'space-between',
-									paddingVertical: 10,
-									borderTopColor: '#8E8E8E',
-									borderTopWidth: StyleSheet.hairlineWidth,
-								}}>
-									<DatePickerInputLineal
-										label="Fecha de Finalización"
-										value={fechaFin}
-										setValue={setFechaFin}
-										type='date'
-										error={hasErrors('fechaFin')}
-										date={fechaFin == '' ? date_param : fechaFin}
-									/>
-								</View>
+								canUpdate ? (
+									<View style={{
+										flexDirection: 'row',
+										justifyContent: 'space-between',
+										paddingVertical: 10,
+										borderTopColor: '#8E8E8E',
+										borderTopWidth: StyleSheet.hairlineWidth,
+									}}>
+										<DatePickerInputLineal
+											label="Fecha de Finalización"
+											value={fechaFin}
+											setValue={setFechaFin}
+											type='date'
+											error={hasErrors('fechaFin')}
+											date={fechaFin == '' ? date_param : fechaFin}
+											resetInput={() => setFechaFin('')}
+										/>
+									</View>
+								) : (
+									<View style={{
+										flexDirection: 'row',
+										justifyContent: 'space-between',
+										paddingVertical: 20,
+										borderTopColor: '#8E8E8E',
+										borderTopWidth: StyleSheet.hairlineWidth,
+									}}>
+										<Typography>Fecha de Finalización</Typography>
+										<View style={[
+											{
+												flexDirection: 'row',
+												justifyContent: 'space-between',
+												alignContent: 'center',
+												alignItems: 'center',
+											},
+										]}>
+											<Typography>{fechaFin}</Typography>
+										</View>
+									</View>
+								)
 							) : (null)}
 						</View>
 						{/* <View style={{ flexDirection: 'row', marginBottom: 15, marginTop: 10, justifyContent: 'space-between' }}>
