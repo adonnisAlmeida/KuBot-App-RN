@@ -30,7 +30,6 @@ const CarrierDetails = () => {
     const [confirmModal, setConfirmModal] = useState(false)
     const [activity, setActivity] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null)
-    const [helloSound, setHelloSound] = useState(null)
     const [vistaPrevia, setVistaPrevia] = useState(null)
     const [photoFile, setPhotoFile] = useState()
     const carrier_info = useSelector(carrierInfo)
@@ -39,12 +38,7 @@ const CarrierDetails = () => {
     //console.log("carrier_info >> ", carrier_info)
 
     useEffect(() => {
-        this.hello = new Sound('prueba.wav', Sound.MAIN_BUNDLE, (error) => {
-            if (error) {
-                console.log('failed to load the sound', error);
-                return;
-            }
-        });
+        console.log('Prueba Esta aqui')
         setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
         setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
         setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))

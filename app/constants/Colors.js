@@ -27,7 +27,7 @@ const COLORS = {
 
 const ORDER_STATUS = {
 	NO_STATUS: '#cbcbcb',
-	ACCEPTED_CARRIER: '#bcfebc',
+	ACCEPTED_CARRIER: '#ffffb8',
 	PICKED_UP_CARRIER: '#16b3ff',
 	IN_TRANSIT: '#FF8000',
 	DELIVERED: '#5bee5b',

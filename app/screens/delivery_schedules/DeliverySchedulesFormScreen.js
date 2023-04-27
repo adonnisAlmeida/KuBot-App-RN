@@ -241,9 +241,9 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 						//if (titulo.length == 0) error_data.push('titulo')
 						if (!inicio) error_data.push('inicio')
 						if (!fin) error_data.push('fin')
-						if (selectedRule != 5) {
+						/* if (selectedRule != 5) {
 							if (!fechaFin) error_data.push('fechaFin')
-						}
+						} */
 						let splitFechaFin = fechaFin.split("-");
 						const myinicioArray = inicio.split(" ");
 						const inicioArray = myinicioArray[0].split(":");

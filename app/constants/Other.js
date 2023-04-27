@@ -1,5 +1,5 @@
 //const URL = 'http://ec2-3-143-244-135.us-east-2.compute.amazonaws.com:8000/'
-const URL = 'http://ec2-18-191-186-201.us-east-2.compute.amazonaws.com:8000/'
+const URL = 'http://lajabitadelloco.com:8000/'
 const URL_API = URL + 'graphql/'
 
 const MONTH_NAMES = [
