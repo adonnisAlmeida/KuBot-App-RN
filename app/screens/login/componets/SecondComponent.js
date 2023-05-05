@@ -37,6 +37,7 @@ const SecondComponent = ({
     setEmpresa,
     hasErrors,
     setErrors,
+    provinciasList,
 }) => {
     const { colors } = useTheme()
 
@@ -127,14 +128,41 @@ const SecondComponent = ({
                     onChangeText={(text) => setPais(text)}
                 /> */}
             </View>
-            <View style={{ marginTop: 15 }}>
+            <View
+                style={{
+                    marginTop: 15,
+                    borderBottomColor: '#8E8E8E',
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                }}
+            >
                 <Typography
                     color={hasErrors('provincia') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}
                 //style={{ marginVertical: 10 }}
                 >
                     Provincia
                 </Typography>
-                <TextInput
+                <Picker
+                    themeVariant={'dark'}
+                    selectedValue={provincia}
+                    style={[
+                        //styles.select,
+                        {
+                            color: colors.ON_BACKGROUND,
+                            padding: 0,
+                            marginLeft: -14,
+                        },
+                    ]}
+                    onValueChange={(itemValue, itemIndex) => {
+                        setProvincia(itemValue)
+                    }
+                    }>
+                    {
+                        provinciasList.map((item, index) => {
+                            return <Picker.Item key={index} themeVariant={'dark'} label={item.name} value={index} />
+                        })
+                    }
+                </Picker>
+                {/* <TextInput
                     value={provincia}
                     style={[
                         styles.input,
@@ -143,16 +171,43 @@ const SecondComponent = ({
                     ]}
                     placeholder='Provincia'
                     onChangeText={(text) => setProvincia(text)}
-                />
+                /> */}
             </View>
-            <View style={{ marginTop: 15 }}>
+            <View
+                style={{
+                    marginTop: 15,
+                    borderBottomColor: '#8E8E8E',
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                }}
+            >
                 <Typography
                     color={hasErrors('minicipio') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}
                 //style={{ marginVertical: 10 }}
                 >
                     Municipio
                 </Typography>
-                <TextInput
+                <Picker
+                    themeVariant={'dark'}
+                    selectedValue={municipio}
+                    style={[
+                        //styles.select,
+                        {
+                            color: colors.ON_BACKGROUND,
+                            padding: 0,
+                            marginLeft: -14,
+                        },
+                    ]}
+                    onValueChange={(itemValue, itemIndex) => {
+                        setMunicipio(itemValue)
+                    }
+                    }>
+                    {
+                        provinciasList[provincia].municipios.map((item, index) => {
+                            return <Picker.Item key={index} themeVariant={'dark'} label={item.node.name} value={index} />
+                        })
+                    }
+                </Picker>
+                {/* <TextInput
                     value={municipio}
                     style={[
                         styles.input,
@@ -161,7 +216,7 @@ const SecondComponent = ({
                     ]}
                     placeholder='Municipio'
                     onChangeText={(text) => setMunicipio(text)}
-                />
+                /> */}
             </View>
             <View style={{ marginTop: 15 }}>
                 <Typography
@@ -243,6 +298,8 @@ const SecondComponent = ({
                     Número de teléfono
                 </Typography>
                 <TextInput
+                    keyboardType='phone-pad'
+                    inputMode='tel'
                     value={telefono}
                     style={[
                         styles.input,

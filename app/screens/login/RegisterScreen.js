@@ -11,7 +11,7 @@ import {
 	ScrollView,
 	Keyboard,
 } from 'react-native'
-import { useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { useTheme } from '@react-navigation/native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { login, setToken, user } from '../../redux/userlogin/userLoginSlice'
 import { dataDetectorType } from 'deprecated-react-native-prop-types/DeprecatedTextPropTypes'
 import { containsOnlyNumbers } from '../../utils/CommonFunctions'
+import { DELIVERY_ZONES } from '../../graphql/deliveryAreas'
 
 export default function RegisterScreen({ navigation }) {
 	const { colors } = useTheme()
@@ -47,8 +48,8 @@ export default function RegisterScreen({ navigation }) {
 	const [repeatPassword, setRepeatPassword] = useState('')
 	const [nombre, setNombre] = useState('')
 	const [apellidos, setApellidos] = useState('')
-	const [pais, setPais] = useState('')
-	const [provincia, setProvincia] = useState('')
+	const [pais, setPais] = useState(57)
+	const [provincia, setProvincia] = useState(1)
 	const [municipio, setMunicipio] = useState('')
 	const [direccion1, setDireccion1] = useState('')
 	const [direccion2, setDireccion2] = useState('')
@@ -58,15 +59,70 @@ export default function RegisterScreen({ navigation }) {
 	const [carnet, setCarnet] = useState('')
 	const [empresa, setEmpresa] = useState('')
 	const [errors, setErrors] = useState([])
+	const [provinciasList, setProvinciasList] = useState([])
+	const [provinciasListUltimo, setProvinciasListUltimo] = useState(null)
 	const firstRef = useRef();
 	const secondRef = useRef();
 	const thirdRef = useRef();
 	const dispatch = useDispatch()
 	const user_state = useSelector(user)
 
-	console.log("user_state TOKEN >>", user_state.token)
+	//console.log("user_state TOKEN >>", user_state.token)
+
+	useEffect(() => {
+		getDeliveryZones({ variables: { after: '', before: '' } })
+	}, [])
 
 	const hasErrors = (key) => (errors.includes(key) ? styles.hasErrors : null)
+
+	const [getDeliveryZones, { loadingProvincias, errorProvincias, dataProvincias }] = useLazyQuery(DELIVERY_ZONES, {
+		onCompleted: (dataProvincias) => {
+			console.log('OnCOmplete OK >>>>', dataProvincias.deliveryZones.edges.length)
+			const allResult = dataProvincias.deliveryZones.edges
+			let groupedProvinces = []
+
+			allResult.map((prov, index) => {
+				if (prov.node.parent !== null) {
+					let flag = false
+					groupedProvinces.map((provi, i) => {
+						if (prov.node.parent.id == provi.id) {
+							provi.municipios.push(prov)
+							flag = true
+						}
+					})
+					if (!flag) {
+						var father = {
+							'id': prov.node.parent.id,
+							'name': prov.node.parent.name,
+							'municipios': [prov]
+						}
+						groupedProvinces.push(father)
+					}
+				} else {
+				}
+			})
+			
+			if (dataProvincias.deliveryZones.pageInfo.hasNextPage) {
+				setProvinciasListUltimo(groupedProvinces.slice(-1))
+				groupedProvinces.pop()
+				setProvinciasList(groupedProvinces)
+				getDeliveryZones({ variables: { after: dataProvincias.deliveryZones.pageInfo.endCursor, before: '' } })
+			} else {
+				let primeroConsulta = groupedProvinces[0]
+				if (provinciasListUltimo[0].name == primeroConsulta.name) {
+					provinciasListUltimo[0].municipios.map((mun) => {
+						primeroConsulta.municipios.push(mun)
+						let finalGrouped = provinciasList.concat(groupedProvinces)
+						setProvinciasList(finalGrouped)
+					})
+				}
+			}
+			
+		},
+		onError: () => {
+			console.log('Error cargando todas las zonas de entrega', errorProvincias)
+		}
+	})
 
 	const [accountRegister, { loading, error, data }] = useMutation(ACCOUNT_REGISTER, {
 		onCompleted: (data) => {
@@ -319,6 +375,7 @@ export default function RegisterScreen({ navigation }) {
 								setEmpresa={setEmpresa}
 								hasErrors={hasErrors}
 								setErrors={setErrors}
+								provinciasList={provinciasList}
 								/* firstName={firstName}
 								lastName={lastName}
 								setLastName={setLastName}
