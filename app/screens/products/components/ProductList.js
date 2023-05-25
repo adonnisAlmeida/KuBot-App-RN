@@ -29,6 +29,7 @@ export default function ProductList({ navigation, list, doRefresh, loadMore, ren
 						onRefresh={onRefresh}
 					/>
 				}
+				keyExtractor={item => item.id}
 				renderItem={({ item, index, separators }) => (
 					<ProductItem product={item} navigation={navigation} key={index} />
 				)}

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TouchableWithoutFeedback, ActivityIndicator, ImageBackground, Dimensions, Platform, ToastAndroid } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TouchableWithoutFeedback, ActivityIndicator, ImageBackground, Dimensions, Platform, ToastAndroid, Image as RNImage } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Typography } from '../../components'
 import { useTheme } from '@react-navigation/native'
@@ -7,6 +7,8 @@ import { carrierInfo, setCarrierInfo, setCarrierInfoOtro } from '../../redux/use
 import Colors from '../../constants/Colors'
 import { kycAmigable } from '../../utils/CommonFunctions'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 //import * as ImagePicker from 'expo-image-picker';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useMutation } from '@apollo/client'
@@ -29,16 +31,21 @@ const CarrierDetails = () => {
     const [showModal, setShowModal] = useState(false)
     const [confirmModal, setConfirmModal] = useState(false)
     const [activity, setActivity] = useState(false)
+    const [uploadFrontal, setUploadFrontal] = useState(false)
+    const [uploadBack, setUploadBack] = useState(false)
+    const [uploadBust, setUploadBust] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null)
     const [vistaPrevia, setVistaPrevia] = useState(null)
     const [photoFile, setPhotoFile] = useState()
+    const [aborterRefFrontal, setAbortRefFrontal] = useState(new AbortController());
+    const [aborterRefBack, setAbortRefBack] = useState(new AbortController());
+    const [aborterRefBust, setAbortRefBust] = useState(new AbortController());
     const carrier_info = useSelector(carrierInfo)
     const dispatch = useDispatch()
 
     //console.log("carrier_info >> ", carrier_info)
 
     useEffect(() => {
-        console.log('Prueba Esta aqui')
         setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
         setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
         setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
@@ -50,68 +57,107 @@ const CarrierDetails = () => {
         setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
     }, [carrier_info])
 
-    const [piPhotoFrontalUpdate, { loading, error, data }] = useMutation(PI_PHOTO_FRONTAL_UPDATE, {
+    const [piPhotoFrontalUpdate, { data, error, loading }] = useMutation(PI_PHOTO_FRONTAL_UPDATE, {
         onCompleted: (data) => {
             console.log('LO ACTUALIZOO >> ', data)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoFrontal: data.carrierPiPhotoFrontalUpdate.carrier.piPhotoFrontal,
             }))
-            setActivity(false)
-            setConfirmModal(false)
-            setPiPhotoFrontal(vistaPrevia)
+            setUploadFrontal(false)
+            if (Platform.OS === 'android')
+                ToastAndroid.show('Imagen delantera actualizada.', ToastAndroid.LONG)
+            /* setConfirmModal(false)
+            setPiPhotoFrontal(vistaPrevia) */
         },
         onError: (error, data) => {
-            setActivity(false)
-            setConfirmModal(false)
-            //setPiPhotoFrontal(vistaPrevia)
-            if (Platform.OS === 'android')
-                ToastAndroid.show('Error actualizando foto delantera.', ToastAndroid.LONG)
+            setUploadFrontal(false)
+            if (error.message == 'Aborted') {
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Actualización de Imagen delantera cancelada.', ToastAndroid.LONG)
+
+            } else {
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Error actualizando Imagen delantera.', ToastAndroid.LONG)
+            }
+            setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
             console.log('Error actalizando info de lcarrier >> ', error)
             console.log('Error actalizando info de data >> ', data)
         },
+        context: {
+            fetchOptions: {
+                signal: aborterRefFrontal.signal
+            }
+        },
     })
 
-    const [piPhotoBackUpdate, { loadingBack, errorBack, dataBack }] = useMutation(PI_PHOTO_BACK_UPDATE, {
+    const [piPhotoBackUpdate, { dataBack, errorBack, loadingBack }] = useMutation(PI_PHOTO_BACK_UPDATE, {
         onCompleted: (dataBust) => {
             console.log('LO ACTUALIZOO >> ', dataBust)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoBack: dataBust.carrierPiPhotoBackUpdate.carrier.piPhotoBack,
             }))
-            setActivity(false)
-            setConfirmModal(false)
-            setPiPhotoBack(vistaPrevia)
-        },
-        onError: (errorBust, dataBust) => {
-            setActivity(false)
-            setConfirmModal(false)
+            setUploadBack(false)
             if (Platform.OS === 'android')
-                ToastAndroid.show('Error actualizando foto trasera.', ToastAndroid.LONG)
-            //setPiPhotoBack(vistaPrevia)
-            console.log('Error actalizando info de lcarrier >> ', errorBust)
-            console.log('Error actalizando info de data >> ', dataBust)
+                ToastAndroid.show('Imagen trasera actualizada.', ToastAndroid.LONG)
+        },
+        onError: (errorBack, dataBack) => {
+            setUploadBack(false)
+            if (errorBack.message == 'Aborted') {
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Actualización de Imagen trasera cancelada.', ToastAndroid.LONG)
+
+            } else {
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Error actualizando Imagen trasera.', ToastAndroid.LONG)
+            }
+            setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
+            /* console.log('Error actalizando info del carrier >> ', typeof(errorBack))
+            console.log('Error actalizando info del carrier >> ', Object.keys(errorBack))
+            console.log('Error actalizando info del carrier >> ', errorBack.message) */
+            console.log('Error actalizando info del carrier >> ', errorBack)
+            console.log('Error actalizando info de data >> ', dataBack)
+        },
+        context: {
+            fetchOptions: {
+                signal: aborterRefBack.signal
+            }
         },
     })
-    const [bustPhotoUpdate, { loadingBust, errorBust, dataBust }] = useMutation(BUST_PHOTO_UPDATE, {
+
+    const [bustPhotoUpdate, { dataBust, errorBust, loadingBust }] = useMutation(BUST_PHOTO_UPDATE, {
         onCompleted: (dataBust) => {
             console.log('LO ACTUALIZOO >> ', dataBust)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 bustPhoto: dataBust.carrierBustPhotoUpdate.carrier.bustPhoto,
             }))
-            setActivity(false)
-            setConfirmModal(false)
-            setBustPhoto(vistaPrevia)
+            setUploadBust(false)
+            if (Platform.OS === 'android')
+                ToastAndroid.show('Imagen de busto actualizada.', ToastAndroid.LONG)
+            /* setConfirmModal(false)
+            setBustPhoto(vistaPrevia) */
         },
         onError: (errorBust, dataBust) => {
-            setActivity(false)
-            setConfirmModal(false)
-            if (Platform.OS === 'android')
-                ToastAndroid.show('Error actualizando foto de busto.', ToastAndroid.LONG)
-            //setBustPhoto(vistaPrevia)
+            setUploadBust(false)
+            //setConfirmModal(false)
+            if (errorBust.message == 'Aborted') {
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Actualización de Imagen de busto cancelada.', ToastAndroid.LONG)
+
+            } else {
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Error actualizando Imagen de busto.', ToastAndroid.LONG)
+            }
             console.log('Error actalizando info de lcarrier >> ', errorBust)
             console.log('Error actalizando info de data >> ', dataBust)
+            setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
+        },
+        context: {
+            fetchOptions: {
+                signal: aborterRefBust.signal
+            }
         },
     })
 
@@ -126,6 +172,23 @@ const CarrierDetails = () => {
     const bustPhotoEdit = () => {
         setSelectedImage('bustPhoto')
         setShowModal(true)
+    }
+
+    const abortUploadFrontal = () => {
+        console.log("ABORTAR")
+        aborterRefFrontal.abort();
+        setAbortRefFrontal(new AbortController());
+        setConfirmModal(false)
+    }
+    const abortUploadBack = () => {
+        aborterRefBack.abort();
+        setAbortRefBack(new AbortController());
+        setConfirmModal(false)
+    }
+    const abortUploadBust = () => {
+        aborterRefBust.abort();
+        setAbortRefBust(new AbortController());
+        setConfirmModal(false)
     }
 
     const openCamera = async () => {
@@ -160,76 +223,56 @@ const CarrierDetails = () => {
         }
     }
 
-    const updatePiPhotoBack = () => {
-        setActivity(true)
-        // ejecutar mutacion
-        piPhotoBackUpdate({
-            variables: { id: carrier_info.id, image: photoFile }
-        })
-        /* setTimeout(() => {
-            setActivity(false)
-            setConfirmModal(false)
-            setPiPhotoBack(vistaPrevia)
-
-        }, 2000); */
-    }
-
     const updatePiPhotoFrontal = () => {
-        setActivity(true)
+        setUploadFrontal(true)
+        setPiPhotoFrontal(vistaPrevia)
         piPhotoFrontalUpdate({
             variables: { id: carrier_info.id, image: photoFile }
         })
-        // ejecutar mutacion
-        /* setTimeout(() => {
-            setActivity(false)
-            setConfirmModal(false)
-            setPiPhotoFrontal(vistaPrevia)
-        }, 2000); */
+    }
+
+    const updatePiPhotoBack = () => {
+        setUploadBack(true)
+        setPiPhotoBack(vistaPrevia)
+        piPhotoBackUpdate({
+            variables: { id: carrier_info.id, image: photoFile }
+        })
     }
 
     const updateBustPhoto = () => {
-        setActivity(true)
-        // ejecutar mutacion
+        setUploadBust(true)
+        setBustPhoto(vistaPrevia)
         bustPhotoUpdate({
             variables: { id: carrier_info.id, image: photoFile }
         })
-        /* setTimeout(() => {
-            setActivity(false)
-            setConfirmModal(false)
-            setBustPhoto(vistaPrevia)
-        }, 2000); */
     }
 
     const sendImage = () => {
+        setConfirmModal(false)
         switch (selectedImage) {
             case 'piPhotoFrontal':
                 updatePiPhotoFrontal()
-
                 break;
             case 'piPhotoBack':
                 updatePiPhotoBack()
-
                 break;
             case 'bustPhoto':
                 updateBustPhoto()
-
                 break;
             default:
                 break;
         }
     }
 
-    const pruebaSonido = () => {
-        this.hello.play((success) => {
-            if (!success) {
-                console.log('Sound did not play')
-            }
-        })
-    }
-
     return (
         <>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+                {/* <RNImage backgroundColor='white'
+                    source={require('../../../assets/upload-green.gif')}
+                    style={{ height: 24, width: 24, position: 'relative', marginTop: 10 }} />
+                <RNImage backgroundColor='red'
+                    source={require('../../../assets/upload-to-cloud.gif')}
+                    style={{ height: 24, width: 24, position: 'relative', marginTop: 10 }} /> */}
                 <Modal
                     visible={showModal}
                     transparent={true}
@@ -260,11 +303,6 @@ const CarrierDetails = () => {
                         </TouchableWithoutFeedback>
                     </TouchableOpacity>
                 </Modal>
-                {/* <TouchableOpacity onPress={() => pruebaSonido()}>
-                    <Typography>
-                        Prueba SONIDO
-                    </Typography>
-                </TouchableOpacity> */}
                 <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
                     <View style={styles.cardRow}>
                         <Typography style={{ marginRight: 5, }}>Estado de la cuenta de Mensajero:</Typography>
@@ -279,14 +317,28 @@ const CarrierDetails = () => {
                         <Typography>Imagen delantera del CI</Typography>
                         <View style={styles.imageContainer}>
                             <View style={styles.editIcon}>
-                                <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
-                                    <FontAwesome
-                                        style={styles.headerRight}
-                                        name="edit"
-                                        color={colors.ON_SURFACE}
-                                        size={22}
-                                    />
-                                </TouchableOpacity>
+                                {uploadFrontal ? (
+                                    <TouchableOpacity onPress={() => abortUploadFrontal()} >
+                                        <RNImage backgroundColor='white'
+                                            source={require('../../../assets/upload-to-cloud.gif')}
+                                            style={{ height: 24, width: 24, position: 'relative', marginTop: 10 }} />
+                                        <AntDesign
+                                            style={{ position: 'absolute', top: 4, right: -4 }}
+                                            name="close"
+                                            color="#000"
+                                            size={15}
+                                        />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
+                                        <MaterialCommunityIcons
+                                            name="image-edit-outline"
+                                            color={Colors.COLORS.PRIMARY}
+                                            size={22}
+                                        />
+                                    </TouchableOpacity>
+                                )}
+
                             </View>
                             <Image
                                 defaultSource={piPhotoBack}
@@ -305,14 +357,27 @@ const CarrierDetails = () => {
                         <Typography>Imagen trasera del CI</Typography>
                         <View style={styles.imageContainer}>
                             <View style={styles.editIcon}>
-                                <TouchableOpacity onPress={() => piPhotoBackEdit()}>
-                                    <FontAwesome
-                                        style={styles.headerRight}
-                                        name="edit"
-                                        color={colors.ON_SURFACE}
-                                        size={22}
-                                    />
-                                </TouchableOpacity>
+                                {uploadBack ? (
+                                    <TouchableOpacity onPress={() => abortUploadBack()} >
+                                        <RNImage backgroundColor='white'
+                                            source={require('../../../assets/upload-to-cloud.gif')}
+                                            style={{ height: 24, width: 24, position: 'relative', marginTop: 10 }} />
+                                        <AntDesign
+                                            style={{ position: 'absolute', top: 4, right: -4 }}
+                                            name="close"
+                                            color="#000"
+                                            size={15}
+                                        />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={() => piPhotoBackEdit()}>
+                                        <MaterialCommunityIcons
+                                            name="image-edit-outline"
+                                            color={Colors.COLORS.PRIMARY}
+                                            size={22}
+                                        />
+                                    </TouchableOpacity>
+                                )}
                             </View>
                             <Image
                                 indicator={Progress.Pie}
@@ -330,14 +395,27 @@ const CarrierDetails = () => {
                         <Typography>Imagen de Busto</Typography>
                         <View style={styles.imageContainer}>
                             <View style={styles.editIcon}>
-                                <TouchableOpacity onPress={() => bustPhotoEdit()}>
-                                    <FontAwesome
-                                        style={styles.headerRight}
-                                        name="edit"
-                                        color={colors.ON_SURFACE}
-                                        size={22}
-                                    />
-                                </TouchableOpacity>
+                                {uploadBust ? (
+                                    <TouchableOpacity onPress={() => abortUploadBust()} >
+                                        <RNImage backgroundColor='white'
+                                            source={require('../../../assets/upload-to-cloud.gif')}
+                                            style={{ height: 24, width: 24, position: 'relative', marginTop: 10 }} />
+                                        <AntDesign
+                                            style={{ position: 'absolute', top: 4, right: -4 }}
+                                            name="close"
+                                            color="#000"
+                                            size={15}
+                                        />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={() => bustPhotoEdit()}>
+                                        <MaterialCommunityIcons
+                                            name="image-edit-outline"
+                                            color={Colors.COLORS.PRIMARY}
+                                            size={22}
+                                        />
+                                    </TouchableOpacity>
+                                )}
                             </View>
                             <Image
                                 indicator={Progress.Pie}
@@ -353,7 +431,7 @@ const CarrierDetails = () => {
                     </View>
                 </View>
                 <View style={{ marginTop: 15, paddingVertical: 8, alignItems: 'center' }} >
-                    <Typography style={{color: Colors.COLORS.ON_SURFACE}} h3 bold>Calificación y opiniones:</Typography>
+                    <Typography style={{ color: Colors.COLORS.ON_SURFACE }} h3 bold>Calificación y opiniones:</Typography>
                 </View>
                 <View
                     style={[styles.card, { backgroundColor: colors.SURFACE }]}
@@ -525,16 +603,16 @@ const styles = StyleSheet.create({
         marginVertical: 15,
     },
     imageContainer: {
-        width: 300,
-        height: 200,
+        width: '100%',
+        height: 180,
     },
     imageStyles: {
         position: 'relative',
         resizeMode: 'contain',
         marginTop: 10,
         alignSelf: 'center',
-        width: 250,
-        height: 200,
+        width: '80%',
+        height: 170,
     },
     headerContainer: {
         justifyContent: 'center',

@@ -151,7 +151,66 @@ export const ALL_USERS = gql`
 						url
 						alt
 					}
-					dateJoined
+				}
+			}
+			pageInfo{
+				hasNextPage
+				hasPreviousPage
+				startCursor
+				endCursor
+			}
+		}
+	}
+`
+
+export const ORDERS_LIST_CONTACTS = gql`
+	query Orders($carrier: Int, $after: String, $before: String) {
+		orders(first: 100, carrier: $carrier, after: $after, before: $before) {
+			edges {
+				node {
+					id
+                    user {
+                        userName
+                        id
+                        serverId
+                        avatar{
+                            url
+                            alt
+                        }
+                        firstName
+                        lastName
+                        dateJoined
+                        addresses {
+                            country {
+                                country
+                            }
+                            streetAddress1
+                            city
+                            postalCode
+                        }
+                    }  
+                    sellers{
+                        user{
+                            userName
+                            id
+                            serverId
+                            avatar{
+                                url
+                                alt
+                            }
+                            firstName
+                            lastName
+                            dateJoined
+                            addresses {
+                                country {
+                                    country
+                                }
+                                streetAddress1
+                                city
+                                postalCode
+                            }
+                        }
+                    } 
 				}
 			}
 			pageInfo{

@@ -124,7 +124,7 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
     navigation.setOptions({
         headerTitle: (props) => (
             <>
-                <Typography bold color='#fff' size={20}>{selecteds.length} destinatarios</Typography>
+                <Typography bold color='#fff' size={20}>{selecteds.length} {selecteds.length == 1? 'destinatario': 'destinatarios'}</Typography>
                 <Typography color='#fff' size={13}>{listaNombres()}</Typography>
             </>
         ),

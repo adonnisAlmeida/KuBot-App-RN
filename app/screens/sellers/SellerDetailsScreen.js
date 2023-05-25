@@ -10,11 +10,14 @@ import * as Progress from 'react-native-progress';
 import Colors from '../../constants/Colors'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { useSelector } from 'react-redux'
+import { conversations } from '../../redux/messages/messagesSlice'
 
 const SellerDetailsScreen = ({ navigation, route }) => {
     const [seller, setSeller] = useState(route.params?.seller)
     const { dark, colors } = useTheme()
     const joinDate = moment(seller.dateJoined).format('YYYY-MM-DD')
+    const conversation_reducer = useSelector(conversations)
 
     //console.log(seller)
 
@@ -42,6 +45,19 @@ const SellerDetailsScreen = ({ navigation, route }) => {
         ),
     })
 
+    const contactMessage = () => {
+        let flag = false
+        conversation_reducer.forEach(conv => {
+            if (conv.usuario.serverId == seller.serverId) {
+                flag = true
+                navigation.navigate('MessagesChatScreen', { message: conv })
+            }
+        })
+        if (!flag) {
+            navigation.navigate('WriteMessageScreen', { selecteds: [seller] })
+        }
+    }
+
     return (
         <ScrollView style={styles.container}>
             <View
@@ -66,7 +82,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                                 seller.userName
                             )}
                         </Typography>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => contactMessage()}>
                             <Typography bold color={Colors.COLORS.WEB_LINK}>
                                 CONTACTAR
                             </Typography>

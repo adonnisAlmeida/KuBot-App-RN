@@ -9,11 +9,14 @@ import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import Colors from '../../constants/Colors'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { useSelector } from 'react-redux'
+import { conversations } from '../../redux/messages/messagesSlice'
 moment.locale('es')
 
 const ClientDetailsScreen = ({ navigation, route }) => {
     const [client, setClient] = useState(route.params?.client)
     const { dark, colors } = useTheme()
+    const conversation_reducer = useSelector(conversations)
 
     const avatar =
         client.avatar !== null
@@ -23,7 +26,7 @@ const ClientDetailsScreen = ({ navigation, route }) => {
             : require('../../../assets/user_avatar.png')
 
     navigation.setOptions({
-        title: `${client.firstName ? client.firstNmae : client.userName}`,
+        title: `${client.firstName ? client.firstName : client.userName}`,
         headerLeft: () => (
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerLeft}>
@@ -38,6 +41,19 @@ const ClientDetailsScreen = ({ navigation, route }) => {
             </View>
         ),
     })
+
+    const contactMessage = () => {
+        let flag = false
+        conversation_reducer.forEach(conv => {
+            if (conv.usuario.serverId == client.serverId) {
+                flag = true
+                navigation.navigate('MessagesChatScreen', { message: conv })
+            }
+        })
+        if (!flag) {
+            navigation.navigate('WriteMessageScreen', { selecteds: [client] })
+        }
+    }
 
     return (
         <ScrollView style={styles.container}>
@@ -63,7 +79,7 @@ const ClientDetailsScreen = ({ navigation, route }) => {
                                 client.userName
                             )}
                         </Typography>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => contactMessage()}>
                             <Typography bold color={Colors.COLORS.WEB_LINK}>
                                 CONTACTAR
                             </Typography>

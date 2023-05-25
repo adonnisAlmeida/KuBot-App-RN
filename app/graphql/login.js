@@ -7,6 +7,8 @@ export const TOKEN_CREATE = gql`
 			user {
 				id
 				isCarrier
+				isStaff
+        		isSeller
 				serverId
 				firstName
 				lastName
@@ -59,7 +61,7 @@ export const ACCOUNT_REGISTER = gql`
 
 export const CARRIER_REGISTER = gql`
 	mutation carrierRegister($input: CarrierCreateInput!) {
-		carrierRegister(input: { email: $email, password: $password }) {
+		carrierRegister(input: $input) {
 			errors{
 				field
 				message

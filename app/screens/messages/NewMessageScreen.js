@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react'
 import { Button, Input, Loading, Select, Typography } from '../../components'
 import MultiSelect from 'react-native-multiple-select';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { ALL_USERS, SEND_MESSAGE } from '../../graphql/messages';
+import { ALL_USERS, ORDERS_LIST_CONTACTS, SEND_MESSAGE } from '../../graphql/messages';
 import Colors from '../../constants/Colors';
 import { useDispatch, useSelector } from 'react-redux';
-import { user } from '../../redux/userlogin/userLoginSlice';
+import { carrierInfo, user } from '../../redux/userlogin/userLoginSlice';
 import { addMessageToConversation, conversations } from '../../redux/messages/messagesSlice';
 import UserItem from './components/UserItem';
 import Fontisto from 'react-native-vector-icons/Fontisto'
@@ -29,9 +29,37 @@ const NewMessageScreen = ({ navigation }) => {
     const [hasNextPage, setHasNextPage] = useState(false)
     const [endCursor, setEndCursor] = useState("")
     const user_state = useSelector(user)
+    const carrier_info = useSelector(carrierInfo)
     const dispatch = useDispatch()
     const [errors, setErrors] = useState([])
     const conversation_reducer = useSelector(conversations)
+
+    //console.log(carrier_info)
+
+    const [getAllContacts, { loadingContacts, errorContacts, dataContacts }] = useLazyQuery(ORDERS_LIST_CONTACTS, {
+        onCompleted: (dataContacts) => {
+            console.log("Termino de cargar las ordenes", dataContacts.orders.edges.length)
+            if (dataContacts.orders.pageInfo.hasNextPage) {
+                actualizarUsuarios(dataContacts.orders.edges)
+                getAllContacts({ variables: { carrier: carrier_info.serverId, after: dataContacts.orders.pageInfo.endCursor, before: '' } })
+            } else {
+                actualizarUsuarios(dataContacts.orders.edges)
+                setLoadingUsers(false)
+            }
+            /* if (dataContacts.users.pageInfo.hasNextPage) {
+                actualizarUsuarios(data.users.edges)
+                getAllUsers({ variables: { after: data.users.pageInfo.endCursor, before: '' } })
+            } else {
+                actualizarUsuarios(data.users.edges)
+                setLoadingUsers(false)
+            } */
+        },
+        onError: (errorContacts) => {
+            console.log('Error Cargando todos los contactos >> ', errorContacts)
+            console.log('Error Cargando todos los usuarios DATA >> ', dataContacts)
+        },
+        fetchPolicy: "no-cache"
+    })
 
     const [getAllUsers, { loading, error, data }] = useLazyQuery(ALL_USERS, {
         onCompleted: (data) => {
@@ -155,12 +183,39 @@ const NewMessageScreen = ({ navigation }) => {
         },
     })
 
-    const actualizarUsuarios = (usuarios) => {
+    const actualizarUsuarios = (orders) => {
+        console.log("entro a actualizar")
         let temp = []
-        usuarios.forEach(element => {
-            element.node.id = element.node.serverId
-            temp.push(element.node)
+        allUsers.forEach(element => {
+            temp.push(element)
         });
+
+        orders.forEach(el => {
+            if (el.node.user != null && el.node.user) {
+                if (temp.filter(e => e.id === el.node.user.id).length > 0) {
+                    return
+                } else {
+                    temp.push(el.node.user)
+                }
+            }
+            el.node.sellers.forEach(use => {
+                if (temp.filter(e => e.id === use.user.id).length > 0) {
+                    return
+                } else {
+                    temp.push(use.user)
+                }
+            })
+        })
+        /* orders.forEach(el => {
+            
+        }) */
+
+        console.log("Termnio actualizar >> ", temp)
+
+        /* usuarios.forEach(element => {
+            element.node.user.id = element.node.user.serverId
+            temp.push(element.node.user)
+        }); */
         setAllUsers(previousState => {
             return previousState.concat(temp)
         })
@@ -170,45 +225,10 @@ const NewMessageScreen = ({ navigation }) => {
     }
 
     useEffect(() => {
-        getAllUsers({ variables: { after: '', before: '' }, })
+        //getAllUsers({ variables: { after: '', before: '' }, })
+        getAllContacts({ variables: { carrier: carrier_info.serverId, after: '', before: '' }, })
     }, [])
 
-    //este es con datos de prueba
-    /* useEffect(() => {
-        let cont = 0
-        let otroTem = []
-        while (cont != 5) {
-            otroTem.push(
-                {
-                    "__typename": "PublicUser",
-                    "avatar": null,
-                    "dateJoined": "2023-02-17T18:21:37.898012+00:00",
-                    "firstName": "",
-                    "id": cont + 1,
-                    "lastName": "",
-                    "serverId": cont + 1,
-                    "userName": "admin"
-                }
-            )
-            cont = cont + 1
-        }
-        otroTem.push(
-            {
-                "__typename": "PublicUser",
-                "avatar": null,
-                "dateJoined": "2023-02-17T18:21:37.898012+00:00",
-                "firstName": "ULTIMO",
-                "id": 200,
-                "lastName": "",
-                "serverId": 200,
-                "userName": "ULTIMO"
-            }
-        )
-        setAllUsersShow(otroTem)
-        setTemUsers(otroTem)
-        console.log(otroTem[0])
-
-    }, []) */
 
     useEffect(() => {
         if (allUsers.length > 0) {
@@ -301,7 +321,6 @@ const NewMessageScreen = ({ navigation }) => {
         } */
     };
 
-    const hasErrors = (key) => (errors.includes(key) ? true : false)
 
     if (loadingUsers) return <Loading />
 

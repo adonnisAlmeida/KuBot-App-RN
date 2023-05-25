@@ -8,62 +8,6 @@ import { getSellersByUser, setSellersByUser } from '../../redux/sellers/sellersS
 import { useEffect } from 'react'
 import { Loading, NetworkError } from '../../components'
 
-const prueba = [
-    {
-        "node": {
-            'sellers': [
-                {
-                    "user": {
-                        "id": " 12"
-                    }
-                },
-                {
-                    "user": {
-                        "id": " 12"
-                    }
-                },
-            ]
-        },
-    },
-    {
-        "node": {
-            'sellers': [
-                {
-                    "user": {
-                        "id": " 12"
-                    }
-                },
-                {
-                    "user": {
-                        "id": " 23"
-                    }
-                },
-            ]
-        },
-    },
-    {
-        "node": {
-            'sellers': [
-                {
-                    "user": {
-                        "id": " 56"
-                    }
-                },
-                {
-                    "user": {
-                        "id": " 23"
-                    }
-                },
-                {
-                    "user": {
-                        "id": " 12"
-                    }
-                },
-            ]
-        },
-    }
-]
-
 
 const SellersScreen = ({ navigation }) => {
     const [loadingApp, setLoadingApp] = useState(false)

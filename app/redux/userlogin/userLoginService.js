@@ -17,9 +17,9 @@ function login(user) {
 }
 
 function setCarrierInfo(carrier) {
-	const carrierInfo = carrier.carriers.edges[0].node
-	AsyncStorage.setItem('@carrierInfo', JSON.stringify(carrierInfo))
-	return carrierInfo
+	//const carrierInfo = carrier.carriers.edges[0].node
+	AsyncStorage.setItem('@carrierInfo', JSON.stringify(carrier))
+	return carrier
 }
 
 function setCarrierInfoOtro(carrier) {

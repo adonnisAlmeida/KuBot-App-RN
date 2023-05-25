@@ -26,6 +26,7 @@ import MessagesChatScreen from './messages/MessagesChatScreen'
 import NewMessageScreen from './messages/NewMessageScreen'
 import Pruebas from './home/Pruebas'
 import WriteMessageScreen from './messages/WriteMessageScreen'
+import CarrierApplicationScreen from './carrier_application/CarrierApplicationScreen'
 
 export default {
 	ONBOARDING: {
@@ -52,6 +53,14 @@ export default {
 		component: Pruebas,
 		title: 'Pruebas',
 		name: 'PruebasScreen',
+		icon: 'home',
+		drawer: false,
+		carrier_only: false,
+	},
+	CARRIER_APPLICATION: {
+		component: CarrierApplicationScreen,
+		title: 'Registro de Mensajero',
+		name: 'CarrierApplicationScreen',
 		icon: 'home',
 		drawer: false,
 		carrier_only: false,

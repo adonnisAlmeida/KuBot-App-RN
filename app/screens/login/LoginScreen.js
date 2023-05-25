@@ -144,119 +144,122 @@ export default function LoginScreen({ navigation }) {
 
 
 	return (
-		<KeyboardAvoidingView
-			style={{ flex: 1, padding: 40, }}
-			behavior={Platform.OS === "ios" ? "padding" : "height"}
-			//style={{ flex: 1, backgroundColor: 'red' }}
-			keyboardVerticalOffset={10}
-		>
-			<ScrollView
-				showsVerticalScrollIndicator={false}
+		<View style={{ flex: 1 }}>
+			<KeyboardAvoidingView
+				style={{ flex: 1 }}
+				behavior={Platform.OS === "ios" ? "padding" : "height"}
+				//style={{ flex: 1, backgroundColor: 'red' }}
+				keyboardVerticalOffset={10}
 			>
-				<View style={{ alignItems: 'center' }}>
-					<Typography color={colors.ON_BACKGROUND} style={styles.title}>
-						Iniciar Sesión
-					</Typography>
-				</View>
-				<View style={{ marginTop: 100 }}>
-					<Typography
-						//color={colors.ON_SURFACE_VARIANT}
-						style={[hasErrors('email'), { marginVertical: 10 }]}
-					>
-						Correo
-					</Typography>
-					<TextInput
-						keyboardType='email-address'
-						value={email}
-						style={[
-							styles.input,
-							hasErrors('email'),
-							{
-								color: colors.ON_BACKGROUND,
-								borderBottomColor: '#8E8E8E',
-								borderBottomWidth: StyleSheet.hairlineWidth,
-							},
-						]}
-						onChangeText={(text) => setEmail(text)}
-					/>
-				</View>
-				<View style={{ marginTop: 20 }}>
-					<Typography
-						color={colors.ON_SURFACE_VARIANT}
-						style={[hasErrors('email'), { marginVertical: 10 }]}
-					>
-						Contraseña
-					</Typography>
-					<View style={{
-						flexDirection: 'row',
-						borderBottomColor: '#8E8E8E',
-						borderBottomWidth: StyleSheet.hairlineWidth,
-					}}>
+				<ScrollView
+				style={{ padding: 40}}
+					showsVerticalScrollIndicator={false}
+				>
+					<View style={{ alignItems: 'center' }}>
+						<Typography color={colors.ON_BACKGROUND} style={styles.title}>
+							Iniciar Sesión
+						</Typography>
+					</View>
+					<View style={{ marginTop: 100 }}>
+						<Typography
+							//color={colors.ON_SURFACE_VARIANT}
+							style={[hasErrors('email'), { marginVertical: 10 }]}
+						>
+							Correo
+						</Typography>
 						<TextInput
-							secureTextEntry={isSecure}
-							value={password}
+							keyboardType='email-address'
+							value={email}
 							style={[
 								styles.input,
-								hasErrors('password'),
-								{ color: colors.ON_BACKGROUND, flex: 1 },
-							]}
-							onChangeText={(text) => setPassword(text)}
-						/>
-						<TouchableOpacity onPress={() => changeSecure()}>
-							<FontAwesome
-								style={{ marginTop: 10 }}
-								name={secureIcon}
-								size={24}
-							//color={colors.SURFACE}
-							/>
-						</TouchableOpacity>
-
-					</View>
-
-				</View>
-				{
-					errorLogin ? (
-						<Typography
-							color='#CF6679'
-							style={{ marginVertical: 10 }}
-						>
-							{errorMessage}
-						</Typography>) : (<></>)
-				}
-				<View style={{ marginTop: 50 }}>
-					<Button
-						style={{ alignItems: 'center', marginBottom: 10 }}
-						onPress={() => handleLogin(email, password)}
-					>
-						{(loadingToken || loadingButton) ? (
-							<ActivityIndicator size="small" color="white" />
-						) : (
-							<Typography color="#ffffff">Acceder</Typography>
-						)}
-					</Button>
-					<Button
-						style={{ alignItems: 'center' }}
-						color="trasparent"
-						onPress={() => navigation.navigate('Register')}
-					>
-						<Typography
-							color={colors.ON_SURFACE_VARIANT}
-							style={[
+								hasErrors('email'),
 								{
-									textDecorationLine: 'underline',
+									color: colors.ON_BACKGROUND,
+									borderBottomColor: '#8E8E8E',
+									borderBottomWidth: StyleSheet.hairlineWidth,
 								},
 							]}
+							onChangeText={(text) => setEmail(text)}
+						/>
+					</View>
+					<View style={{ marginTop: 20 }}>
+						<Typography
+							color={colors.ON_SURFACE_VARIANT}
+							style={[hasErrors('email'), { marginVertical: 10 }]}
 						>
-							Crear cuenta de mensajero en solo tres pasos.
+							Contraseña
 						</Typography>
-					</Button>
-				</View>
-				{/* <Typography>
+						<View style={{
+							flexDirection: 'row',
+							borderBottomColor: '#8E8E8E',
+							borderBottomWidth: StyleSheet.hairlineWidth,
+						}}>
+							<TextInput
+								secureTextEntry={isSecure}
+								value={password}
+								style={[
+									styles.input,
+									hasErrors('password'),
+									{ color: colors.ON_BACKGROUND, flex: 1 },
+								]}
+								onChangeText={(text) => setPassword(text)}
+							/>
+							<TouchableOpacity onPress={() => changeSecure()}>
+								<FontAwesome
+									style={{ marginTop: 10 }}
+									name={secureIcon}
+									size={24}
+								//color={colors.SURFACE}
+								/>
+							</TouchableOpacity>
+
+						</View>
+
+					</View>
+					{
+						errorLogin ? (
+							<Typography
+								color='#CF6679'
+								style={{ marginVertical: 10 }}
+							>
+								{errorMessage}
+							</Typography>) : (<></>)
+					}
+					<View style={{ marginTop: 50 }}>
+						<Button
+							style={{ alignItems: 'center', marginBottom: 10 }}
+							onPress={() => handleLogin(email, password)}
+						>
+							{(loadingToken || loadingButton) ? (
+								<ActivityIndicator size="small" color="white" />
+							) : (
+								<Typography color="#ffffff">Acceder</Typography>
+							)}
+						</Button>
+						<Button
+							style={{ alignItems: 'center' }}
+							color="trasparent"
+							onPress={() => navigation.navigate('Register')}
+						>
+							<Typography
+								color={colors.ON_SURFACE_VARIANT}
+								style={[
+									{
+										textDecorationLine: 'underline',
+									},
+								]}
+							>
+								Crear cuenta.
+							</Typography>
+						</Button>
+					</View>
+					{/* <Typography>
 				Pushy.me Token {pushyToken}
 			</Typography> */}
-			</ScrollView>
+				</ScrollView>
+			</KeyboardAvoidingView>
+		</View>
 
-		</KeyboardAvoidingView>
 	)
 }
 

@@ -24,7 +24,7 @@ import { useLazyQuery, useQuery } from '@apollo/client'
 import Theme from '../../constants/Theme'
 import { Typography, FloatingActionButton } from '../../components'
 import { PRODUCT_TYPES } from '../../graphql/product'
-import { setCarrierInfo, user } from '../../redux/userlogin/userLoginSlice'
+import { setCarrierInfo, user, carrierInfo } from '../../redux/userlogin/userLoginSlice'
 import { URL } from '../../constants/Other'
 import Pushy from 'pushy-react-native';
 import { GET_CARRIER_BY_USER_EMAIL } from '../../graphql/login'
@@ -34,14 +34,25 @@ const { width } = Dimensions.get('window')
 
 export default function HomeScreen({ navigation }) {
 	const { colors } = useTheme()
+	const [localCarreirInfo, setLocalCarrierInfo] = useState({})
 	const dispatch = useDispatch()
 	const user_state = useSelector(user)
+	const carrier_state = useSelector(carrierInfo)
 	const [pushyToken, setPushyToken] = useState(null)
+
+	//console.log(user_state)
 
 	const [getCarrierByUserEmail, { loading, error, data }] = useLazyQuery(GET_CARRIER_BY_USER_EMAIL, {
 		onCompleted: (data) => {
-			//console.log('A CARGAR DATOS DEL CARRIER >> ', data)
-			dispatch(setCarrierInfo(data))
+			console.log('A CARGAR DATOS DEL CARRIER >> ', data.carriers.edges.length)
+			if (data.carriers.edges.length >= 1) {
+				console.log("Entro a actualizar con datos OKOK", data.carriers.edges[0].node)
+				dispatch(setCarrierInfo(data.carriers.edges[0].node))
+			} else {
+				console.log("Entro a actualizar sin datos KK")
+				dispatch(setCarrierInfo({}))
+			}
+
 		},
 		onError: (error) => {
 			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', error)
@@ -67,7 +78,9 @@ export default function HomeScreen({ navigation }) {
 		});
 	}, [])
 
-
+	useEffect(() => {
+		setLocalCarrierInfo(carrier_state)
+	}, [carrier_state])
 
 	navigation.setOptions({
 		headerRight: () => (
@@ -120,31 +133,69 @@ export default function HomeScreen({ navigation }) {
 		)
 	}
 
-	const pushyTokenComponent = () => {
-		return (
-			<LinearGradient
-				start={{ x: 0, y: 0 }}
-				end={{ x: 1, y: 1 }}
-				colors={[colors.PRIMARY, colors.SECUNDARY]}
-				style={[
-					styles.recent,
-					{ backgroundColor: colors.SURFACE, marginBottom: 20 },
-				]}
-			>
-				<View style={styles.hola_text}>
-					{user_state.isCarrier ? (
-						<Typography h3 color="#ffffff">
-							{pushyToken ? 'Pushy.me Token ' + pushyToken : 'Error en Pushy.me Token'}
-						</Typography>
-					) : (
+	const carrierApplication = () => {
+		if (loading) {
+			return null
+		} else {
+			if (Object.keys(localCarreirInfo).length == 0) {// elcarrier no ha terminado el registro
+				return (
+					<TouchableOpacity
+						onPress={() => navigation.navigate("CarrierApplicationScreen")}
+					>
+						<LinearGradient
+							start={{ x: 0, y: 0 }}
+							end={{ x: 1, y: 1 }}
+							colors={[Colors.COLORS.WARNING, '#FB6360']}
+							style={[
+								styles.recent,
+								{ backgroundColor: '#fff', marginBottom: 20 },
+							]}
+						>
+							<View>
+								<Typography h3 bold color="#ffffff">
+									Su registro de cuenta de mensajero no está completado, presione aquí para completarlo.
+								</Typography>
+							</View>
+						</LinearGradient>
+					</TouchableOpacity>
+				)
+			} else if (localCarreirInfo.kyc == "APPROVED") {
+				return null
+			} else if (localCarreirInfo.kyc == "PENDING") {
+				<LinearGradient
+					start={{ x: 0, y: 0 }}
+					end={{ x: 1, y: 1 }}
+					colors={[Colors.COLORS.INFO, '#11CDff']}
+					style={[
+						styles.recent,
+						{ backgroundColor: '#fff', marginBottom: 20 },
+					]}
+				>
+					<View>
 						<Typography h3 bold color="#ffffff">
-							Su solicitud de cuenta para mensajero está siendo procesada.
+							Su solicitud de cuenta de mensajero está siendo procesada.
 						</Typography>
-					)}
+					</View>
+				</LinearGradient>
+			} else if (localCarreirInfo.kyc == "DISAPPROVED") {
+				<LinearGradient
+					start={{ x: 0, y: 0 }}
+					end={{ x: 1, y: 1 }}
+					colors={[Colors.COLORS.LABEL, '#FE2472']}
+					style={[
+						styles.recent,
+						{ backgroundColor: '#fff', marginBottom: 20 },
+					]}
+				>
+					<View>
+						<Typography h3 bold color="#ffffff">
+							Lo sentimos su cuenta de mensajero no ha sido aprobada.
+						</Typography>
+					</View>
+				</LinearGradient>
+			}
+		}
 
-				</View>
-			</LinearGradient>
-		)
 	}
 	const product = () => {
 		return (
@@ -239,8 +290,8 @@ export default function HomeScreen({ navigation }) {
 						Pruebas View
 					</Typography>
 				</TouchableOpacity> */}
+				{!user_state.isCarrier ? carrierApplication() : null}
 				{product()}
-				{pushyTokenComponent()}
 				{recent()}
 			</ScrollView>
 			{buttons()}

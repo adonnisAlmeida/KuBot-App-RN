@@ -133,14 +133,16 @@ function AppNavigation(props) {
 								/>
 							)
 						} else if (!screen.carrier_only) {
-							<Stack.Screen
-								key={index}
-								name={screen.name}
-								component={screen.component}
-								options={{
-									title: screen.title,
-								}}
-							/>
+							return (
+								<Stack.Screen
+									key={index}
+									name={screen.name}
+									component={screen.component}
+									options={{
+										title: screen.title,
+									}}
+								/>
+							)
 						}
 					}
 				})}

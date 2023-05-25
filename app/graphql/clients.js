@@ -9,6 +9,7 @@ export const ORDERS_LIST_CLIENTS = gql`
 					user {
                         userName
                         id
+                        serverId
                         avatar{
                             url
                             alt
@@ -41,6 +42,7 @@ export const ORDERS_LIST_SELLERS = gql`
                         user{
                             userName
                             id
+                            serverId
                             avatar{
                                 url
                                 alt
