@@ -28,9 +28,6 @@ export default function MessengerOrdersScreen({ navigation }) {
 	const dispatch = useDispatch()
 	const carrierID = userStore.carrierInfo.serverId;
 
-	console.log("messengerOrdersRedux.listado.length >> ", messengerOrdersRedux.listado.length)
-
-
 	const [getOrdersList, { loading, error, data }] = useLazyQuery(ORDERS_LIST, {
 		onCompleted: (data) => {
 			if (data.orders.pageInfo.hasNextPage) {

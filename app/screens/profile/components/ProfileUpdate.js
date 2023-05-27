@@ -152,7 +152,7 @@ const ProfileUpdate = () => {
                 >
                     <TouchableWithoutFeedback /* style={styles.modalContent} */>
                         <View keyboardShouldPersistTaps={'handled'} style={styles.modalContent}>
-                            <Typography style={styles.inputLabel} color={colors.ON_SURFACE}>Nombre</Typography>
+                            <Typography color={colors.ON_SURFACE}>Nombre</Typography>
                             <TextInput
                                 selectTextOnFocus
                                 ref={refNameInput}
@@ -162,7 +162,7 @@ const ProfileUpdate = () => {
                                 //onSubmitEditing={sendMessage}
                                 value={firstName}
                             />
-                            <Typography style={styles.inputLabel} color={colors.ON_SURFACE}>Apellidos</Typography>
+                            <Typography color={colors.ON_SURFACE}>Apellidos</Typography>
                             <TextInput
                                 style={styles.textInput}
                                 placeholder='Apellidos'

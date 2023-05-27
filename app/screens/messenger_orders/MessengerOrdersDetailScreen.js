@@ -29,9 +29,9 @@ export default function MessengerOrdersDetailScreen({ route, navigation, ...prop
 			//console.log('On complete >> ', data)
 		},
 		onError: () => {
-			console.log('ERROR cargando orden >> ', error.errors)
-			console.log('ERROR cargando orden data var >> ', data)
-			console.log('ERROR cargando orden networkStatus >> ', networkStatus)
+			console.log('ERROR cargando Envío >> ', error.errors)
+			console.log('ERROR cargando Envío data var >> ', data)
+			console.log('ERROR cargando Envío networkStatus >> ', networkStatus)
 		},
 		fetchPolicy: "no-cache"
 	})
@@ -57,7 +57,7 @@ export default function MessengerOrdersDetailScreen({ route, navigation, ...prop
 	if (Object.keys(orderDetails).length == 0) return <Loading />
 
 	navigation.setOptions({
-		title: `Orden # ` + orderDetails.order.number,
+		title: `Envío #` + orderDetails.order.number,
 	})
 	/* console.log("a mostar >> ", orderDetails.order.number)
 	console.log("a mostar estado >> ", messengerOrdersRedux.selectedOrder.order.number) */

@@ -12,6 +12,17 @@ export function printCreated(date) {
     return output
 }
 
+export function printCreated2(date) {
+    let output = 'Realizado el '
+    let dateObject = new Date(date)
+    output += DAY_NAMES[dateObject.getDay()] +
+        ' ' + dateObject.getDate() +
+        ' de ' + MONTH_NAMES[dateObject.getMonth()] +
+        ' del ' + dateObject.getFullYear()
+
+    return output
+}
+
 export function containsOnlyNumbers(str) {
     return /^[0-9]+$/.test(str);
 }

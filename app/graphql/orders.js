@@ -79,6 +79,128 @@ mutation shipmentDeliveredSignatureImage($id: ID!, $images: [Upload!]) {
   }
 `
 
+export const ORDER_REJECTED = gql`
+mutation orderRejected($id: ID!, $input: ReasonRejectedInput!) {
+	orderRejected(id: $id, input: $input) {
+		order{
+			shippingStatus
+		}
+		errors{
+			field
+			message
+		}
+	}
+}
+`
+
+export const DELETE_SIGNATURE_IMAGE_REJECTION = gql`
+mutation deleteSignatureImageRejection($id: ID!) {
+	deleteSignatureImageRejection(id: $id) {
+		errors{
+			field
+			message
+		}
+		orderErrors{
+			field
+			message
+			code
+		}
+	}
+}
+`
+
+export const DELETE_EVIDENCE_IMAGE_REJECTION = gql`
+mutation deleteEvidenceImageRejection($id: ID!) {
+	deleteEvidenceImageRejection(id: $id) {
+		errors{
+			field
+			message
+		}
+		orderErrors{
+			field
+			message
+			code
+		}
+	}
+}
+`
+
+export const SIGNATURE_REJECTED_IMAGES = gql`
+mutation signatureImagesRejection($id: ID!, $images: [Upload!]) {
+	signatureImagesRejection( id: $id, input: {images: $images} ) {
+		order{
+			rejectedOrder{
+				id
+				reason
+				shipImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+				signImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+			}
+		}
+		orderErrors{
+			field
+			message
+			code
+		}
+		errors {
+			field
+			message
+		}
+	}
+}
+`
+
+export const EVIDENCE_REJECTED_IMAGES = gql`
+mutation evidenceImagesRejection($id: ID!, $images: [Upload!]) {
+	evidenceImagesRejection( id: $id, input: {images: $images} ) {
+		order{
+			rejectedOrder{
+				id
+				reason
+				shipImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+				signImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+			}
+		}
+		orderErrors{
+			field
+			message
+			code
+		}
+		errors {
+			field
+			message
+		}
+	}
+}
+`
+
 export const PACKAGE_IMAGES = gql`
 mutation shipmentDeliveredPackageImage($id: ID!, $images: [Upload!]) {
 	shipmentDeliveredPackageImage( id: $id, input: {images: $images} ) {
@@ -240,6 +362,26 @@ export const ORDER_ID = gql`
 			  packageImagesDelivery {
 				image {
 				  url
+				}
+			  }
+			  rejectedOrder{
+				id
+				reason
+				shipImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+				signImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
 				}
 			  }
 			shippingAddress{
