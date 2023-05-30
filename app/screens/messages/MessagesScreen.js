@@ -7,68 +7,10 @@ import MessagesList from './components/MessagesList'
 import { RECEIVED_MESSAGES, SENT_MESSAGES } from '../../graphql/messages'
 import { useDispatch, useSelector } from 'react-redux'
 import { conversations, receivedMessages, sentMessages, setConversations, setReceivedMessagesByUser, setSentMessagesByUser } from '../../redux/messages/messagesSlice'
-import { user } from '../../redux/userlogin/userLoginSlice'
+import { user, carrierInfo } from '../../redux/userlogin/userLoginSlice'
 import { FloatingAction } from 'react-native-floating-action'
 import Colors from '../../constants/Colors'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-
-let fake_messages = [
-    {
-        id: 1,
-        'usuario': {
-            id: 1,
-            nombre: 'Manolo',
-            avatar: 'bonito'
-        },
-        'mensaje': 'Esto es una prueba',
-        'fecha': '24-05-2022',
-        'leido': true
-    },
-    {
-        id: 2,
-        'usuario': {
-            id: 1,
-            nombre: 'Manolo',
-            avatar: 'bonito'
-        },
-        'mensaje': 'Otro mensaje',
-        'fecha': '24-05-2022',
-        'leido': false
-    },
-    {
-        id: 3,
-        'usuario': {
-            id: 1,
-            nombre: 'Manolo',
-            avatar: 'bonito'
-        },
-        'mensaje': 'Este tiene mas texto de pueba para ver como queda en una burbuja bien grande que no quepa en el telefono',
-        'fecha': '24-05-2022',
-        'leido': false
-    },
-    {
-        id: 4,
-        'usuario': {
-            id: 2,
-            nombre: 'Fatima',
-            avatar: 'bonito'
-        },
-        'mensaje': 'tiene  ok Mensaje de fatima Este tiene mas texto de pueba para ver como queda en una burbuja bien grande que no quepa en el telefono',
-        'fecha': '24-05-2022',
-        'leido': false
-    },
-    {
-        id: 5,
-        'usuario': {
-            id: 2,
-            nombre: 'Fatima',
-            avatar: 'bonito'
-        },
-        'mensaje': 'Este si que esta bueno',
-        'fecha': '24-05-2022',
-        'leido': false
-    },
-]
 
 const MessagesScreen = ({ navigation }) => {
     const { colors } = useTheme()
@@ -80,8 +22,10 @@ const MessagesScreen = ({ navigation }) => {
     const [firstTime, setFirstTime] = useState(false)
     const [endCursor, setEndCursor] = useState("")
     const user_state = useSelector(user)
+    const carrier_state = useSelector(carrierInfo)
     const conversation_reducer = useSelector(conversations)
     const dispatch = useDispatch()
+    
     const [tempConversation, setTempConversation] = useState([])
 
     const [getSentMessages, { loadingSent, errorSent, dataSent }] = useLazyQuery(SENT_MESSAGES, {
@@ -284,7 +228,7 @@ const MessagesScreen = ({ navigation }) => {
         )
     }
 
-    const actionNewMessage = [
+    const actionNewMessageCarrier = [
         {
             text: "Nuevo Mensaje",
             icon: actionIcon('email-plus-outline'),
@@ -292,6 +236,16 @@ const MessagesScreen = ({ navigation }) => {
             position: 1,
             color: Colors.COLORS.PRIMARY
         },
+        {
+            text: "Actualizar",
+            icon: actionIcon('reload'),
+            name: "bt_update",
+            position: 2,
+            color: Colors.COLORS.PRIMARY
+        },
+    ];
+
+    const actionNewMessage = [
         {
             text: "Actualizar",
             icon: actionIcon('reload'),
@@ -334,7 +288,7 @@ const MessagesScreen = ({ navigation }) => {
                         </View>
                         <FloatingAction
                             color={Colors.COLORS.PRIMARY}
-                            actions={actionNewMessage}
+                            actions={carrier_state.kyc == 'APPROVED'?  actionNewMessageCarrier: actionNewMessage}
                             onPressItem={name => {
                                 doAction(name)
                             }}

@@ -7,6 +7,7 @@ import {
 	View,
 	Platform,
 	ToastAndroid,
+	ScrollView,
 } from 'react-native'
 import { useMutation } from '@apollo/client'
 import { useTheme } from '@react-navigation/native'
@@ -27,14 +28,14 @@ export default function RegisterScreen({ navigation }) {
 	//console.log("user_state TOKEN >>", user_state.token)
 
 	useEffect(() => {
-		if(hasErrors('email')){
+		if (hasErrors('email')) {
 			setErrors(pre => pre.filter((key) => key != 'email'))
 			setEmailError(null)
 		}
 	}, [email])
 
 	useEffect(() => {
-		if(hasErrors('password')){
+		if (hasErrors('password')) {
 			setErrors(pre => pre.filter((key) => key != 'password'))
 			setPassError(null)
 		}
@@ -65,14 +66,15 @@ export default function RegisterScreen({ navigation }) {
 					ToastAndroid.show(`Usuario ${email} creado correctamente`, ToastAndroid.LONG)
 				}
 				//setCurrentPosition(currentPosition + 1)
-				tokenCreate({ variables: { email: email, password: password } })
+				//tokenCreate({ variables: { email: email, password: password } })
+				navigation.goBack()
 				/* setEmail('')
 				setPassword('')
 				setRepeatPassword('') */
 			}
 
 		},
-		onError: () => {
+		onError: (error) => {
 			console.log("ERROR REGISTRANDO USUARIO >> ", error)
 			if (Platform.OS === 'android') {
 				ToastAndroid.show(`Error registrando usuario: ${error}`, ToastAndroid.LONG)
@@ -93,8 +95,8 @@ export default function RegisterScreen({ navigation }) {
 			setErrors(['email'])
 		} else {
 			if (vPassword == vRepeatPassword) {
-				//accountRegister({ variables: { email: vEmail, password: vPassword } })
-				console.log("Son iguales")
+				accountRegister({ variables: { email: vEmail, password: vPassword } })
+				//console.log("Son iguales")
 			} else {
 				const valid = []
 				valid.push('password')
@@ -105,106 +107,114 @@ export default function RegisterScreen({ navigation }) {
 	}
 
 	return (
+
 		<KeyboardAvoidingView
 			style={styles.login}
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 		>
-			<View style={{alignItems: 'center',}}>
-				<Typography color={colors.ON_BACKGROUND} style={styles.title}>
-					Crear Cuenta
-				</Typography>
-			</View>
-			<View style={{ marginTop: 85 }}>
-				<Typography
-					color={colors.ON_SURFACE_VARIANT}
-				//style={{ marginVertical: 10 }}
-				>
-					Correo
-				</Typography>
-				<TextInput
-					keyboardType='email-address'
-					value={email}
-					style={[
-						styles.input,
-						hasErrors('email'),
-						{ color: colors.ON_BACKGROUND },
-					]}
-					onChangeText={(text) => setEmail(text)}
-				/>
-				{emailError ? (
-					<Typography small color="red" style={{ marginVertical: 10 }} >
-						{emailError}
+			<ScrollView
+				keyboardShouldPersistTaps='handled' /* esto hace que sea cliqueable el contenido con el keyboard open */
+				showsVerticalScrollIndicator={false}
+			> 
+				<View style={{ alignItems: 'center', }}>
+					<Typography color={colors.ON_BACKGROUND} style={styles.title}>
+						Crear Cuenta
 					</Typography>
-				) : (null)}
-			</View>
-			<View style={{ marginTop: 20 }}>
-				<Typography
-					color={colors.ON_SURFACE_VARIANT}
-				//style={{ marginVertical: 10 }}
-				>
-					Contraseña
-				</Typography>
-				<TextInput
-					secureTextEntry
-					value={password}
-					style={[
-						styles.input,
-						hasErrors('password'),
-						{ color: colors.ON_BACKGROUND },
-					]}
-					onChangeText={(text) => setPassword(text)}
-				/>
-			</View>
-			<View style={{ marginTop: 20 }}>
-				<Typography
-					color={colors.ON_SURFACE_VARIANT}
-				//style={{ marginVertical: 10 }}
-				>
-					Repetir Contraseña
-				</Typography>
-				<TextInput
-					secureTextEntry
-					value={repeatPassword}
-					style={[
-						styles.input,
-						hasErrors('password'),
-						{ color: colors.ON_BACKGROUND },
-					]}
-					onChangeText={(text) => setRepeatPassword(text)}
-				/>
-			</View>
-			{passError ? (
-				<Typography small color="red" style={{ marginVertical: 10 }} >
-					{passError}
-				</Typography>
-			) : (null)}
-			<View style={{ marginTop: 50 }}>
-				<Button
-					style={{ alignItems: 'center', marginBottom: 10 }}
-					onPress={() => handleRegister(email, password, repeatPassword)}
-				>
-					{loading ? (
-						<ActivityIndicator size="small" color="white" />
-					) : (
-						<Typography color="#ffffff">Crear Cuenta</Typography>
-					)}
-				</Button>
-				<Button
-					style={{ alignItems: 'center' }}
-					color="trasparent"
-					onPress={() => navigation.navigate('Login')}
-				>
+				</View>
+				<View style={{ marginTop: 85 }}>
 					<Typography
 						color={colors.ON_SURFACE_VARIANT}
-						style={{
-							textDecorationLine: 'underline',
-						}}
+					//style={{ marginVertical: 10 }}
 					>
-						Acceder
+						Correo
 					</Typography>
-				</Button>
-			</View>
+					<TextInput
+						keyboardType='email-address'
+						value={email}
+						style={[
+							styles.input,
+							hasErrors('email'),
+							{ color: colors.ON_BACKGROUND },
+						]}
+						onChangeText={(text) => setEmail(text)}
+					/>
+					{emailError ? (
+						<Typography small color="red" style={{ marginVertical: 10 }} >
+							{emailError}
+						</Typography>
+					) : (null)}
+				</View>
+				<View style={{ marginTop: 20 }}>
+					<Typography
+						color={colors.ON_SURFACE_VARIANT}
+					//style={{ marginVertical: 10 }}
+					>
+						Contraseña
+					</Typography>
+					<TextInput
+						secureTextEntry
+						value={password}
+						style={[
+							styles.input,
+							hasErrors('password'),
+							{ color: colors.ON_BACKGROUND },
+						]}
+						onChangeText={(text) => setPassword(text)}
+					/>
+				</View>
+				<View style={{ marginTop: 20 }}>
+					<Typography
+						color={colors.ON_SURFACE_VARIANT}
+					//style={{ marginVertical: 10 }}
+					>
+						Repetir Contraseña
+					</Typography>
+					<TextInput
+						secureTextEntry
+						value={repeatPassword}
+						style={[
+							styles.input,
+							hasErrors('password'),
+							{ color: colors.ON_BACKGROUND },
+						]}
+						onChangeText={(text) => setRepeatPassword(text)}
+					/>
+				</View>
+				{passError ? (
+					<Typography small color="red" style={{ marginVertical: 10 }} >
+						{passError}
+					</Typography>
+				) : (null)}
+				<View style={{ marginTop: 50 }}>
+					<Button
+						style={{ alignItems: 'center', marginBottom: 10 }}
+						onPress={() => handleRegister(email, password, repeatPassword)}
+					>
+						{loading ? (
+							<ActivityIndicator size="small" color="white" />
+						) : (
+							<Typography color="#ffffff">Crear Cuenta</Typography>
+						)}
+					</Button>
+					<Button
+						style={{ alignItems: 'center' }}
+						color="trasparent"
+						onPress={() => navigation.navigate('Login')}
+					>
+						<Typography
+							color={colors.ON_SURFACE_VARIANT}
+							style={{
+								textDecorationLine: 'underline',
+							}}
+						>
+							Acceder
+						</Typography>
+					</Button>
+				</View>
+
+			</ScrollView>
 		</KeyboardAvoidingView>
+
 	)
 }
 
@@ -217,10 +227,6 @@ const styles = StyleSheet.create({
 		bottom: 90,
 		right: 27,
 		backgroundColor: Colors.COLORS.PRIMARY
-	},
-	login: {
-		flex: 1,
-		padding: 15,
 	},
 	login: {
 		flex: 1,

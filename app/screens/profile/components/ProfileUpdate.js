@@ -1,4 +1,4 @@
-import { View, Text, Platform, ToastAndroid, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Keyboard, ScrollView } from 'react-native'
+import { View, Text, Platform, ToastAndroid, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Keyboard, ScrollView, KeyboardAvoidingView } from 'react-native'
 import React, { useState, useRef } from 'react'
 import { useMutation } from '@apollo/client'
 import { ACCOUNT_UPDATE } from '../../../graphql/customers'
@@ -14,20 +14,23 @@ const ProfileUpdate = () => {
     const dispatch = useDispatch()
     const { colors } = useTheme()
     const user_state = useSelector(user)
-    const [userInfo, setUserInfo] = useState(user_state)
     const [editNameModal, setEditNameModal] = useState(false)
     const [actualizando, setActualizando] = useState(false)
-    const [firstName, setFirstName] = useState(userInfo.firstName)
-    const [lastName, setLastName] = useState(userInfo.lastName)
+    const [firstName, setFirstName] = useState(user_state.firstName)
+    const [lastName, setLastName] = useState(user_state.lastName)
     const refNameInput = useRef();
 
     useEffect(() => {
-        setUserInfo(user_state)
-        setFirstName(userInfo.firstName)
-        setLastName(userInfo.lastName)
+        setFirstName(user_state.firstName)
+        setLastName(user_state.lastName)
     }, [user_state])
 
     useEffect(() => {
+        setFirstName(user_state.firstName)
+        setLastName(user_state.lastName)
+    }, []);
+
+    /* useEffect(() => {
         const showSubscriptionDid = Keyboard.addListener('keyboardDidShow', () => {
             console.log('Keyboard Shown <<keyboardDidShow>>');
         });
@@ -55,7 +58,7 @@ const ProfileUpdate = () => {
             frameSubscriptionDid.remove();
             frameSubscriptionWill.remove();
         };
-    }, []);
+    }, []); */
 
     const [accountUpdate, { loading, error, data }] = useMutation(ACCOUNT_UPDATE, {
         onCompleted: (data) => {
@@ -107,7 +110,7 @@ const ProfileUpdate = () => {
                             Nombre:
                         </Typography>
                         <Typography style={{ color: colors.ON_SURFACE }}>
-                            {userInfo.firstName}
+                            {firstName}
                         </Typography>
                     </View>
                     <View style={styles.seccion}>
@@ -115,7 +118,7 @@ const ProfileUpdate = () => {
                             Apellidos:
                         </Typography>
                         <Typography style={{ color: colors.ON_SURFACE }}>
-                            {userInfo.lastName}
+                            {lastName}
                         </Typography>
                     </View>
                     <MaterialCommunityIcons
@@ -130,7 +133,7 @@ const ProfileUpdate = () => {
                         Correo:
                     </Typography>
                     <Typography style={{ color: colors.ON_SURFACE }}>
-                        {userInfo.email}
+                        {user_state.email}
                     </Typography>
                 </View>
             </View>
@@ -192,7 +195,6 @@ const ProfileUpdate = () => {
                                 </TouchableOpacity>
                             </View>
                         </View>
-
                     </TouchableWithoutFeedback>
                 </TouchableOpacity>
             </Modal>

@@ -8,7 +8,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { Typography } from '../../components'
 import useAlert from '../../hooks/useAlert'
 import { logout } from '../../redux/userlogin/userLoginSlice'
-import { user } from '../../redux/userlogin/userLoginSlice'
+import { user, carrierInfo } from '../../redux/userlogin/userLoginSlice'
 import { USER_ID } from '../../graphql/user'
 import { CUSTOMER_DELETE } from '../../graphql/customers'
 import Colors from '../../constants/Colors'
@@ -23,6 +23,7 @@ export default function ProfileScreen({ navigation }) {
 	const dispatch = useDispatch()
 	const [showAlertAw, setShowAlert] = useState(false)
 	const user_state = useSelector(user)
+	const carrier_state = useSelector(carrierInfo)
 	const [customerDelete, result] = useMutation(CUSTOMER_DELETE)
 
 	const { alert, showAlert } = useAlert({
@@ -102,7 +103,7 @@ export default function ProfileScreen({ navigation }) {
 				}}>
 				<Tab.Screen name="ContactDetailsNavView" options={{ tabBarLabel: 'Contacto', title: "PRUEBAA", }} component={ContactDetails} />
 				{
-					user_state.isCarrier ? (
+					(carrier_state.kyc == 'PENDING' || carrier_state.kyc == 'APPROVED' || carrier_state.kyc == 'DISAPPROVED') ? (
 						<Tab.Screen name="CarrierDetailsNavView" options={{ tabBarLabel: 'Mensajero' }} component={CarrierDetails} />
 					): (
 						null

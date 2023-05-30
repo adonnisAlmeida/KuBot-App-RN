@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Keyboard, KeyboardAvoidingView, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, ActivityIndicator, Keyboard, KeyboardAvoidingView, StyleSheet, ScrollView, TouchableOpacity, Platform, ToastAndroid } from 'react-native'
 import React from 'react'
 import StepIndicator from 'react-native-step-indicator';
 import Colors from '../../constants/Colors';
@@ -12,8 +12,11 @@ import FirstComponent from './components/FirstComponent'
 import SecondComponent from './components/SecondComponent'
 import { useRef } from 'react';
 import { containsOnlyNumbers } from '../../utils/CommonFunctions';
+import { COUNTRIES } from '../../constants/Other';
+import { useDispatch } from 'react-redux';
+import { setCarrierInfo } from '../../redux/userlogin/userLoginSlice';
 
-const CarrierApplicationScreen = () => {
+const CarrierApplicationScreen = ({ navigation }) => {
 	const [currentPosition, setCurrentPosition] = useState(0)
 	const [piPhotoFrontal, setPiPhotoFrontal] = useState(require('../../../assets/user_avatar.png'))
 	const [piPhotoBack, setPiPhotoBack] = useState(require('../../../assets/user_avatar.png'))
@@ -31,30 +34,27 @@ const CarrierApplicationScreen = () => {
 	const [direccion2, setDireccion2] = useState('')
 	const [codigoPostal, setCodigoPostal] = useState('')
 	const [telefono, setTelefono] = useState('')
+	const [codigoTelefono, setCodigoTelefono] = useState(57)
 	const [carnet, setCarnet] = useState('')
 	const [empresa, setEmpresa] = useState('')
 	const [provinciasList, setProvinciasList] = useState([])
-	const [provinciasListUltimo, setProvinciasListUltimo] = useState(null)
 	const [registerCarrier, setRegisterCarrier] = useState(false)
-
-	const abortController = new AbortController();
-
-	const firstRef = useRef();
-	const secondRef = useRef();
-	const thirdRef = useRef();
+	const [loadingZones, setLoadingZones] = useState(false)
+	const dispatch = useDispatch()
 
 	const hasErrors = (key) => (errors.includes(key) ? styles.hasErrors : null)
-
-	useEffect(() => {
-		getDeliveryZones({ variables: { after: '', before: '' } })
-	}, [])
 
 	const [carrierRegister, { loadingCarrierRegister, errorCarrierRegister, dataCarrierRegister }] = useMutation(CARRIER_REGISTER, {
 		onCompleted: (dataCarrierRegister) => {
 			setRegisterCarrier(false)
-			console.log("OKOK CARRIER REGISTER ", dataCarrierRegister)
+			console.log("OKOK CARRIER REGISTER ", dataCarrierRegister.carrierRegister.carrier)
+			dispatch(setCarrierInfo(dataCarrierRegister.carrierRegister.carrier))
+			if (Platform.OS === 'android') {
+				ToastAndroid.show('Solicitud de cuenta de mensajero enviada.', ToastAndroid.LONG)
+			}
+			navigation.navigate('Home')
 		},
-		onError: (errorCarrierRegister) => {
+		onError: (errorCarrierRegister, dataCarrierRegister) => {
 			setRegisterCarrier(false)
 			console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
 			console.log('ERROR CARRIER REGISTER >> dataCarrierRegister', dataCarrierRegister)
@@ -68,7 +68,7 @@ const CarrierApplicationScreen = () => {
 			const allResult = dataProvincias.deliveryZones.edges
 			let groupedProvinces = []
 
-			allResult.map((prov, index) => {
+			allResult.map((prov) => {
 				if (prov.node.parent !== null) {
 					let flag = false
 					groupedProvinces.map((provi, i) => {
@@ -85,31 +85,40 @@ const CarrierApplicationScreen = () => {
 						}
 						groupedProvinces.push(father)
 					}
-				} else {
 				}
 			})
-
 			if (dataProvincias.deliveryZones.pageInfo.hasNextPage) {
-				setProvinciasListUltimo(groupedProvinces.slice(-1))
-				groupedProvinces.pop()
 				setProvinciasList(groupedProvinces)
 				getDeliveryZones({ variables: { after: dataProvincias.deliveryZones.pageInfo.endCursor, before: '' } })
 			} else {
-				let primeroConsulta = groupedProvinces[0]
-				if (provinciasListUltimo[0].name == primeroConsulta.name) {
-					provinciasListUltimo[0].municipios.map((mun) => {
-						primeroConsulta.municipios.push(mun)
-						let finalGrouped = provinciasList.concat(groupedProvinces)
-						setProvinciasList(finalGrouped)
+				let temporal = []
+				provinciasList.forEach(item => temporal.push(item))
+				groupedProvinces.map((groupProv) => {
+					let flag = false
+					temporal.map((prov) => {
+						if (groupProv.name == prov.name) {
+							flag = true
+							prov.municipios = prov.municipios.concat(groupProv.municipios)
+						}
 					})
-				}
+					if (!flag) {
+						temporal = temporal.concat(groupProv)
+					}
+				})
+				setProvinciasList(temporal)
+				setLoadingZones(false)
 			}
-
 		},
-		onError: () => {
+		onError: (errorProvincias) => {
+			setLoadingZones(false)
 			console.log('Error cargando todas las zonas de entrega', errorProvincias)
 		}
 	})
+
+	useEffect(() => {
+		setLoadingZones(true)
+		getDeliveryZones({ variables: { after: '', before: '' } })
+	}, [])
 
 	const labels = ["Información Personal", "Información de KYC"];
 	const customStyles = {
@@ -147,10 +156,10 @@ const CarrierApplicationScreen = () => {
 		if (bustPhotoFile == null) {
 			errorData.push('bustPhotoFile')
 		}
-		/* if (errorData.length > 0) {
+		if (errorData.length > 0) {
 			setErrors(errorData)
 			console.log("TIENE ERRORESSS >> ", errorData)
-		} else { */
+		} else {
 			let carrierApplication = {
 				piPhotoFrontal: piPhotoFrontalFile,
 				piPhotoBack: piPhotoBackFile,
@@ -164,9 +173,9 @@ const CarrierApplicationScreen = () => {
 					city: provincia,
 					cityArea: municipio,
 					postalCode: codigoPostal,
-					country: pais,
-					countryArea: "",
-					phone: telefono,
+					country: COUNTRIES[pais].code,
+					countryArea: municipio,
+					phone: telefono == ''? '': COUNTRIES[codigoTelefono].mobileCode + telefono,
 				}
 			}
 			setRegisterCarrier(true)
@@ -186,50 +195,38 @@ const CarrierApplicationScreen = () => {
 							city: provincia,
 							cityArea: municipio,
 							postalCode: codigoPostal,
-							country: "CU",
-							countryArea: "",
+							country: COUNTRIES[pais].code,
+							countryArea: municipio,
 							phone: telefono,
 						}
 					}
 				}
 			})
-		/* } */
-		
+		}
+
 	}
 
 	const makeNext = () => {
 		switch (currentPosition) {
 			case 0:
 				Keyboard.dismiss()
-				/* if (containsOnlyNumbers(carnet) && carnet.length == 11) {
-					setCurrentPosition(currentPosition + 1)
+				let error_data = []
+				if (!containsOnlyNumbers(carnet) || carnet.length != 11) {
+					error_data.push('carnet')
+				}
+				/* if (!containsOnlyNumbers(telefono)) {
+					error_data.push('telefono')
+				} */
+
+				/* if (nombre.length == 0) error_data.push('firstName')
+				if (nombre.length == 0) error_data.push('firstName')
+				if (apellidos.length == 0) error_data.push('lastName') */
+				if (error_data.length > 0) {
+					setErrors(error_data)
+					console.log("error_data", error_data)
 				} else {
-					setErrors(['carnet'])
-				} */
-				/* let error_data = []
-				if (firstName.length == 0) error_data.push('firstName')
-				if (lastName.length == 0) error_data.push('lastName')
-				if (error_data.length > 0) setErrors(error_data)
-				else {
 					setCurrentPosition(currentPosition + 1)
-				} */
-				setCurrentPosition(currentPosition + 1)
-				break;
-			case 1:
-				/* Keyboard.dismiss()
-				if (containsOnlyNumbers(carnet) && carnet.length == 11) {
-					setCurrentPosition(currentPosition + 1)
-				} else {
-					setErrors(['carnet'])
-				} */
-				/* let error_data = []
-				if (firstName.length == 0) error_data.push('firstName')
-				if (lastName.length == 0) error_data.push('lastName')
-				if (error_data.length > 0) setErrors(error_data)
-				else {
-					setCurrentPosition(currentPosition + 1)
-				} */
-				setCurrentPosition(currentPosition + 1)
+				}
 				break;
 			default:
 				break;
@@ -246,126 +243,114 @@ const CarrierApplicationScreen = () => {
 					labels={labels}
 				/>
 			</View>
-			<KeyboardAvoidingView
-				style={styles.login}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-				keyboardVerticalOffset={100}
-			>
-				<ScrollView style={{ flex: 1, paddingTop: 20, paddingHorizontal: 20 }}>
-					{currentPosition == 0 ? (
-						<FirstComponent
-							nombre={nombre}
-							setNombre={setNombre}
-							apellidos={apellidos}
-							setApellidos={setApellidos}
-							pais={pais}
-							setPais={setPais}
-							provincia={provincia}
-							setProvincia={setProvincia}
-							municipio={municipio}
-							setMunicipio={setMunicipio}
-							direccion1={direccion1}
-							setDireccion1={setDireccion1}
-							direccion2={direccion2}
-							setDireccion2={setDireccion2}
-							codigoPostal={codigoPostal}
-							setCodigoPostal={setCodigoPostal}
-							telefono={telefono}
-							setTelefono={setTelefono}
-							carnet={carnet}
-							setCarnet={setCarnet}
-							empresa={empresa}
-							setEmpresa={setEmpresa}
-							hasErrors={hasErrors}
-							setErrors={setErrors}
-							provinciasList={provinciasList}
-							/* firstName={firstName}
-							lastName={lastName}
-							setLastName={setLastName}
-							setFirstName={setFirstName}
-							hasErrors={hasErrors}
-							setErrors={setErrors}
-							avatarURL={avatarURL}
-							setAvatarURL={setAvatarURL} */
-							ref={secondRef}
-						/>
-					) : (
-						<SecondComponent
-							ref={thirdRef}
-							/* terminos={terminos}
-							setTerminos={setTerminos} */
-							piPhotoFrontal={piPhotoFrontal}
-							setPiPhotoFrontal={setPiPhotoFrontal}
-							piPhotoBack={piPhotoBack}
-							setPiPhotoBack={setPiPhotoBack}
-							bustPhoto={bustPhoto}
-							setBustPhoto={setBustPhoto}
-							piPhotoFrontalFile={piPhotoFrontalFile}
-							piPhotoBackFile={piPhotoBackFile}
-							bustPhotoFile={bustPhotoFile}
-							setPiPhotoFrontalFile={setPiPhotoFrontalFile}
-							setPiPhotoBackFile={setPiPhotoBackFile}
-							setBustPhotoFile={setBustPhotoFile}
-							hasErrors={hasErrors}
-							setErrors={setErrors}
-						/>
-					)}
-				</ScrollView>
-				<View style={{
-					flexDirection: 'row',
-					justifyContent: 'space-between',
-					padding: 15,
-				}}>
-					{currentPosition == 1 ? (<TouchableOpacity
-						onPress={() => setCurrentPosition(currentPosition - 1)}
+			{currentPosition == 0 ? (
+				<FirstComponent
+					nombre={nombre}
+					setNombre={setNombre}
+					apellidos={apellidos}
+					setApellidos={setApellidos}
+					pais={pais}
+					setPais={setPais}
+					provincia={provincia}
+					setProvincia={setProvincia}
+					municipio={municipio}
+					setMunicipio={setMunicipio}
+					direccion1={direccion1}
+					setDireccion1={setDireccion1}
+					direccion2={direccion2}
+					setDireccion2={setDireccion2}
+					codigoPostal={codigoPostal}
+					setCodigoPostal={setCodigoPostal}
+					telefono={telefono}
+					setTelefono={setTelefono}
+					codigoTelefono={codigoTelefono}
+					setCodigoTelefono={setCodigoTelefono}
+					carnet={carnet}
+					setCarnet={setCarnet}
+					empresa={empresa}
+					setEmpresa={setEmpresa}
+					hasErrors={hasErrors}
+					setErrors={setErrors}
+					errors={errors}
+					provinciasList={provinciasList}
+					loadingZones={loadingZones}
+				/>
+			) : (
+				<SecondComponent
+					piPhotoFrontal={piPhotoFrontal}
+					setPiPhotoFrontal={setPiPhotoFrontal}
+					piPhotoBack={piPhotoBack}
+					setPiPhotoBack={setPiPhotoBack}
+					bustPhoto={bustPhoto}
+					setBustPhoto={setBustPhoto}
+					piPhotoFrontalFile={piPhotoFrontalFile}
+					piPhotoBackFile={piPhotoBackFile}
+					bustPhotoFile={bustPhotoFile}
+					setPiPhotoFrontalFile={setPiPhotoFrontalFile}
+					setPiPhotoBackFile={setPiPhotoBackFile}
+					setBustPhotoFile={setBustPhotoFile}
+					hasErrors={hasErrors}
+					setErrors={setErrors}
+				/>
+			)}
+			<View style={{
+				position: 'absolute',
+				bottom: 0,
+				left: 0,
+				right: 0,
+				flexDirection: 'row',
+				justifyContent: 'space-between',
+				paddingVertical: 10,
+				paddingHorizontal: 15,
+			}}>
+				{currentPosition == 1 ? (<TouchableOpacity
+					onPress={() => setCurrentPosition(currentPosition - 1)}
+					style={{
+						padding: 10,
+						borderRadius: 6,
+						backgroundColor: 'rgba(0,0,0,0.1)',
+
+					}}
+				>
+					<Typography color={'rgba(0,0,0,0.7)'} >
+						Anterior
+					</Typography>
+				</TouchableOpacity>) : (null)}
+				<Typography></Typography>
+				{currentPosition == 1 ? (
+					<TouchableOpacity
+						onPress={() => makeCarrier()}
 						style={{
 							padding: 10,
 							borderRadius: 6,
-							backgroundColor: 'rgba(0,0,0,0.1)',
+							backgroundColor: Colors.COLORS.PRIMARY,
 
 						}}
 					>
-						<Typography color={'rgba(0,0,0,0.7)'} >
-							Anterior
-						</Typography>
-					</TouchableOpacity>) : (null)}
-					<Typography></Typography>
-					{currentPosition == 1 ? (
-						<TouchableOpacity
-							onPress={() => makeCarrier()}
-							style={{
-								padding: 10,
-								borderRadius: 6,
-								backgroundColor: Colors.COLORS.PRIMARY,
-
-							}}
-						>
-							{registerCarrier ? (
-								<ActivityIndicator color={'#fff'}></ActivityIndicator>
-							) : (
-								<Typography color={'#fff'}>
-									Crear
-								</Typography>
-							)}
-
-						</TouchableOpacity>
-					) : (
-						<TouchableOpacity
-							onPress={() => makeNext()}
-							style={{
-								padding: 10,
-								borderRadius: 6,
-								backgroundColor: Colors.COLORS.WEB_START_OFF,
-							}}
-						>
-							<Typography color={'rgba(0,0,0,0.7)'}>
-								Siguiente
+						{registerCarrier ? (
+							<ActivityIndicator color={'#fff'}></ActivityIndicator>
+						) : (
+							<Typography color={'#fff'}>
+								Crear
 							</Typography>
-						</TouchableOpacity>
-					)}
-				</View>
-			</KeyboardAvoidingView >
+						)}
 
+					</TouchableOpacity>
+				) : (
+					<TouchableOpacity
+						onPress={() => makeNext()}
+						style={{
+							padding: 10,
+							borderRadius: 6,
+							backgroundColor: Colors.COLORS.WEB_START_OFF,
+						}}
+					>
+						<Typography color={'rgba(0,0,0,0.7)'}>
+							Siguiente
+						</Typography>
+					</TouchableOpacity>
+				)}
+			</View>
 		</View >
 	)
 }

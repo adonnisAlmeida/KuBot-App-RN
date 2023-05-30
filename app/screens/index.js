@@ -71,7 +71,7 @@ export default {
 		name: 'MessagesScreen',
 		icon: 'comments',
 		drawer: true,
-		carrier_only: true,
+		carrier_only: false,
 	},
 	MESSAGES_CHAT: {
 		component: MessagesChatScreen,
@@ -79,7 +79,7 @@ export default {
 		name: 'MessagesChatScreen',
 		icon: 'comments',
 		drawer: false,
-		carrier_only: true,
+		carrier_only: false,
 	},
 	NEW_MESSAGE: {
 		component: NewMessageScreen,
@@ -93,7 +93,7 @@ export default {
 		title: 'Redactar Mensaje',
 		name: 'WriteMessageScreen',
 		drawer: false,
-		carrier_only: true,
+		carrier_only: false,
 	},
 	PRODUCTS: {
 		component: ProductsScreen,

@@ -38,7 +38,6 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 	const delivery = useSelector(listado)
 	const { colors } = useTheme()
 	const [provinciasList, setProvinciasList] = useState([])
-	const [provinciasListUltimo, setProvinciasListUltimo] = useState(null)
 	const [ref_ico_element, setRef_ico_element] = useState([]);
 	const [ref_num_element, setRef_num_element] = useState([]);
 	const deliveryAreasStore = useSelector(store => store.deliveryareas)
@@ -88,36 +87,27 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 						}
 						groupedProvinces.push(father)
 					}
-				} else {
-				}
+				} 
 			})
-			/* let formStorage = []
-			formStorage = deliveryAreasStore.allDeliveryAreas.filter((item) => item)
-			groupedProvinces.map((items, indexs) => {
-				formStorage.map((itemp, indexp) => {
-					if (items.name == itemp.name) {
-						console.log('Conincide en ', items.name)
-						items.municipios.map((m) => {
-							itemp.municipios.push(m)
-						})
-						groupedProvinces.splice(indexs, 1);
-					}
-				})
-			}) */
 			if (data.deliveryZones.pageInfo.hasNextPage) {
-				setProvinciasListUltimo(groupedProvinces.slice(-1))
-				groupedProvinces.pop()
 				setProvinciasList(groupedProvinces)
 				getDeliveryZones({ variables: { after: data.deliveryZones.pageInfo.endCursor, before: '' } })
 			} else {
-				let primeroConsulta = groupedProvinces[0]
-				if (provinciasListUltimo[0].name == primeroConsulta.name) {
-					provinciasListUltimo[0].municipios.map((mun) => {
-						primeroConsulta.municipios.push(mun)
-						let finalGrouped = provinciasList.concat(groupedProvinces)
-						setProvinciasList(finalGrouped)
+				let temporal = []
+				provinciasList.forEach(item => temporal.push(item))
+				groupedProvinces.map((groupProv) => {
+					let flag = false
+					temporal.map((prov) => {
+						if(groupProv.name == prov.name){
+							flag = true
+							prov.municipios = prov.municipios.concat(groupProv.municipios)
+						}
 					})
-				}
+					if(!flag){
+						temporal = temporal.concat(groupProv)
+					}
+				})
+				setProvinciasList(temporal)
 			}
 			/* let ultimoStorage = deliveryAreasStore.allDeliveryAreas.slice(-1);
 			let primeroConsulta = groupedProvinces[0]

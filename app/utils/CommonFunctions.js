@@ -218,21 +218,25 @@ export function kycAmigable(kyc) {
     switch (kyc) {
         case 'APPROVED':
             return "APROBADO"
-            break;
-        /* case 'PARTIALLY_REFUNDED':
-            return "PARCIALMENTE REEMBOLSADO"
-            break;
-        case 'NOT_CHARGED':
-            return "NO PAGADO"
-            break;
-        case 'FULLY_CHARGED':
-            return "TOTALMENTE PAGADO"
-            break;
-        case 'PARTIALLY_CHARGED':
-            return "PARCIALMENTE PAGADO"
-            break; */
+        case 'PENDING':
+            return "PENDIENTE"
+        case 'DISAPPROVED':
+            return "DESAPROBADO"
         default:
-            return "NO APROBADO"
+            return "DESAPROBADO"
+    }
+}
+
+export function kycColor(kyc) {
+    switch (kyc) {
+        case 'APPROVED':
+            return "#27ae60"
+        case 'PENDING':
+            return "#ffc107"
+        case 'DISAPPROVED':
+            return "#eb5757"
+        default:
+            return "#eb5757"
     }
 }
 

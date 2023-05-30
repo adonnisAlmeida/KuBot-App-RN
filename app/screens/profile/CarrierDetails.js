@@ -5,7 +5,7 @@ import { useTheme } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { carrierInfo, setCarrierInfo, setCarrierInfoOtro } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
-import { kycAmigable } from '../../utils/CommonFunctions'
+import { kycAmigable, kycColor } from '../../utils/CommonFunctions'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -306,12 +306,14 @@ const CarrierDetails = () => {
                 <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
                     <View style={styles.cardRow}>
                         <Typography style={{ marginRight: 5, }}>Estado de la cuenta de Mensajero:</Typography>
-                        <Typography bold color={Colors.COLORS.PRIMARY}>{carrier_info.isActive ? 'ACTIVA'.toUpperCase() : 'NO ACTIVA'.toUpperCase()}</Typography>
+                        <Typography bold color={
+                            carrier_info.kyc == 'APPROVED'? Colors.COLORS.PRIMARY : '#eb5757'
+                            }>{carrier_info.kyc == 'APPROVED'? 'Activa'.toUpperCase(): 'Inactiva'.toUpperCase()}</Typography>
                     </View>
                     <View style={styles.headerContainer}><Typography style={{ marginRight: 5, }}>{'Información de KYC'.toUpperCase()}</Typography></View>
                     <View style={styles.cardRow}>
                         <Typography style={{ marginRight: 5, }}>Estado de KYC:</Typography>
-                        <Typography bold color={Colors.COLORS.PRIMARY}>{kycAmigable(carrier_info.kyc).toUpperCase()}</Typography>
+                        <Typography bold color={kycColor(carrier_info.kyc)}>{kycAmigable(carrier_info.kyc).toUpperCase()}</Typography>
                     </View>
                     <View style={styles.imageRow}>
                         <Typography>Imagen delantera del CI</Typography>

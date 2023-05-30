@@ -72,8 +72,25 @@ export const CARRIER_REGISTER = gql`
 				code
 			}
 			carrier{
+				id
+				kyc
 				isActive
 				serverId
+				piPhotoFrontal{
+					image{
+						url
+					}
+				}
+				piPhotoBack{
+					image{
+						url
+					}
+				}
+				bustPhoto{
+					image{
+						url
+					}
+				}
 			}
 		}
 	}

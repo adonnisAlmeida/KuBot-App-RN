@@ -152,8 +152,9 @@ export default function LoginScreen({ navigation }) {
 				keyboardVerticalOffset={10}
 			>
 				<ScrollView
-				style={{ padding: 40}}
+					style={{ padding: 40 }}
 					showsVerticalScrollIndicator={false}
+					keyboardShouldPersistTaps='handled'
 				>
 					<View style={{ alignItems: 'center' }}>
 						<Typography color={colors.ON_BACKGROUND} style={styles.title}>

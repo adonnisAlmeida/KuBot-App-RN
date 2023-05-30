@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, Modal, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, TouchableWithoutFeedback } from 'react-native'
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, Modal, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, TouchableWithoutFeedback, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Typography } from '../../../components'
 import { useTheme } from '@react-navigation/native'
@@ -34,7 +34,6 @@ const SecondComponent = ({
     const [selectedImage, setSelectedImage] = useState(null)
 
     useEffect(() => {
-        console.log("CAMBIO piPhotoFrontalFile > ", piPhotoFrontalFile)
         if (piPhotoFrontalFile != null) {
             setErrors(pre => pre.filter((key) => key != 'piPhotoFrontalFile'))
         }
@@ -145,172 +144,181 @@ const SecondComponent = ({
     }
 
     return (
-        <View>
-            <View style={styles.imageRow}>
-                <Typography color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen delantera del CI</Typography>
-                <View style={styles.imageContainer}>
-                    <View style={styles.editIcon}>
-                        <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
-                            <FontAwesome
-                                style={styles.headerRight}
-                                name="edit"
-                                color={colors.ON_SURFACE}
-                                size={22}
-                            />
-                        </TouchableOpacity>
+        <ScrollView
+            showsVerticalScrollIndicator={true}
+            style={{
+                flex: 1,
+                paddingTop: 20,
+                paddingHorizontal: 20,
+                marginBottom: 59,
+            }}>
+            <View>
+                <View style={styles.imageRow}>
+                    <Typography color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen delantera del CI</Typography>
+                    <View style={styles.imageContainer}>
+                        <View style={styles.editIcon}>
+                            <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
+                                <FontAwesome
+                                    style={styles.headerRight}
+                                    name="edit"
+                                    color={colors.ON_SURFACE}
+                                    size={22}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <Image
+                            defaultSource={piPhotoBack}
+                            backgroundColor='white'
+                            source={piPhotoFrontal}
+                            imageStyle={styles.imageStyles}
+                            indicator={Progress.Pie}
+                            indicatorProps={{
+                                color: colors.PRIMARY,
+                                borderWidth: 0,
+                            }}
+                        />
                     </View>
-                    <Image
-                        defaultSource={piPhotoBack}
-                        backgroundColor='white'
-                        source={piPhotoFrontal}
-                        imageStyle={styles.imageStyles}
-                        indicator={Progress.Pie}
-                        indicatorProps={{
-                            color: colors.PRIMARY,
-                            borderWidth: 0,
-                        }}
-                    />
                 </View>
-            </View>
-            <View style={styles.imageRow}>
-                <Typography color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen trasera del CI</Typography>
-                <View style={styles.imageContainer}>
-                    <View style={styles.editIcon}>
-                        <TouchableOpacity onPress={() => piPhotoBackEdit()}>
-                            <FontAwesome
-                                style={styles.headerRight}
-                                name="edit"
-                                color={colors.ON_SURFACE}
-                                size={22}
-                            />
-                        </TouchableOpacity>
+                <View style={styles.imageRow}>
+                    <Typography color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen trasera del CI</Typography>
+                    <View style={styles.imageContainer}>
+                        <View style={styles.editIcon}>
+                            <TouchableOpacity onPress={() => piPhotoBackEdit()}>
+                                <FontAwesome
+                                    style={styles.headerRight}
+                                    name="edit"
+                                    color={colors.ON_SURFACE}
+                                    size={22}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <Image
+                            indicator={Progress.Pie}
+                            indicatorProps={{
+                                color: colors.PRIMARY,
+                                borderWidth: 0,
+                            }}
+                            backgroundColor='white'
+                            source={piPhotoBack}
+                            imageStyle={styles.imageStyles}
+                        />
                     </View>
-                    <Image
-                        indicator={Progress.Pie}
-                        indicatorProps={{
-                            color: colors.PRIMARY,
-                            borderWidth: 0,
-                        }}
-                        backgroundColor='white'
-                        source={piPhotoBack}
-                        imageStyle={styles.imageStyles}
-                    />
                 </View>
-            </View>
-            <View style={styles.imageRow}>
-                <Typography color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen de Busto</Typography>
-                <View style={styles.imageContainer}>
-                    <View style={styles.editIcon}>
-                        <TouchableOpacity onPress={() => bustPhotoEdit()}>
-                            <FontAwesome
-                                style={styles.headerRight}
-                                name="edit"
-                                color={colors.ON_SURFACE}
-                                size={22}
-                            />
-                        </TouchableOpacity>
+                <View style={styles.imageRow}>
+                    <Typography color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen de Busto</Typography>
+                    <View style={styles.imageContainer}>
+                        <View style={styles.editIcon}>
+                            <TouchableOpacity onPress={() => bustPhotoEdit()}>
+                                <FontAwesome
+                                    style={styles.headerRight}
+                                    name="edit"
+                                    color={colors.ON_SURFACE}
+                                    size={22}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <Image
+                            indicator={Progress.Pie}
+                            indicatorProps={{
+                                color: colors.PRIMARY,
+                                borderWidth: 0,
+                            }}
+                            backgroundColor='white'
+                            source={bustPhoto}
+                            imageStyle={styles.imageStyles}
+                        />
                     </View>
-                    <Image
-                        indicator={Progress.Pie}
-                        indicatorProps={{
-                            color: colors.PRIMARY,
-                            borderWidth: 0,
-                        }}
-                        backgroundColor='white'
-                        source={bustPhoto}
-                        imageStyle={styles.imageStyles}
-                    />
                 </View>
-            </View>
-            <View style={styles.imageRow}>
-                {/* <CheckBox
+                <View style={styles.imageRow}>
+                    {/* <CheckBox
                     value={terminos}
                     onValueChange={setTerminos}
                     //style={styles.checkbox}
                 /> */}
-            </View>
-            <Modal
-                visible={confirmModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setConfirmModal(false)}
-            >
-
-                <View
-                    style={styles.modalView}
-                //onPressOut={() => setConfirmModal(false)}
+                </View>
+                <Modal
+                    visible={confirmModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setConfirmModal(false)}
                 >
-                    <ImageBackground
-                        resizeMode='contain'
-                        style={styles.vistaPrevia}
-                        source={vistaPrevia}
-                    />
-                    <View style={styles.topButtons}>
-                        <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
-                        >
-                            <Ionicons
-                                name='ios-close-circle-outline'
-                                size={40}
-                                color='rgba(255,255,255,0.9)'
-                            />
-                        </TouchableOpacity>
-                        {activity ? (
-                            <ActivityIndicator
-                                //style={styles.aIndicator}
-                                color={Colors.COLORS.SUCCESS}
-                                size='large'
-                            />
-                        ) : (
-                            <TouchableOpacity style={styles.okIcon} onPress={() => sendImage()}
+
+                    <View
+                        style={styles.modalView}
+                    //onPressOut={() => setConfirmModal(false)}
+                    >
+                        <ImageBackground
+                            resizeMode='contain'
+                            style={styles.vistaPrevia}
+                            source={vistaPrevia}
+                        />
+                        <View style={styles.topButtons}>
+                            <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
                             >
                                 <Ionicons
-                                    name='ios-checkmark-circle-outline'
+                                    name='ios-close-circle-outline'
                                     size={40}
+                                    color='rgba(255,255,255,0.9)'
+                                />
+                            </TouchableOpacity>
+                            {activity ? (
+                                <ActivityIndicator
+                                    //style={styles.aIndicator}
                                     color={Colors.COLORS.SUCCESS}
+                                    size='large'
                                 />
-                            </TouchableOpacity>
-                        )}
+                            ) : (
+                                <TouchableOpacity style={styles.okIcon} onPress={() => sendImage()}
+                                >
+                                    <Ionicons
+                                        name='ios-checkmark-circle-outline'
+                                        size={40}
+                                        color={Colors.COLORS.SUCCESS}
+                                    />
+                                </TouchableOpacity>
+                            )}
 
-                    </View>
-                </View>
-            </Modal>
-            <Modal
-                visible={showModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setShowModal(false)}
-            >
-                <TouchableOpacity
-                    style={styles.centeredView}
-                    onPressOut={() => setShowModal(false)}
-                >
-                    <TouchableWithoutFeedback>
-                        <View style={styles.selectModal}>
-                            <TouchableOpacity onPress={() => openCamera()}>
-                                <FontAwesome
-                                    name="camera-retro"
-                                    color={colors.PRIMARY}
-                                    size={35}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => openGalery()}>
-                                <FontAwesome
-                                    name="photo"
-                                    color={colors.PRIMARY}
-                                    size={35}
-                                />
-                            </TouchableOpacity>
                         </View>
-                    </TouchableWithoutFeedback>
-                </TouchableOpacity>
-            </Modal>
-        </View>
+                    </View>
+                </Modal>
+                <Modal
+                    visible={showModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowModal(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.centeredView}
+                        onPressOut={() => setShowModal(false)}
+                    >
+                        <TouchableWithoutFeedback>
+                            <View style={styles.selectModal}>
+                                <TouchableOpacity onPress={() => openCamera()}>
+                                    <FontAwesome
+                                        name="camera-retro"
+                                        color={colors.PRIMARY}
+                                        size={35}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => openGalery()}>
+                                    <FontAwesome
+                                        name="photo"
+                                        color={colors.PRIMARY}
+                                        size={35}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </TouchableOpacity>
+                </Modal>
+            </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     imageRow: {
-        marginVertical: 15,
+        marginVertical: 8,
     },
     login: {
         flex: 1,

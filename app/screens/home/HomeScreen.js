@@ -40,16 +40,17 @@ export default function HomeScreen({ navigation }) {
 	const carrier_state = useSelector(carrierInfo)
 	const [pushyToken, setPushyToken] = useState(null)
 
-	//console.log(user_state)
+	/* console.log("countryArea >>>>", user_state.addresses[0].countryArea)
+	console.log("cityArea >>>>", user_state.addresses[0].cityArea) */
+	//console.log("carrier_state >> ", carrier_state)
+	//console.log("localCarreirInfo >> ", localCarreirInfo)
+	//console.log("user_state.isCarrier >> ", user_state.isCarrier)
 
 	const [getCarrierByUserEmail, { loading, error, data }] = useLazyQuery(GET_CARRIER_BY_USER_EMAIL, {
 		onCompleted: (data) => {
-			console.log('A CARGAR DATOS DEL CARRIER >> ', data.carriers.edges.length)
 			if (data.carriers.edges.length >= 1) {
-				console.log("Entro a actualizar con datos OKOK", data.carriers.edges[0].node)
 				dispatch(setCarrierInfo(data.carriers.edges[0].node))
 			} else {
-				console.log("Entro a actualizar sin datos KK")
 				dispatch(setCarrierInfo({}))
 			}
 
@@ -134,7 +135,9 @@ export default function HomeScreen({ navigation }) {
 	}
 
 	const carrierApplication = () => {
+		//console.log("carrierApplication >>", localCarreirInfo.kyc)
 		if (loading) {
+			console.log("Loading")
 			return null
 		} else {
 			if (Object.keys(localCarreirInfo).length == 0) {// elcarrier no ha terminado el registro
@@ -153,46 +156,50 @@ export default function HomeScreen({ navigation }) {
 						>
 							<View>
 								<Typography h3 bold color="#ffffff">
-									Su registro de cuenta de mensajero no está completado, presione aquí para completarlo.
+									Su registro de cuenta de mensajero no está completo, presione aquí para completarlo.
 								</Typography>
 							</View>
 						</LinearGradient>
 					</TouchableOpacity>
 				)
+			} else if (localCarreirInfo.kyc == "PENDING") {
+				return (
+					<LinearGradient
+						start={{ x: 0, y: 0 }}
+						end={{ x: 1, y: 1 }}
+						colors={[Colors.COLORS.INFO, '#11CDff']}
+						style={[
+							styles.recent,
+							{ backgroundColor: '#fff', marginBottom: 20 },
+						]}
+					>
+						<View>
+							<Typography h3 bold color="#ffffff">
+								Su solicitud de cuenta de mensajero está siendo procesada.
+							</Typography>
+						</View>
+					</LinearGradient>
+				)
+			} else if (localCarreirInfo.kyc == "DISAPPROVED") {
+				return (
+					<LinearGradient
+						start={{ x: 0, y: 0 }}
+						end={{ x: 1, y: 1 }}
+						colors={[Colors.COLORS.LABEL, '#FE2472']}
+						style={[
+							styles.recent,
+							{ backgroundColor: '#fff', marginBottom: 20 },
+						]}
+					>
+						<View>
+							<Typography h3 bold color="#ffffff">
+								Lo sentimos su cuenta de mensajero no ha sido aprobada.
+							</Typography>
+						</View>
+					</LinearGradient>
+				)
 			} else if (localCarreirInfo.kyc == "APPROVED") {
 				return null
-			} else if (localCarreirInfo.kyc == "PENDING") {
-				<LinearGradient
-					start={{ x: 0, y: 0 }}
-					end={{ x: 1, y: 1 }}
-					colors={[Colors.COLORS.INFO, '#11CDff']}
-					style={[
-						styles.recent,
-						{ backgroundColor: '#fff', marginBottom: 20 },
-					]}
-				>
-					<View>
-						<Typography h3 bold color="#ffffff">
-							Su solicitud de cuenta de mensajero está siendo procesada.
-						</Typography>
-					</View>
-				</LinearGradient>
-			} else if (localCarreirInfo.kyc == "DISAPPROVED") {
-				<LinearGradient
-					start={{ x: 0, y: 0 }}
-					end={{ x: 1, y: 1 }}
-					colors={[Colors.COLORS.LABEL, '#FE2472']}
-					style={[
-						styles.recent,
-						{ backgroundColor: '#fff', marginBottom: 20 },
-					]}
-				>
-					<View>
-						<Typography h3 bold color="#ffffff">
-							Lo sentimos su cuenta de mensajero no ha sido aprobada.
-						</Typography>
-					</View>
-				</LinearGradient>
 			}
 		}
 
@@ -290,7 +297,7 @@ export default function HomeScreen({ navigation }) {
 						Pruebas View
 					</Typography>
 				</TouchableOpacity> */}
-				{!user_state.isCarrier ? carrierApplication() : null}
+				{carrierApplication()}
 				{product()}
 				{recent()}
 			</ScrollView>
