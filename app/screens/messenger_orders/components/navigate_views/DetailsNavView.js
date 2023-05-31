@@ -1,4 +1,4 @@
-import { View, Image, Dimensions, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform} from 'react-native'
+import { View, Image, Dimensions, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Typography } from '../../../../components'
 import { useTheme } from '@react-navigation/native'
@@ -7,6 +7,7 @@ import { orderShippingStatusDisplay, orderStatusDisplay } from '../../../../util
 import Colors from '../../../../constants/Colors'
 import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { FloatingAction } from 'react-native-floating-action'
 import { useMutation } from '@apollo/client'
 import { ORDER_LOST, ORDER_TRANSIT } from '../../../../graphql/orders'
@@ -14,6 +15,7 @@ import { useDispatch } from 'react-redux'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../redux/messenger_orders/messenger_ordersSlice'
 import ModalRejected from './components/ModalRejected'
 import ModalDelivered from './components/ModalDelivered'
+import AwesomeAlert from 'react-native-awesome-alerts'
 
 moment.locale('es')
 
@@ -26,6 +28,7 @@ const DetailsNavView = ({ navigation, route }) => {
     const [gifSource, setGifSource] = useState(null)
     const [showModalRejected, setShowModalRejected] = useState(false)
     const [showModalDelivered, setShowModalDelivered] = useState(false)
+    const [showAlertAw, setShowAlert] = useState(false)
     let hasNote = false
     const { colors } = useTheme()
 
@@ -324,14 +327,21 @@ const DetailsNavView = ({ navigation, route }) => {
                 setShowModalRejected(true)
                 break;
             case 'lost':
-                console.log('Cambiar estado a PERDIDA')
+                setShowAlert(true)
+                /* console.log('Cambiar estado a PERDIDA')
                 setDisplayLoading(true)
-                orderLost({ variables: { id: data.order.id } })
+                orderLost({ variables: { id: data.order.id } }) */
                 break;
             case 'delivered':
                 setShowModalDelivered(true)
                 break;
         }
+    }
+
+    const statusToLost = () => {
+        setDisplayLoading(true)
+        setShowAlert(false)
+        orderLost({ variables: { id: data.order.id } })
     }
 
     const llamar = (phoneNumber) => {
@@ -550,6 +560,13 @@ const DetailsNavView = ({ navigation, route }) => {
                     (
                         <FloatingAction
                             color={Colors.COLORS.PRIMARY}
+                            floatingIcon={
+                                <MaterialCommunityIcons
+                                    name='state-machine'
+                                    size={26}
+                                    color='#fff'
+                                />
+                            }
                             actions={actionsButton}
                             onPressItem={name => {
                                 doAction(name)
@@ -564,6 +581,25 @@ const DetailsNavView = ({ navigation, route }) => {
                     </View>
                 ) : (null)
             }
+            <AwesomeAlert
+                show={showAlertAw}
+                title="Estado de la orden"
+                message="¿Está seguro de cambiar el estado de la orden a 'Perdido'?"
+                closeOnTouchOutside={true}
+                closeOnHardwareBackPress={true}
+                showCancelButton={true}
+                showConfirmButton={true}
+                cancelText="Cancelar"
+                confirmText="Aceptar"
+                confirmButtonColor="#F5365C"
+                onCancelPressed={() => {
+                    setShowAlert(false)
+                }}
+                onDismiss={() => {
+                    setShowAlert(false)
+                }}
+                onConfirmPressed={() => statusToLost()}
+            />
         </>
     )
 }
