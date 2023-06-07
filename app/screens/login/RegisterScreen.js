@@ -111,6 +111,7 @@ export default function RegisterScreen({ navigation }) {
 		<KeyboardAvoidingView
 			style={styles.login}
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			keyboardVerticalOffset={-300}
 		>
 			<ScrollView
 				keyboardShouldPersistTaps='handled' /* esto hace que sea cliqueable el contenido con el keyboard open */
@@ -242,6 +243,7 @@ const styles = StyleSheet.create({
 		borderBottomColor: '#8E8E8E',
 		borderBottomWidth: StyleSheet.hairlineWidth,
 		height: 45,
+		fontSize: 16,
 	},
 	hasErrors: {
 		borderBottomColor: '#CF6679',

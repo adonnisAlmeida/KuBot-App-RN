@@ -109,9 +109,40 @@ mutation deleteSignatureImageRejection($id: ID!) {
 }
 `
 
+export const DELETE_SIGNATURE_IMAGE_DELIVERED = gql`
+mutation deleteSignatureImageDelivered($id: ID!) {
+	deleteSignatureImageDelivered(id: $id) {
+		errors{
+			field
+			message
+		}
+		orderErrors{
+			field
+			message
+			code
+		}
+	}
+}
+`
+
 export const DELETE_EVIDENCE_IMAGE_REJECTION = gql`
 mutation deleteEvidenceImageRejection($id: ID!) {
 	deleteEvidenceImageRejection(id: $id) {
+		errors{
+			field
+			message
+		}
+		orderErrors{
+			field
+			message
+			code
+		}
+	}
+}
+`
+export const DELETE_PACKAGE_IMAGE_DELIVERED = gql`
+mutation deletePackageImageDelivered($id: ID!) {
+	deletePackageImageDelivered(id: $id) {
 		errors{
 			field
 			message
@@ -355,11 +386,13 @@ export const ORDER_ID = gql`
 				}
 			  }
 			  signatureImagesDelivery {
+				id
 				image {
 				  url
 				}
 			  }
 			  packageImagesDelivery {
+				id
 				image {
 				  url
 				}

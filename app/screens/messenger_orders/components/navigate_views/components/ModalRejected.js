@@ -530,6 +530,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#8E8E8E',
         borderBottomWidth: StyleSheet.hairlineWidth,
         height: 45,
+        fontSize: 16,
     },
     centeredView: {
         flex: 1,

@@ -9,6 +9,7 @@ export default {
 	getCarrierInfo,
 	setCarrierInfoOtro,
 	setToken,
+	setUserAddresses,
 }
 
 function login(user) {
@@ -52,6 +53,14 @@ function logout() {
 
 async function setToken(token) {
 	const data = await AsyncStorage.getItem('@userlogin')
-	await AsyncStorage.setItem('@sellers', JSON.stringify({token: token, ...data}))
+	await AsyncStorage.setItem('@userlogin', JSON.stringify({token: token, ...data}))
 	return token
+}
+
+async function setUserAddresses(addresses) {
+	const data = await AsyncStorage.getItem('@userlogin')
+	let userInfo = JSON.parse(data)
+	userInfo.addresses = addresses
+	await AsyncStorage.setItem('@userlogin', JSON.stringify(userInfo))
+	return addresses
 }

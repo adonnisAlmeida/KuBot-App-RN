@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
         borderRadius: 0,
         borderWidth: 0,
         height: 45,
+        fontSize: 16,
     },
     hasErrors: {
         borderBottomColor: '#CF6679',

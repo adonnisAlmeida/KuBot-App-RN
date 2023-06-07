@@ -48,7 +48,19 @@ const FirstComponent = ({
     }, [carnet])
 
     useEffect(() => {
-        if (containsOnlyNumbers(telefono)) {
+        if (direccion1.length > 0) {
+            setErrors(pre => pre.filter((key) => key != 'direccion1'))
+        }
+    }, [direccion1])
+
+    useEffect(() => {
+        if (direccion2.length > 0) {
+            setErrors(pre => pre.filter((key) => key != 'direccion2'))
+        }
+    }, [direccion2])
+
+    useEffect(() => {
+        if (containsOnlyNumbers(telefono) && telefono.length == 8) {
             setErrors(pre => pre.filter((key) => key != 'telefono'))
         }
     }, [telefono])
@@ -65,7 +77,7 @@ const FirstComponent = ({
                     flex: 1,
                     paddingTop: 20,
                     paddingHorizontal: 20,
-                    marginBottom: 59,
+                    //paddingBottom: 59,
                 }}>
                 <View>
                     <View>
@@ -167,6 +179,7 @@ const FirstComponent = ({
                                 ]}
                                 onValueChange={(itemValue, itemIndex) => {
                                     setProvincia(itemValue)
+                                    setMunicipio(0)
                                 }
                                 }>
                                 {
@@ -218,7 +231,7 @@ const FirstComponent = ({
                     </View>
                     <View style={{ marginTop: 15 }}>
                         <Typography
-                            color={hasErrors('direccion') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}
+                            color={hasErrors('direccion1') || hasErrors('direccion2') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}
                         //style={{ marginVertical: 10 }}
                         >
                             Dirección
@@ -227,22 +240,36 @@ const FirstComponent = ({
                             value={direccion1}
                             style={[
                                 styles.input,
-                                hasErrors('direccion'),
+                                hasErrors('direccion1'),
                                 { color: colors.ON_BACKGROUND },
                             ]}
                             placeholder='Dirección'
                             onChangeText={(text) => setDireccion1(text)}
                         />
+                        {hasErrors('direccion1') ? (
+                            <Typography color={Colors.COLORS.ERROR} style={{ marginVertical: 10 }} >
+                                Este campo es requerido.
+                            </Typography>
+                        ) : (
+                            null
+                        )}
                         <TextInput
                             value={direccion2}
                             style={[
                                 styles.input,
-                                hasErrors('Dirección'),
+                                hasErrors('direccion2'),
                                 { color: colors.ON_BACKGROUND },
                             ]}
                             placeholder='Departamento, suite, edificio, piso, etc'
                             onChangeText={(text) => setDireccion2(text)}
                         />
+                        {hasErrors('direccion2') ? (
+                            <Typography color={Colors.COLORS.ERROR} style={{ marginVertical: 10 }} >
+                                Este campo es requerido.
+                            </Typography>
+                        ) : (
+                            null
+                        )}
                     </View>
                     <View style={{ marginTop: 15 }}>
                         <Typography
@@ -298,7 +325,8 @@ const FirstComponent = ({
                         <View style={{ flexDirection: 'row' }}>
                             <Typography
                                 style={{
-                                    marginTop: 13,
+                                    fontSize: 16,
+                                    marginTop: 11,
                                     paddingRight: 5,
                                     borderBottomColor: '#8E8E8E',
                                     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -318,7 +346,6 @@ const FirstComponent = ({
                                 onChangeText={(text) => setTelefono(text)}
                             />
                         </View>
-
                         {hasErrors('telefono') ? (
                             <Typography color={Colors.COLORS.ERROR} style={{ marginVertical: 10 }} >
                                 El número de teléfono no es válido.
@@ -347,6 +374,9 @@ const FirstComponent = ({
                     </View>
                     <Typography></Typography>
                     <Typography></Typography>
+                    <Typography></Typography>
+                    <Typography></Typography>
+                    <Typography></Typography>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -364,100 +394,16 @@ const styles = StyleSheet.create({
         borderBottomColor: '#8E8E8E',
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
-    login: {
-        flex: 1,
-        padding: 15,
-        marginTop: 30,
-    },
-    title: {
-        fontSize: 30,
-        fontWeight: 'bold',
-    },
     input: {
         borderRadius: 0,
         borderWidth: 0,
         height: 45,
+        fontSize: 16,
         borderBottomColor: '#8E8E8E',
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
     hasErrors: {
         borderBottomColor: '#CF6679',
-    },
-    topButtons: {
-        paddingHorizontal: 25,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%'
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.7)'
-    },
-    selectModal: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        width: 150,
-        height: 100,
-        backgroundColor: '#fff',
-        margin: 42,
-        borderRadius: 12,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowColor: '#000000',
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 8,
-    },
-    modalView: {
-        flex: 1,
-        paddingTop: 20,
-        /* justifyContent: 'center',
-        alignItems: 'center', */
-        backgroundColor: 'rgba(0,0,0,0.7)'
-    },
-    vistaPrevia: {
-        marginTop: 10,
-        //marginHorizontal: 10,
-        height: Dimensions.get('window').height * 0.85,
-        width: '100%'
-        /* marginTop: 10,
-        marginHorizontal: 10,
-        height: 500,
-        resizeMode: 'contain',
-        width: '99%' */
-    },
-    /* buttonEdit: {
-        position: 'absolute',
-        top: 18,
-        right: 0,
-    }, */
-    editIcon: {
-        position: 'absolute',
-        top: 15,
-        //right: 0,
-        left: 15,
-        zIndex: 10
-    },
-    imageContainer: {
-        //flex: 1,
-        //height: 200,
-        marginBottom: 20
-    },
-    imageStyles: {
-        position: 'relative',
-        resizeMode: 'contain',
-        marginTop: 10,
-        alignSelf: 'center',
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        //backgroundColor: 'red'
     },
 })
 

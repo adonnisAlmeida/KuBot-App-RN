@@ -14,7 +14,8 @@ import { useRef } from 'react';
 import { containsOnlyNumbers } from '../../utils/CommonFunctions';
 import { COUNTRIES } from '../../constants/Other';
 import { useDispatch } from 'react-redux';
-import { setCarrierInfo } from '../../redux/userlogin/userLoginSlice';
+import { setCarrierInfo, setUserAddresses } from '../../redux/userlogin/userLoginSlice';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
 const CarrierApplicationScreen = ({ navigation }) => {
 	const [currentPosition, setCurrentPosition] = useState(0)
@@ -29,7 +30,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 	const [apellidos, setApellidos] = useState('')
 	const [pais, setPais] = useState(57)
 	const [provincia, setProvincia] = useState(1)
-	const [municipio, setMunicipio] = useState('')
+	const [municipio, setMunicipio] = useState(0)
 	const [direccion1, setDireccion1] = useState('')
 	const [direccion2, setDireccion2] = useState('')
 	const [codigoPostal, setCodigoPostal] = useState('')
@@ -49,6 +50,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 			setRegisterCarrier(false)
 			console.log("OKOK CARRIER REGISTER ", dataCarrierRegister.carrierRegister.carrier)
 			dispatch(setCarrierInfo(dataCarrierRegister.carrierRegister.carrier))
+			dispatch(setUserAddresses(dataCarrierRegister.carrierRegister.carrier.user.addresses))
 			if (Platform.OS === 'android') {
 				ToastAndroid.show('Solicitud de cuenta de mensajero enviada.', ToastAndroid.LONG)
 			}
@@ -56,8 +58,12 @@ const CarrierApplicationScreen = ({ navigation }) => {
 		},
 		onError: (errorCarrierRegister, dataCarrierRegister) => {
 			setRegisterCarrier(false)
-			console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
-			console.log('ERROR CARRIER REGISTER >> dataCarrierRegister', dataCarrierRegister)
+			if (Platform.OS === 'android') {
+				ToastAndroid.show(`Error realizando solicitud de mensajero. ${errorCarrierRegister.message}`, ToastAndroid.LONG)
+			}
+			//console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
+			console.log('ERROR CARRIER REGISTER >> ', errorCarrierRegister)
+			console.log('ERROR CARRIER REGISTER dataCarrierRegister>> ', dataCarrierRegister)
 		},
 		fetchPolicy: "no-cache"
 	})
@@ -160,7 +166,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 			setErrors(errorData)
 			console.log("TIENE ERRORESSS >> ", errorData)
 		} else {
-			let carrierApplication = {
+			/* let carrierApplication = {
 				piPhotoFrontal: piPhotoFrontalFile,
 				piPhotoBack: piPhotoBackFile,
 				bustPhoto: bustPhotoFile,
@@ -170,16 +176,15 @@ const CarrierApplicationScreen = ({ navigation }) => {
 					companyName: empresa,
 					streetAddress1: direccion1,
 					streetAddress2: direccion2,
-					city: provincia,
-					cityArea: municipio,
+					city: provinciasList[provincia].municipios[municipio].node.name,
+					cityArea: provinciasList[provincia].name,
 					postalCode: codigoPostal,
 					country: COUNTRIES[pais].code,
 					countryArea: municipio,
-					phone: telefono == ''? '': COUNTRIES[codigoTelefono].mobileCode + telefono,
+					phone: telefono == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + telefono,
 				}
-			}
+			} */
 			setRegisterCarrier(true)
-			console.log("Ejecutar consulta con : >>> ", carrierApplication)
 			carrierRegister({
 				variables: {
 					input: {
@@ -192,12 +197,12 @@ const CarrierApplicationScreen = ({ navigation }) => {
 							companyName: empresa,
 							streetAddress1: direccion1,
 							streetAddress2: direccion2,
-							city: provincia,
-							cityArea: municipio,
+							city: provinciasList[provincia].municipios[municipio].node.name,
+							cityArea: provinciasList[provincia].name,
 							postalCode: codigoPostal,
 							country: COUNTRIES[pais].code,
 							countryArea: municipio,
-							phone: telefono,
+							phone: telefono == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + telefono,
 						}
 					}
 				}
@@ -214,13 +219,15 @@ const CarrierApplicationScreen = ({ navigation }) => {
 				if (!containsOnlyNumbers(carnet) || carnet.length != 11) {
 					error_data.push('carnet')
 				}
-				/* if (!containsOnlyNumbers(telefono)) {
-					error_data.push('telefono')
-				} */
+				if (telefono != '') {
+					if (!containsOnlyNumbers(telefono) || telefono.length != 8) {
+						error_data.push('telefono')
+					}
+				}
 
-				/* if (nombre.length == 0) error_data.push('firstName')
-				if (nombre.length == 0) error_data.push('firstName')
-				if (apellidos.length == 0) error_data.push('lastName') */
+				if (direccion1.length == 0) error_data.push('direccion1')
+				if (direccion2.length == 0) error_data.push('direccion2')
+				//if (apellidos.length == 0) error_data.push('lastName')
 				if (error_data.length > 0) {
 					setErrors(error_data)
 					console.log("error_data", error_data)
@@ -235,14 +242,20 @@ const CarrierApplicationScreen = ({ navigation }) => {
 
 	return (
 		<View style={{ flex: 1 }}>
-			<View style={{ marginTop: 10, paddingHorizontal: 10 }}>
-				<StepIndicator
-					stepCount={2}
-					customStyles={customStyles}
-					currentPosition={currentPosition}
-					labels={labels}
-				/>
-			</View>
+			{/* <View style={{ overflow: 'hidden', paddingBottom: 5 }}> */}
+				<View
+					style={{
+						paddingTop: 10,
+						paddingHorizontal: 10,
+					}}>
+					<StepIndicator
+						stepCount={2}
+						customStyles={customStyles}
+						currentPosition={currentPosition}
+						labels={labels}
+					/>
+				</View>
+			{/* </View> */}
 			{currentPosition == 0 ? (
 				<FirstComponent
 					nombre={nombre}
@@ -293,7 +306,78 @@ const CarrierApplicationScreen = ({ navigation }) => {
 					setErrors={setErrors}
 				/>
 			)}
-			<View style={{
+			{
+				currentPosition == 0 ? (
+					<TouchableOpacity
+						onPress={() => makeNext()}
+						style={{
+							position: 'absolute',
+							bottom: 12,
+							right: 16,
+							padding: 8,
+							paddingHorizontal: 9,
+							borderRadius: 100,
+							backgroundColor: Colors.COLORS.WEB_BUTTON,
+						}}
+					>
+						<Ionicons
+							name="arrow-forward"
+							color='#fff'
+							size={30}
+						/>
+					</TouchableOpacity>
+				) : (
+					<>
+						<TouchableOpacity
+							onPress={() => setCurrentPosition(currentPosition - 1)}
+							style={{
+								position: 'absolute',
+								bottom: 12,
+								left: 16,
+								padding: 8,
+								paddingHorizontal: 9,
+								borderRadius: 100,
+								backgroundColor: Colors.COLORS.WEB_BUTTON,
+							}}
+						>
+							<Ionicons
+								name="arrow-back"
+								color='#fff'
+								size={30}
+							/>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							disabled={registerCarrier}
+							onPress={() => makeCarrier()}
+							style={{
+								position: 'absolute',
+								bottom: 12,
+								right: 16,
+								padding: 11,
+								paddingHorizontal: 12,
+								borderRadius: 100,
+								backgroundColor: Colors.COLORS.PRIMARY,
+
+							}}
+						>
+							{registerCarrier ? (
+								<ActivityIndicator style={{ padding: 4 }} color={'#fff'}></ActivityIndicator>
+							) : (
+								<Ionicons
+									//style={{backgroundColor: 'red'}}
+									name="send"
+									color='#fff'
+									size={25}
+								/>
+							)}
+
+						</TouchableOpacity>
+					</>
+				)
+			}
+			{/* <View style={{
+				backgroundColor: 'red',
 				position: 'absolute',
 				bottom: 0,
 				left: 0,
@@ -303,19 +387,19 @@ const CarrierApplicationScreen = ({ navigation }) => {
 				paddingVertical: 10,
 				paddingHorizontal: 15,
 			}}>
-				{currentPosition == 1 ? (<TouchableOpacity
-					onPress={() => setCurrentPosition(currentPosition - 1)}
-					style={{
-						padding: 10,
-						borderRadius: 6,
-						backgroundColor: 'rgba(0,0,0,0.1)',
-
-					}}
-				>
-					<Typography color={'rgba(0,0,0,0.7)'} >
-						Anterior
-					</Typography>
-				</TouchableOpacity>) : (null)}
+				{currentPosition == 1 ? (
+					<TouchableOpacity
+						onPress={() => setCurrentPosition(currentPosition - 1)}
+						style={{
+							padding: 10,
+							borderRadius: 6,
+							backgroundColor: 'rgba(0,0,0,0.1)',
+						}}
+					>
+						<Typography color={'rgba(0,0,0,0.7)'} >
+							Anterior
+						</Typography>
+					</TouchableOpacity>) : (null)}
 				<Typography></Typography>
 				{currentPosition == 1 ? (
 					<TouchableOpacity
@@ -350,33 +434,12 @@ const CarrierApplicationScreen = ({ navigation }) => {
 						</Typography>
 					</TouchableOpacity>
 				)}
-			</View>
+			</View> */}
 		</View >
 	)
 }
 
 const styles = StyleSheet.create({
-	button: {
-		padding: 15,
-		borderRadius: 100,
-		elevation: 5,
-		position: 'absolute',
-		bottom: 90,
-		right: 27,
-		backgroundColor: Colors.COLORS.PRIMARY
-	},
-	login: {
-		flex: 1,
-		//padding: 15,
-	},
-	/* login: {
-		flex: 1,
-		padding: 40,
-	}, */
-	title: {
-		fontSize: 30,
-		fontWeight: 'bold',
-	},
 	input: {
 		borderRadius: 0,
 		borderWidth: 0,

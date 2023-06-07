@@ -5,6 +5,7 @@ import { useTheme } from '@react-navigation/native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Colors from '../../../constants/Colors'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -150,7 +151,7 @@ const SecondComponent = ({
                 flex: 1,
                 paddingTop: 20,
                 paddingHorizontal: 20,
-                marginBottom: 59,
+                //marginBottom: 59,
             }}>
             <View>
                 <View style={styles.imageRow}>
@@ -158,25 +159,26 @@ const SecondComponent = ({
                     <View style={styles.imageContainer}>
                         <View style={styles.editIcon}>
                             <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
-                                <FontAwesome
-                                    style={styles.headerRight}
-                                    name="edit"
+                                <MaterialIcons
+                                    name="add-photo-alternate"
                                     color={colors.ON_SURFACE}
-                                    size={22}
+                                    size={25}
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Image
-                            defaultSource={piPhotoBack}
-                            backgroundColor='white'
-                            source={piPhotoFrontal}
-                            imageStyle={styles.imageStyles}
-                            indicator={Progress.Pie}
-                            indicatorProps={{
-                                color: colors.PRIMARY,
-                                borderWidth: 0,
-                            }}
-                        />
+                        <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
+                            <Image
+                                defaultSource={piPhotoBack}
+                                backgroundColor='white'
+                                source={piPhotoFrontal}
+                                imageStyle={styles.imageStyles}
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.imageRow}>
@@ -184,24 +186,25 @@ const SecondComponent = ({
                     <View style={styles.imageContainer}>
                         <View style={styles.editIcon}>
                             <TouchableOpacity onPress={() => piPhotoBackEdit()}>
-                                <FontAwesome
-                                    style={styles.headerRight}
-                                    name="edit"
+                                <MaterialIcons
+                                    name="add-photo-alternate"
                                     color={colors.ON_SURFACE}
-                                    size={22}
+                                    size={25}
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Image
-                            indicator={Progress.Pie}
-                            indicatorProps={{
-                                color: colors.PRIMARY,
-                                borderWidth: 0,
-                            }}
-                            backgroundColor='white'
-                            source={piPhotoBack}
-                            imageStyle={styles.imageStyles}
-                        />
+                        <TouchableOpacity onPress={() => piPhotoBackEdit()}>
+                            <Image
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
+                                backgroundColor='white'
+                                source={piPhotoBack}
+                                imageStyle={styles.imageStyles}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.imageRow}>
@@ -209,109 +212,106 @@ const SecondComponent = ({
                     <View style={styles.imageContainer}>
                         <View style={styles.editIcon}>
                             <TouchableOpacity onPress={() => bustPhotoEdit()}>
-                                <FontAwesome
-                                    style={styles.headerRight}
-                                    name="edit"
+                                <MaterialIcons
+                                    name="add-photo-alternate"
                                     color={colors.ON_SURFACE}
-                                    size={22}
+                                    size={25}
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Image
-                            indicator={Progress.Pie}
-                            indicatorProps={{
-                                color: colors.PRIMARY,
-                                borderWidth: 0,
-                            }}
-                            backgroundColor='white'
-                            source={bustPhoto}
-                            imageStyle={styles.imageStyles}
-                        />
+                        <TouchableOpacity onPress={() => bustPhotoEdit()}>
+                            <Image
+                                indicator={Progress.Pie}
+                                indicatorProps={{
+                                    color: colors.PRIMARY,
+                                    borderWidth: 0,
+                                }}
+                                backgroundColor='white'
+                                source={bustPhoto}
+                                imageStyle={styles.imageStyles}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
-                <View style={styles.imageRow}>
-                    {/* <CheckBox
-                    value={terminos}
-                    onValueChange={setTerminos}
-                    //style={styles.checkbox}
-                /> */}
-                </View>
-                <Modal
-                    visible={confirmModal}
-                    transparent={true}
-                    animationType="fade"
-                    onRequestClose={() => setConfirmModal(false)}
-                >
+                <Typography />
+                <Typography />
+                <Typography />
+            </View>
+            <Modal
+                visible={confirmModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setConfirmModal(false)}
+            >
 
-                    <View
-                        style={styles.modalView}
-                    //onPressOut={() => setConfirmModal(false)}
-                    >
-                        <ImageBackground
-                            resizeMode='contain'
-                            style={styles.vistaPrevia}
-                            source={vistaPrevia}
-                        />
-                        <View style={styles.topButtons}>
-                            <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
+                <View
+                    style={styles.modalView}
+                //onPressOut={() => setConfirmModal(false)}
+                >
+                    <ImageBackground
+                        resizeMode='contain'
+                        style={styles.vistaPrevia}
+                        source={vistaPrevia}
+                    />
+                    <View style={styles.topButtons}>
+                        <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
+                        >
+                            <Ionicons
+                                name='ios-close-circle-outline'
+                                size={40}
+                                color='rgba(255,255,255,0.9)'
+                            />
+                        </TouchableOpacity>
+                        {activity ? (
+                            <ActivityIndicator
+                                //style={styles.aIndicator}
+                                color={Colors.COLORS.SUCCESS}
+                                size='large'
+                            />
+                        ) : (
+                            <TouchableOpacity style={styles.okIcon} onPress={() => sendImage()}
                             >
                                 <Ionicons
-                                    name='ios-close-circle-outline'
+                                    name='ios-checkmark-circle-outline'
                                     size={40}
-                                    color='rgba(255,255,255,0.9)'
+                                    color={Colors.COLORS.SUCCESS}
                                 />
                             </TouchableOpacity>
-                            {activity ? (
-                                <ActivityIndicator
-                                    //style={styles.aIndicator}
-                                    color={Colors.COLORS.SUCCESS}
-                                    size='large'
-                                />
-                            ) : (
-                                <TouchableOpacity style={styles.okIcon} onPress={() => sendImage()}
-                                >
-                                    <Ionicons
-                                        name='ios-checkmark-circle-outline'
-                                        size={40}
-                                        color={Colors.COLORS.SUCCESS}
-                                    />
-                                </TouchableOpacity>
-                            )}
+                        )}
 
-                        </View>
                     </View>
-                </Modal>
-                <Modal
-                    visible={showModal}
-                    transparent={true}
-                    animationType="fade"
-                    onRequestClose={() => setShowModal(false)}
+                </View>
+            </Modal>
+            <Modal
+                visible={showModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowModal(false)}
+            >
+                <TouchableOpacity
+                    style={styles.centeredView}
+                    onPressOut={() => setShowModal(false)}
                 >
-                    <TouchableOpacity
-                        style={styles.centeredView}
-                        onPressOut={() => setShowModal(false)}
-                    >
-                        <TouchableWithoutFeedback>
-                            <View style={styles.selectModal}>
-                                <TouchableOpacity onPress={() => openCamera()}>
-                                    <FontAwesome
-                                        name="camera-retro"
-                                        color={colors.PRIMARY}
-                                        size={35}
-                                    />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => openGalery()}>
-                                    <FontAwesome
-                                        name="photo"
-                                        color={colors.PRIMARY}
-                                        size={35}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </TouchableOpacity>
-                </Modal>
-            </View>
+                    <TouchableWithoutFeedback>
+                        <View style={styles.selectModal}>
+                            <TouchableOpacity onPress={() => openCamera()}>
+                                <FontAwesome
+                                    name="camera-retro"
+                                    color={colors.PRIMARY}
+                                    size={35}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => openGalery()}>
+                                <FontAwesome
+                                    name="photo"
+                                    color={colors.PRIMARY}
+                                    size={35}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </TouchableOpacity>
+            </Modal>
         </ScrollView>
     )
 }
@@ -319,11 +319,6 @@ const SecondComponent = ({
 const styles = StyleSheet.create({
     imageRow: {
         marginVertical: 8,
-    },
-    login: {
-        flex: 1,
-        padding: 15,
-        marginTop: 30,
     },
     topButtons: {
         paddingHorizontal: 25,

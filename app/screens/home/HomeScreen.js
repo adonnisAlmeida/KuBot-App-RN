@@ -137,7 +137,6 @@ export default function HomeScreen({ navigation }) {
 	const carrierApplication = () => {
 		//console.log("carrierApplication >>", localCarreirInfo.kyc)
 		if (loading) {
-			console.log("Loading")
 			return null
 		} else {
 			if (Object.keys(localCarreirInfo).length == 0) {// elcarrier no ha terminado el registro

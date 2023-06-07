@@ -16,6 +16,7 @@ import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../..
 import ModalRejected from './components/ModalRejected'
 import ModalDelivered from './components/ModalDelivered'
 import AwesomeAlert from 'react-native-awesome-alerts'
+import PackageInfo from './components/PackageInfo'
 
 moment.locale('es')
 
@@ -29,6 +30,7 @@ const DetailsNavView = ({ navigation, route }) => {
     const [showModalRejected, setShowModalRejected] = useState(false)
     const [showModalDelivered, setShowModalDelivered] = useState(false)
     const [showAlertAw, setShowAlert] = useState(false)
+    const [pickedDate, setPickedDate] = useState('')
     let hasNote = false
     const { colors } = useTheme()
 
@@ -131,6 +133,10 @@ const DetailsNavView = ({ navigation, route }) => {
                     ])
                     break;
                 case 'PICKED_UP_CARRIER':
+                    data.order.events.map((event) => {
+                        if (event.type == 'PICKED_UP_CARRIER')
+                            setPickedDate(event.date)
+                    })
                     setGifSource(require('../../../../../assets/product.gif'))
                     setActionsButton([
                         {
@@ -150,6 +156,10 @@ const DetailsNavView = ({ navigation, route }) => {
                     ])
                     break;
                 case 'IN_TRANSIT':
+                    data.order.events.map((event) => {
+                        if (event.type == 'PICKED_UP_CARRIER')
+                            setPickedDate(event.date)
+                    })
                     setGifSource(require('../../../../../assets/delivery.gif'))
                     setActionsButton([
                         {
@@ -362,6 +372,13 @@ const DetailsNavView = ({ navigation, route }) => {
                 envio={data}
                 setShippingStatus={setShippingStatus}
             />
+            {
+                ((data.order.shippingStatus == 'PICKED_UP_CARRIER'
+                    || data.order.shippingStatus == 'IN_TRANSIT')
+                    && pickedDate != '') ? (
+                    <PackageInfo pickedDate={pickedDate} />
+                ) : (null)
+            }
             <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

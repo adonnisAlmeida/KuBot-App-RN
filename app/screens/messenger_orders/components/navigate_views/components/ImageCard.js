@@ -7,7 +7,7 @@ import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import { Typography } from '../../../../../components'
 import { useMutation } from '@apollo/client'
-import { DELETE_EVIDENCE_IMAGE_REJECTION, DELETE_SIGNATURE_IMAGE_REJECTION } from '../../../../../graphql/orders'
+import { DELETE_EVIDENCE_IMAGE_REJECTION, DELETE_PACKAGE_IMAGE_DELIVERED, DELETE_SIGNATURE_IMAGE_DELIVERED, DELETE_SIGNATURE_IMAGE_REJECTION } from '../../../../../graphql/orders'
 
 const ImageCard = ({ photo, setImages, mutation }) => {
     const [preViewModal, setPreViewModal] = useState(false)
@@ -83,6 +83,72 @@ const ImageCard = ({ photo, setImages, mutation }) => {
         }
     })
 
+    const [signatureDeliveredImageDelete, { loadingDelivered, errorDelivered, dataDelivered }] = useMutation(DELETE_SIGNATURE_IMAGE_DELIVERED, {
+        onCompleted: (dataDelivered) => {
+            if (dataDelivered.deleteSignatureImageDelivered.errors.length != 0) {
+                console.log("Errores", dataDelivered.deleteSignatureImageDelivered.errors)
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Error eliminado imagen.', ToastAndroid.LONG)
+                }
+                setErrorDeleting(true)
+                setTimeout(() => {
+                    setErrorDeleting(false)
+                }, 2000);
+            } else {
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Imagen eliminada correctamente.', ToastAndroid.LONG)
+                }
+                setImages((prev) => prev.filter((temp) => temp.id != photo.id))
+                setDeletingImage(false)
+            }
+        },
+        onError: (errorDelivered, dataDelivered) => {
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Ha ocurrido un error eliminando la imagen de firma.', ToastAndroid.LONG)
+            }
+            console.log('Error eliminando imagen >> ', JSON.stringify(errorDelivered, null, 2))
+            console.log('Error eliminando imagen dataDelivered >> ', dataDelivered)
+            setDeletingImage(false)
+            setErrorDeleting(true)
+            setTimeout(() => {
+                setErrorDeleting(false)
+            }, 2000);
+        }
+    })
+
+    const [packageDeliveredImageDelete, { loadingpackage, errorpackage, datapackage }] = useMutation(DELETE_PACKAGE_IMAGE_DELIVERED, {
+        onCompleted: (dataPackage) => {
+            if (dataPackage.deletePackageImageDelivered.errors.length != 0) {
+                console.log("Errores", dataPackage.deletePackageImageDelivered.errors)
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Error eliminado imagen.', ToastAndroid.LONG)
+                }
+                setErrorDeleting(true)
+                setTimeout(() => {
+                    setErrorDeleting(false)
+                }, 2000);
+            } else {
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Imagen eliminada correctamente.', ToastAndroid.LONG)
+                }
+                setImages((prev) => prev.filter((temp) => temp.id != photo.id))
+                setDeletingImage(false)
+            }
+        },
+        onError: (errorPackage, dataPackage) => {
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Ha ocurrido un error eliminando la imagen de evidencia.', ToastAndroid.LONG)
+            }
+            console.log('Error subiendo imagen >> ', errorPackage)
+            console.log('Error subiendo imagen dataEvidence >> ', dataPackage)
+            setDeletingImage(false)
+            setErrorDeleting(true)
+            setTimeout(() => {
+                setErrorDeleting(false)
+            }, 2000);
+        }
+    })
+
     const deleteImage = () => {
         setPreViewModal(false)
         setDeletingImage(true)
@@ -92,6 +158,12 @@ const ImageCard = ({ photo, setImages, mutation }) => {
                 break;
             case 'EVIDENCE_REJECTED':
                 evidenceRejectionImageDelete({ variables: { id: photo.id } })
+                break;
+            case 'SIGNATURE_DELIVERED':
+                signatureDeliveredImageDelete({ variables: { id: photo.id } })
+                break;
+            case 'PACKAGE_DELIVERED':
+                packageDeliveredImageDelete({ variables: { id: photo.id } })
                 break;
         
             default:

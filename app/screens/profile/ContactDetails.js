@@ -1,8 +1,8 @@
 import { StyleSheet, ScrollView, View, TouchableOpacity, Dimensions, Modal, ToastAndroid, Platform, TouchableWithoutFeedback, ImageBackground, TextInput, ActivityIndicator } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import React, { useRef, useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { user } from '../../redux/userlogin/userLoginSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUserAddresses, user } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
 import { Button, Typography } from '../../components'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -15,11 +15,12 @@ import ProfileUpdate from './components/ProfileUpdate'
 const ContactDetails = ({ navigation }) => {
     const user_state = useSelector(user)
     const [userInfo, setUserInfo] = useState(user_state)
+    const dispatch = useDispatch()
 
     const { colors } = useTheme()
     const [avatar, setAvatar] = useState()
 
-    //console.log(user_state)
+    //console.log("User state desde contact Detaisl View >>> ", user_state)
     //console.log("userInfo.avatar", userInfo.avatar)
 
     useEffect(() => {
@@ -34,25 +35,11 @@ const ContactDetails = ({ navigation }) => {
             : require('../../../assets/user_avatar.png'))
     }, [])
 
-    const handleEditAddress = (address) => {
-        navigation.navigate('EditAddressScreen', {
-            address: address
-        })
-    }
-
-    const showModalName = () => {
-        setEditNameModal(true)
-        setTimeout(() => {
-            refNameInput.current.focus()
-        }, 200);
-        //refNameInput.current.focus()
-    }
-
     return (
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
             {alert}
             <View style={[styles.card, { backgroundColor: colors.SURFACE, marginBottom: 30 }]}>
-                <ProfilePhoto avatar={avatar} setAvatar={setAvatar} />
+                <ProfilePhoto avatar={avatar} setAvatar={() => setAvatar()} />
                 <ProfileUpdate />
             </View>
             {/* <View style={styles.headerContainer}>
@@ -82,7 +69,7 @@ const ContactDetails = ({ navigation }) => {
                                     null
                                 )}
                             </View>
-                            <View style={[styles.cardRow, {marginBottom: 5}]}>
+                            <View style={[styles.cardRow, { marginBottom: 5 }]}>
                                 <Typography style={{
                                     color: Colors.COLORS.ON_SURFACE,
                                     fontWeight: 'bold', marginRight: 5,
@@ -96,6 +83,21 @@ const ContactDetails = ({ navigation }) => {
                                     {address.lastName}
                                 </Typography>
                             </View>
+                            {address.companyName ? (
+                                <View style={styles.cardRow}>
+                                    <Typography bold style={{
+                                        color: Colors.COLORS.ON_SURFACE,
+                                        fontSize: 15,
+                                        fontWeight: 'bold',
+                                        marginRight: 5,
+                                    }}>
+                                        Empresa:
+                                    </Typography>
+                                    <Typography style={{ color: colors.ON_SURFACE }}>
+                                        {address.companyName}
+                                    </Typography>
+                                </View>
+                            ) : (null)}
                             <View style={styles.cardRow}>
                                 <Typography bold style={{
                                     color: Colors.COLORS.ON_SURFACE,
@@ -109,6 +111,21 @@ const ContactDetails = ({ navigation }) => {
                                     {address.streetAddress1}
                                 </Typography>
                             </View>
+                            {address.streetAddress2 ? (
+                                <View style={styles.cardRow}>
+                                    <Typography bold style={{
+                                        color: Colors.COLORS.ON_SURFACE,
+                                        fontSize: 15,
+                                        fontWeight: 'bold',
+                                        marginRight: 5,
+                                    }}>
+                                        Edificio:
+                                    </Typography>
+                                    <Typography style={{ color: colors.ON_SURFACE }}>
+                                        {address.streetAddress2}
+                                    </Typography>
+                                </View>
+                            ) : (null)}
                             <View style={styles.cardRow}>
                                 <Typography bold style={{
                                     color: Colors.COLORS.ON_SURFACE,
@@ -135,19 +152,6 @@ const ContactDetails = ({ navigation }) => {
                                     {address.countryArea}
                                 </Typography>
                             </View>
-                            <View style={{ flexDirection: 'row', marginTop: 3 }}>
-                                <Typography bold style={{
-                                    color: Colors.COLORS.ON_SURFACE,
-                                    fontSize: 15,
-                                    fontWeight: 'bold',
-                                    marginRight: 5,
-                                }}>
-                                    País:
-                                </Typography>
-                                <Typography color={colors.ON_SURFACE}>
-                                    {address.country.country}
-                                </Typography>
-                            </View>
                             <View style={styles.cardRow}>
                                 <Typography bold style={{
                                     color: Colors.COLORS.ON_SURFACE,
@@ -161,6 +165,34 @@ const ContactDetails = ({ navigation }) => {
                                     {address.postalCode}
                                 </Typography>
                             </View>
+                            <View style={{ flexDirection: 'row', marginTop: 3 }}>
+                                <Typography bold style={{
+                                    color: Colors.COLORS.ON_SURFACE,
+                                    fontSize: 15,
+                                    fontWeight: 'bold',
+                                    marginRight: 5,
+                                }}>
+                                    País:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {address.country.country}
+                                </Typography>
+                            </View>
+                            {address.phone ? (
+                                <View style={{ flexDirection: 'row', marginTop: 3 }}>
+                                    <Typography bold style={{
+                                        color: Colors.COLORS.ON_SURFACE,
+                                        fontSize: 15,
+                                        fontWeight: 'bold',
+                                        marginRight: 5,
+                                    }}>
+                                        Teléfono:
+                                    </Typography>
+                                    <Typography color={colors.ON_SURFACE}>
+                                        {address.phone}
+                                    </Typography>
+                                </View>
+                            ) : (null)}
                             {/* <View style={styles.addressEdit}>
                                 <TouchableOpacity>
                                     <FontAwesome

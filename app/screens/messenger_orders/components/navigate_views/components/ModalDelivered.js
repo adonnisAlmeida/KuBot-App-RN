@@ -14,6 +14,7 @@ import { useMutation } from '@apollo/client'
 import { useDispatch } from 'react-redux'
 import { ORDER_DELIVERED, PACKAGE_IMAGES, SIGNATURE_IMAGES } from '../../../../../graphql/orders'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../../redux/messenger_orders/messenger_ordersSlice'
+import ImageCard from './ImageCard'
 
 const ModalDelivered = ({
     showModalDelivered,
@@ -31,6 +32,8 @@ const ModalDelivered = ({
     const [actualizando, setActualizando] = useState(false)
     const [aborterRefSignature, setAborterRefSignature] = useState(new AbortController());
     const [aborterRefPackage, setAborterRefPackage] = useState(new AbortController());
+    const [signatureImages, setSignatureImages] = useState(envio.order.signatureImagesDelivery)
+    const [packageImages, setPackageImages] = useState(envio.order.packageImagesDelivery)
 
     const dispatch = useDispatch()
 
@@ -67,10 +70,11 @@ const ModalDelivered = ({
         }
     })
 
-    const [signatureImages, { loadingSignature, errorSignature, dataSignature }] = useMutation(SIGNATURE_IMAGES, {
+    const [signatureDeliveredImages, { loadingSignature, errorSignature, dataSignature }] = useMutation(SIGNATURE_IMAGES, {
         onCompleted: (dataSignature) => {
             //console.log("CREOO LA IMAGEN >> ", dataSignature)
-            envio.order.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
+            //envio.order.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
+            setSignatureImages(dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery)
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
             }
@@ -98,10 +102,11 @@ const ModalDelivered = ({
         },
     })
 
-    const [packageImages, { loadingPackage, errorPackage, dataPackage }] = useMutation(PACKAGE_IMAGES, {
+    const [packageDeliveredImages, { loadingPackage, errorPackage, dataPackage }] = useMutation(PACKAGE_IMAGES, {
         onCompleted: (dataPackage) => {
             //console.log("CREOO LA IMAGEN >> ", dataPackage)
-            envio.order.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
+            //envio.order.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
+            setPackageImages(dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery)
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de paquete correctamente.', ToastAndroid.LONG)
             }
@@ -196,12 +201,12 @@ const ModalDelivered = ({
         setUploadingImage(true)
         switch (modalTarget) {
             case 'SIGNATURE':
-                signatureImages({
+                signatureDeliveredImages({
                     variables: { id: envio.order.id, images: imageURI }
                 })
                 break;
             case 'PACKAGE':
-                packageImages({
+                packageDeliveredImages({
                     variables: { id: envio.order.id, images: imageURI }
                 })
                 break;
@@ -362,19 +367,14 @@ const ModalDelivered = ({
                                 >
                                     <View style={{ flexDirection: "row", marginTop: 5 }}>
                                         {envio.order.signatureImagesDelivery ? (
-                                            envio.order.signatureImagesDelivery.length > 0 ? (
-                                                envio.order.signatureImagesDelivery.map((photo, index) => (
-                                                    <View key={index} style={{ marginRight: 8 }}>
-                                                        <Image
-                                                            source={{ uri: photo.image.url, }}
-                                                            indicator={Progress.Pie}
-                                                            indicatorProps={{
-                                                                color: Colors.COLORS.PRIMARY,
-                                                                borderWidth: 0,
-                                                            }}
-                                                            imageStyle={{ height: 90, width: 90, position: 'relative', resizeMode: 'contain' }}
-                                                        />
-                                                    </View>
+                                            signatureImages?.length > 0 ? (
+                                                signatureImages.map((photo, index) => (
+                                                    <ImageCard
+                                                        key={index}
+                                                        photo={photo}
+                                                        setImages={setSignatureImages}
+                                                        mutation='SIGNATURE_DELIVERED'
+                                                    />
                                                 ))
                                             ) : (
                                                 <Typography>
@@ -408,19 +408,14 @@ const ModalDelivered = ({
                                 >
                                     <View style={{ flexDirection: "row", marginTop: 5 }}>
                                         {envio.order.packageImagesDelivery ? (
-                                            envio.order.packageImagesDelivery.length > 0 ? (
-                                                envio.order.packageImagesDelivery.map((photo, index) => (
-                                                    <View key={index} style={{ marginRight: 8 }}>
-                                                        <Image
-                                                            source={{ uri: photo.image.url, }}
-                                                            indicator={Progress.Pie}
-                                                            indicatorProps={{
-                                                                color: Colors.COLORS.PRIMARY,
-                                                                borderWidth: 0,
-                                                            }}
-                                                            imageStyle={{ height: 90, width: 90, position: 'relative', resizeMode: 'contain' }}
-                                                        />
-                                                    </View>
+                                            packageImages.length > 0 ? (
+                                                packageImages.map((photo, index) => (
+                                                    <ImageCard
+                                                        key={index}
+                                                        photo={photo}
+                                                        setImages={setPackageImages}
+                                                        mutation='PACKAGE_DELIVERED'
+                                                    />
                                                 ))
                                             ) : (
                                                 <Typography>
@@ -500,6 +495,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#8E8E8E',
         borderBottomWidth: StyleSheet.hairlineWidth,
         height: 45,
+        fontSize: 16,
     },
     centeredView: {
         flex: 1,

@@ -72,6 +72,26 @@ export const CARRIER_REGISTER = gql`
 				code
 			}
 			carrier{
+				user{
+					addresses{
+						id
+						companyName
+						isDefaultBillingAddress
+						isDefaultShippingAddress
+						streetAddress1
+						firstName
+						lastName
+						streetAddress2
+						city
+						cityArea
+						postalCode
+						country{
+						  country
+						}
+						countryArea
+						phone
+					}
+				}
 				id
 				kyc
 				isActive
