@@ -23,6 +23,7 @@ const COLORS = {
 	WEB_START_OFF: '#d3d1d0',
 	WEB_LINK: '#039BE5',
 	WEB_BUTTON: '#26A5D4',
+	WEB_RED: '#ee4f55',
 }
 
 const ORDER_STATUS = {

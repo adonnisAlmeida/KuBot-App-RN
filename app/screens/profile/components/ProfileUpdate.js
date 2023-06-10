@@ -153,50 +153,48 @@ const ProfileUpdate = () => {
                         refNameInput.current.blur()
                     }}
                 >
-                    <TouchableWithoutFeedback /* style={styles.modalContent} */>
-                        <View keyboardShouldPersistTaps={'handled'} style={styles.modalContent}>
-                            <Typography color={colors.ON_SURFACE}>Nombre</Typography>
-                            <TextInput
-                                selectTextOnFocus
-                                ref={refNameInput}
-                                style={[styles.textInput, , { marginBottom: 20 }]}
-                                placeholder='Nombre'
-                                onChangeText={setFirstName}
-                                //onSubmitEditing={sendMessage}
-                                value={firstName}
-                            />
-                            <Typography color={colors.ON_SURFACE}>Apellidos</Typography>
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder='Apellidos'
-                                onChangeText={setLastName}
-                                //onSubmitEditing={sendMessage}
-                                value={lastName}
-                            />
-                            <View style={styles.modalButtons}>
-                                <TouchableOpacity
-                                    style={{ paddingVertical: 5, paddingHorizontal: 8, marginRight: 40 }}
-                                    onPressOut={() => {
-                                        setEditNameModal(false)
-                                        refNameInput.current.blur()
-                                    }}
-                                >
-                                    <Typography bold color={Colors.COLORS.PRIMARY}>Cancelar</Typography>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleProfileEdit()}
-                                    style={{ paddingVertical: 5, paddingHorizontal: 8 }}
-                                >
-                                    {actualizando ? (
-                                        <ActivityIndicator color={Colors.COLORS.PRIMARY} />
-                                    ) : (
-                                        <Typography bold color={Colors.COLORS.PRIMARY}>Guardar</Typography>
-                                    )}
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
                 </TouchableOpacity>
+                <View keyboardShouldPersistTaps={'handled'} style={styles.modalContent}>
+                    <Typography color={colors.ON_SURFACE}>Nombre</Typography>
+                    <TextInput
+                        selectTextOnFocus
+                        ref={refNameInput}
+                        style={[styles.textInput, , { marginBottom: 20 }]}
+                        placeholder='Nombre'
+                        onChangeText={setFirstName}
+                        //onSubmitEditing={sendMessage}
+                        value={firstName}
+                    />
+                    <Typography color={colors.ON_SURFACE}>Apellidos</Typography>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder='Apellidos'
+                        onChangeText={setLastName}
+                        //onSubmitEditing={sendMessage}
+                        value={lastName}
+                    />
+                    <View style={styles.modalButtons}>
+                        <TouchableOpacity
+                            style={{ paddingVertical: 5, paddingHorizontal: 8, marginRight: 40 }}
+                            onPressOut={() => {
+                                setEditNameModal(false)
+                                refNameInput.current.blur()
+                            }}
+                        >
+                            <Typography bold color={Colors.COLORS.PRIMARY}>Cancelar</Typography>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleProfileEdit()}
+                            style={{ paddingVertical: 5, paddingHorizontal: 8 }}
+                        >
+                            {actualizando ? (
+                                <ActivityIndicator color={Colors.COLORS.PRIMARY} />
+                            ) : (
+                                <Typography bold color={Colors.COLORS.PRIMARY}>Guardar</Typography>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </Modal>
         </>
     )

@@ -108,6 +108,7 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 					}
 				})
 				setProvinciasList(temporal)
+				dispatch(setAllDeliveryAreas(temporal))
 			}
 			/* let ultimoStorage = deliveryAreasStore.allDeliveryAreas.slice(-1);
 			let primeroConsulta = groupedProvinces[0]

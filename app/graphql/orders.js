@@ -417,11 +417,29 @@ export const ORDER_ID = gql`
 				  }
 				}
 			  }
+			  defaultPickupAddress{
+				phone
+				id
+				streetAddress1
+				streetAddress2
+				city
+				cityArea
+				countryArea
+				firstName
+				lastName
+				companyName
+				postalCode
+				country{
+				  country
+				  code
+				}
+			  }
 			shippingAddress{
 				phone
 				id
 				streetAddress1
 				streetAddress2
+				countryArea
 				city
 				cityArea
 				firstName

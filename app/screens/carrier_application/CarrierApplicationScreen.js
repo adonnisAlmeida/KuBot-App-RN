@@ -16,6 +16,7 @@ import { COUNTRIES } from '../../constants/Other';
 import { useDispatch } from 'react-redux';
 import { setCarrierInfo, setUserAddresses } from '../../redux/userlogin/userLoginSlice';
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { allDeliveryAreas, setAllDeliveryAreas } from '../../redux/deliveryareas/deliveryareasSlice';
 
 const CarrierApplicationScreen = ({ navigation }) => {
 	const [currentPosition, setCurrentPosition] = useState(0)
@@ -42,6 +43,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 	const [registerCarrier, setRegisterCarrier] = useState(false)
 	const [loadingZones, setLoadingZones] = useState(false)
 	const dispatch = useDispatch()
+	const allDeliveryAreasStorage = useSelector(allDeliveryAreas)
 
 	const hasErrors = (key) => (errors.includes(key) ? styles.hasErrors : null)
 
@@ -113,6 +115,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 				})
 				setProvinciasList(temporal)
 				setLoadingZones(false)
+				dispatch(setAllDeliveryAreas(temporal))
 			}
 		},
 		onError: (errorProvincias) => {
@@ -122,8 +125,13 @@ const CarrierApplicationScreen = ({ navigation }) => {
 	})
 
 	useEffect(() => {
-		setLoadingZones(true)
-		getDeliveryZones({ variables: { after: '', before: '' } })
+		if (allDeliveryAreasStorage.length == 0) {// no ha cargado todas las zonas todavia
+			setLoadingZones(true)
+			getDeliveryZones({ variables: { after: '', before: '' } })
+		} else { // ya los cargo estane l localstorage
+			setProvinciasList(allDeliveryAreasStorage)
+		}
+		//getDeliveryZones({ variables: { after: '', before: '' } })
 	}, [])
 
 	const labels = ["Información Personal", "Información de KYC"];

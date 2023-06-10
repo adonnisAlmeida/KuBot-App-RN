@@ -140,6 +140,30 @@ export const GET_CARRIER_BY_USER_EMAIL = gql`
 						  url
 						}
 					}
+					reviews{
+						createdAt
+						user{
+						  firstName
+						  lastName
+						  userName
+						  avatar{
+							url
+							alt
+						  }
+						}
+						title
+						message
+						rating
+						approvalStatus
+						option{
+						  name
+						  description
+						  serverId
+						}
+						order{
+						  number
+						}
+					}
 				}
 			}
 		}

@@ -432,9 +432,63 @@ const DetailsNavView = ({ navigation, route }) => {
                             Invitado
                         </Typography>
                     )}
+                    {data.order.defaultPickupAddress ? (
+                        <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
+                            <Typography h3 style={{ marginVertical: 10 }}>
+                                Dirección de Recogida
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                {data.order.defaultPickupAddress.firstName} {data.order.defaultPickupAddress.lastName}
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                {data.order.defaultPickupAddress.streetAddress1}
+                            </Typography>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Ciudad:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {data.order.defaultPickupAddress.city}
+                                </Typography>
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Provincia:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {data.order.defaultPickupAddress.countryArea}
+                                </Typography>
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    País:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {data.order.defaultPickupAddress.country.country}
+                                </Typography>
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                    Código postal:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {data.order.defaultPickupAddress.postalCode}
+                                </Typography>
+                            </View>
+                        </View>
+                    ) : (
+                        <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
+                            <Typography h3 style={{ marginVertical: 10 }}>
+                                Dirección de Recogida
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                Dirección de recogida no encontrada
+                            </Typography>
+                        </View>
+                    )}
                     <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
                         <Typography h3 style={{ marginVertical: 10 }}>
-                            Dirección de Envío
+                            Dirección de Entrega
                         </Typography>
                         <Typography color={colors.ON_SURFACE}>
                             {data.order.shippingAddress.firstName} {data.order.shippingAddress.lastName}
@@ -442,20 +496,29 @@ const DetailsNavView = ({ navigation, route }) => {
                         <Typography color={colors.ON_SURFACE}>
                             {data.order.shippingAddress.streetAddress1}
                         </Typography>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
-                                País:
-                            </Typography>
-                            <Typography color={colors.ON_SURFACE}>
-                                {data.order.shippingAddress.country.country}
-                            </Typography>
-                        </View>
+
                         <View style={{ flexDirection: 'row' }}>
                             <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
                                 Ciudad:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
                                 {data.order.shippingAddress.city}
+                            </Typography>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                Provincia:
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                {data.order.shippingAddress.countryArea}
+                            </Typography>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+                                País:
+                            </Typography>
+                            <Typography color={colors.ON_SURFACE}>
+                                {data.order.shippingAddress.country.country}
                             </Typography>
                         </View>
                         <View style={{ flexDirection: 'row' }}>

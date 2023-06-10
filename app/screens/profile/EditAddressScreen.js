@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useTheme } from '@react-navigation/native'
 import { ADDRESS_UPDATE } from '../../graphql/customers'
 import { useMutation } from '@apollo/client'
+import Colors from '../../constants/Colors'
 
 const EditAddressScreen = ({ navigation, route }) => {
     const addressParam = route.params?.address
@@ -85,7 +86,7 @@ const EditAddressScreen = ({ navigation, route }) => {
             <KeyboardAvoidingView >
                 <View>
                     <Typography
-                        color={colors.ON_SURFACE_VARIANT}
+                        color={Colors.ON_SURFACE_VARIANT}
                         style={styles.inputLabel}
                     >
                         Nombre

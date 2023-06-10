@@ -85,7 +85,7 @@ const SellersScreen = ({ navigation }) => {
     if (loadingApp) return <Loading />
     if (loading && mySellers.length === 0 ) return <Loading />
 
-    console.log(mySellers.length)
+    //console.log(mySellers.length)
 
     return (
         <View style={{ flex: 1 }}>

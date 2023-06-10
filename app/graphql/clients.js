@@ -39,6 +39,47 @@ export const ORDERS_LIST_SELLERS = gql`
 				node {
 					id
                     sellers{
+                        defaultAddress{
+                            phone
+                            id
+                            streetAddress1
+                            streetAddress2
+                            countryArea
+                            city
+                            cityArea
+                            firstName
+                            lastName
+                            companyName
+                            postalCode
+                            country{
+                            country
+                            code
+                            }
+                        }
+                        reviews{
+                            createdAt
+                            user{
+                              firstName
+                              lastName
+                              userName
+                              avatar{
+                                url
+                                alt
+                              }
+                            }
+                            title
+                            message
+                            rating
+                            approvalStatus
+                            option{
+                              name
+                              description
+                              serverId
+                            }
+                            order{
+                              number
+                            }
+                        }
                         user{
                             userName
                             id

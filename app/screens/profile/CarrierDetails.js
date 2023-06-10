@@ -20,6 +20,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { BUST_PHOTO_UPDATE, CARRIER_UPDATE, PI_PHOTO_BACK_UPDATE, PI_PHOTO_FRONTAL_UPDATE } from '../../graphql/profile'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { ReactNativeFile } from 'apollo-upload-client'
+import ReviewsCard from './components/ReviewsCard'
 
 const Sound = require('react-native-sound')
 
@@ -40,6 +41,7 @@ const CarrierDetails = () => {
     const [aborterRefFrontal, setAbortRefFrontal] = useState(new AbortController());
     const [aborterRefBack, setAbortRefBack] = useState(new AbortController());
     const [aborterRefBust, setAbortRefBust] = useState(new AbortController());
+    const [reviews, setReviews] = useState(null);
     const carrier_info = useSelector(carrierInfo)
     const dispatch = useDispatch()
 
@@ -49,12 +51,14 @@ const CarrierDetails = () => {
         setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
         setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
         setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
+        setReviews(carrier_info.reviews)
     }, [])
 
     useEffect(() => {
         setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
         setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
         setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
+        setReviews(carrier_info.reviews)
     }, [carrier_info])
 
     const [piPhotoFrontalUpdate, { data, error, loading }] = useMutation(PI_PHOTO_FRONTAL_UPDATE, {
@@ -307,8 +311,8 @@ const CarrierDetails = () => {
                     <View style={styles.cardRow}>
                         <Typography style={{ marginRight: 5, }}>Estado de la cuenta de Mensajero:</Typography>
                         <Typography bold color={
-                            carrier_info.kyc == 'APPROVED'? Colors.COLORS.PRIMARY : '#eb5757'
-                            }>{carrier_info.kyc == 'APPROVED'? 'Activa'.toUpperCase(): 'Inactiva'.toUpperCase()}</Typography>
+                            carrier_info.kyc == 'APPROVED' ? Colors.COLORS.PRIMARY : '#eb5757'
+                        }>{carrier_info.kyc == 'APPROVED' ? 'Activa'.toUpperCase() : 'Inactiva'.toUpperCase()}</Typography>
                     </View>
                     <View style={styles.headerContainer}><Typography style={{ marginRight: 5, }}>{'Información de KYC'.toUpperCase()}</Typography></View>
                     <View style={styles.cardRow}>
@@ -435,57 +439,12 @@ const CarrierDetails = () => {
                 <View style={{ marginTop: 15, paddingVertical: 8, alignItems: 'center' }} >
                     <Typography style={{ color: Colors.COLORS.ON_SURFACE }} h3 bold>Calificación y opiniones:</Typography>
                 </View>
-                <View
-                    style={[styles.card, { backgroundColor: colors.SURFACE }]}
-                >
-                    <View style={{ flexDirection: 'row' }}>
-                        <Image
-                            backgroundColor='white'
-                            source={require('../../../assets/user_avatar.png')}
-                            imageStyle={styles.opinionAvatar}
-                            indicator={Progress.Pie}
-                            indicatorProps={{
-                                color: Colors.COLORS.PRIMARY,
-                                borderWidth: 0,
-                            }}
-                        />
-                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
-                            <View>
-                                <Typography style={{ color: '#333' }}>Samantha Lambert </Typography>
-                                <Typography style={{ color: '#828282' }}>22 de Febrero de 2023 </Typography>
-                            </View>
-                            <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
-                                <MaterialIcons
-                                    name='star'
-                                    size={20}
-                                    color={Colors.COLORS.WEB_START_ON}
-                                />
-                                <MaterialIcons
-                                    name='star'
-                                    size={20}
-                                    color={Colors.COLORS.WEB_START_ON}
-                                />
-                                <MaterialIcons
-                                    name='star-half'
-                                    size={20}
-                                    color={Colors.COLORS.WEB_START_ON}
-                                />
-                                <MaterialIcons
-                                    name='star-border'
-                                    size={20}
-                                    color={Colors.COLORS.WEB_START_OFF}
-                                />
-                                <MaterialIcons
-                                    name='star-border'
-                                    size={20}
-                                    color={Colors.COLORS.WEB_START_OFF}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                    <Typography style={{ marginTop: 10, color: Colors.COLORS.ON_SURFACE, }} bold>buena</Typography>
-                    <Typography style={{ color: '#333' }}>Muy buena</Typography>
-                </View>
+                {reviews ? (
+                    reviews.slice(0).reverse().map((review, index) => <ReviewsCard key={index} review={review}/>)
+                ) : (
+                    null
+                )}
+                <Typography></Typography>
                 <Typography></Typography>
             </ScrollView>
             <Modal

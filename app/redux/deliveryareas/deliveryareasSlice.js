@@ -39,6 +39,7 @@ export const deliveryareasSlice = createSlice({
 })
 
 export const listado = (state) => state.deliveryareas.listado
+export const allDeliveryAreas = (state) => state.deliveryareas.allDeliveryAreas
 
 export const getDeliveryAreas = createAsyncThunk(
 	'deliveryareas/getDeliveryAreas',

@@ -119,14 +119,14 @@ export default {
 		drawer: true,
 		carrier_only: false,
 	},
-	EDITAR_PROFILE: {
+	/* EDITAR_PROFILE: {
 		component: EditProfileScreen,
 		title: 'Editar Perfil',
 		name: 'EditarProfile',
 		icon: 'edit',
 		drawer: false,
 		carrier_only: false,
-	},
+	}, */
 	HOLIDAYS: {
 		component: HolidaysScreen,
 		title: 'Vacaciones',

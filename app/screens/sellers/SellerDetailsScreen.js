@@ -12,24 +12,25 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useSelector } from 'react-redux'
 import { conversations } from '../../redux/messages/messagesSlice'
+import ReviewsCard from '../profile/components/ReviewsCard'
 
 const SellerDetailsScreen = ({ navigation, route }) => {
     const [seller, setSeller] = useState(route.params?.seller)
     const { dark, colors } = useTheme()
-    const joinDate = moment(seller.dateJoined).format('YYYY-MM-DD')
+    const joinDate = moment(seller.user.dateJoined).format('YYYY-MM-DD')
     const conversation_reducer = useSelector(conversations)
 
-    //console.log(seller)
+    console.log("seller >> ", seller)
 
     const avatar =
-        seller.avatar !== null
+        seller.user.avatar !== null
             ? {
-                uri: seller.avatar.url,
+                uri: seller.user.avatar.url,
             }
             : require('../../../assets/user_avatar.png')
 
     navigation.setOptions({
-        title: `${seller.firstName? seller.firstName:seller.userName}`,
+        title: `${seller.user.firstName ? seller.user.firstName : seller.user.userName}`,
         headerLeft: () => (
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerLeft}>
@@ -76,10 +77,10 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                     />
                     <View style={styles.headetText}>
                         <Typography style={{ color: 'white', shadowOpacity: 0.8, shadowColor: 'red', }} bold title >
-                            {seller.firstName ? (
-                                seller.firstName + " " + seller.lastName
+                            {seller.user.firstName ? (
+                                seller.user.firstName + " " + seller.user.lastName
                             ) : (
-                                seller.userName
+                                seller.user.userName
                             )}
                         </Typography>
                         <TouchableOpacity onPress={() => contactMessage()}>
@@ -93,21 +94,34 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                     <Typography style={styles.textHeader} h3 bold>
                         Dirección:
                     </Typography>
-                    <Typography >
-                        {seller.addresses[0].streetAddress1}, {seller.addresses[0].city}, {seller.addresses[0].country.country}
-                    </Typography>
+                    {seller.defaultAddress? (
+                        <Typography >
+                            {seller.defaultAddress.streetAddress1}, {seller.defaultAddress.city}, {seller.defaultAddress.country.country}
+                        </Typography>
+
+                    ) : (
+                        <Typography >
+                            {seller.user.addresses[0].streetAddress1}, {seller.user.addresses[0].city}, {seller.user.addresses[0].country.country}
+                        </Typography>
+                    )}
+
                     <Typography style={styles.textHeader} h3 bold>
                         Fecha de Ingreso:
                     </Typography>
                     <Typography>
-                        {printCreated(seller.dateJoined)}
+                        {printCreated(seller.user.dateJoined)}
                     </Typography>
                 </View>
             </View>
             <View style={{ paddingVertical: 8 }} >
                 <Typography h3 bold>Calificación y opiniones:</Typography>
             </View>
-            <View
+            {seller.reviews ? (
+                seller.reviews.slice(0).reverse().map((review, index) => review.approvalStatus == 'APPROVED'? <ReviewsCard key={index} review={review}/>: null)
+            ) : (
+                null
+            )}
+            {/* <View
                 style={[dark ? styles.cardDark : styles.card]}
             >
                 <View style={{ flexDirection: 'row' }}>
@@ -157,7 +171,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                 </View>
                 <Typography style={{ marginTop: 10, color: '#333' }} bold>buena</Typography>
                 <Typography style={{ color: '#333' }}>Muy buena</Typography>
-            </View>
+            </View> */}
         </ScrollView>
     )
 }

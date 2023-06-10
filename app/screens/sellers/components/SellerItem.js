@@ -19,7 +19,7 @@ const SellerItem = ({ navigation, seller, ...props }) => {
 
     return (
         <TouchableOpacity {...props}
-            onPress={() => navigation.navigate('SellerDetails', { seller: seller.user })}
+            onPress={() => navigation.navigate('SellerDetails', { seller: seller })}
         >
             <View
                 style={[dark ? styles.cardDark : styles.card]}
@@ -57,12 +57,25 @@ const SellerItem = ({ navigation, seller, ...props }) => {
                             </View>
                         </View>
                         <View style={{ marginTop: 10 }}>
-                            <Typography>
-                                {seller.user.addresses[0].streetAddress1}
-                            </Typography>
-                            <Typography>
-                                {seller.user.addresses[0].city}, {seller.user.addresses[0].country.country}
-                            </Typography>
+                            {seller.defaultAddress ? (
+                                <>
+                                    <Typography>
+                                        {seller.defaultAddress.streetAddress1}
+                                    </Typography>
+                                    <Typography>
+                                        {seller.defaultAddress.city}, {seller.defaultAddress.country.country}
+                                    </Typography>
+                                </>
+                            ) : (
+                                <>
+                                    <Typography>
+                                        {seller.user.addresses[0].streetAddress1}
+                                    </Typography>
+                                    <Typography>
+                                        {seller.user.addresses[0].city}, {seller.user.addresses[0].country.country}
+                                    </Typography>
+                                </>
+                            )}
                         </View>
                     </View>
                 </View>
