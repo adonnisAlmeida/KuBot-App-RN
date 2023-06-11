@@ -1,9 +1,16 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, ToastAndroid, Image } from 'react-native'
 import React from 'react'
 import { useTheme } from '@react-navigation/native'
 import { Typography } from '../../../components'
 import Colors from '../../../constants/Colors'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { COUNTRIES } from '../../../constants/Other'
+import { useState } from 'react'
+import { useMutation } from '@apollo/client'
+import { ADDRESS_DELETE } from '../../../graphql/customers'
+import AwesomeAlert from 'react-native-awesome-alerts'
+import { useDispatch } from 'react-redux'
+import { setUserAddresses } from '../../../redux/userlogin/userLoginSlice'
 
 const AddressCard = ({
     address,
@@ -11,7 +18,9 @@ const AddressCard = ({
     setFirstName,
     setLastName,
     setCountry,
+    setCountryCode,
     setCountryArea,
+
     setCity,
     setCityArea,
     setAddress,
@@ -19,50 +28,133 @@ const AddressCard = ({
     setPostalCode,
     setPhone,
     setCompanyName,
+    setSelectedAddress,
+    setCodigoTelefono,
+    setActionToDo,
 }) => {
+    const [showAlertAw, setShowAlertAw] = useState(false)
+    const [deletingAddress, setDeletingAddress] = useState(false)
     const { colors } = useTheme()
+    const dispatch = useDispatch()
 
-    console.log("addressaddressaddress >> ", address)
+    const [addressDelete, { loadingAddressDelete, errorAddressDelete, dataAddressDelete }] = useMutation(ADDRESS_DELETE, {
+        onCompleted: (dataAddressDelete) => {
+            console.log("Eliminando la direccion >> ", dataAddressDelete.accountAddressDelete.user)
+            dispatch(setUserAddresses(dataAddressDelete.accountAddressDelete.user.addresses))
+            setShowAlertAw(false)
+            setDeletingAddress(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Dirección eliminada correctamente.', ToastAndroid.LONG)
+            }
+        },
+        onError: (errorAddressDelete, dataAddressDelete) => {
+            setShowAlertAw(false)
+            setDeletingAddress(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show(`Error actualizando dirección. ${errorAddressDelete.message}`, ToastAndroid.LONG)
+            }
+            //console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
+            console.log('ERROR Creando direccion >> ', JSON.stringify(errorAddressDelete, null, 2))
+            console.log('ERROR Creando direccion dataCarrierRegister>> ', dataAddressDelete)
+        },
+        fetchPolicy: "no-cache"
+    })
+
+    const deleteAddress = () => {
+        setDeletingAddress(true)
+        setShowAlertAw(false)
+        addressDelete({
+            variables: {
+                id: address.id
+            }
+        })
+        /* console.log("Eliminar Direccion >> ", address.id)
+        setTimeout(() => {
+            setDeletingAddress(false)
+            setShowAlertAw(false)
+            console.log("Direccion Eliminada correctamente >> ", address.id)
+        }, 1000); */
+    }
+
     return (
-        <View style={[styles.card, { backgroundColor: colors.SURFACE, marginTop: 10, paddingTop: 5, }]}>
-            <View style={styles.seccionCorner}>
-                {address.isDefaultBillingAddress ? (
-                    <Typography style={{
-                        color: Colors.COLORS.ON_SURFACE,
-                        fontWeight: 'bold',
-                    }}>Dirección de facturación</Typography>
-                ) : (
-                    null
-                )}
-                {address.isDefaultShippingAddress ? (
-                    <Typography style={{
-                        color: Colors.COLORS.ON_SURFACE,
-                        fontWeight: 'bold',
-                    }}>Dirección de entrega</Typography>
-                ) : (
-                    null
-                )}
-            </View>
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between'
-            }}>
-                <View>
-                    <View style={[styles.cardRow, { marginBottom: 5 }]}>
-                        <Typography style={{
-                            color: Colors.COLORS.ON_SURFACE,
-                            fontWeight: 'bold', marginRight: 5,
-                        }}>
-                            {address.firstName}
-                        </Typography>
+        <>
+            <View style={[styles.card, { backgroundColor: colors.SURFACE, marginTop: 10, paddingTop: 5, }]}>
+                {deletingAddress ? (
+                    <View
+                        style={{
+                            position: 'absolute',
+                            borderRadius: 8,
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            right: 0,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(255, 255, 255,0.7)',
+                            zIndex: 999,
+                        }}
+                    >
+                        <Image
+                            source={require('../../../../assets/outline-bin-solid.gif')}
+                            style={{ width: 40, height: 40 }}
+                        />
+                    </View>
+                ) : (null)}
+                <View style={styles.seccionCorner}>
+                    {address.isDefaultBillingAddress ? (
                         <Typography style={{
                             color: Colors.COLORS.ON_SURFACE,
                             fontWeight: 'bold',
-                        }}>
-                            {address.lastName}
-                        </Typography>
-                    </View>
-                    {address.companyName ? (
+                        }}>Dirección de facturación</Typography>
+                    ) : (
+                        null
+                    )}
+                    {address.isDefaultShippingAddress ? (
+                        <Typography style={{
+                            color: Colors.COLORS.ON_SURFACE,
+                            fontWeight: 'bold',
+                        }}>Dirección de entrega</Typography>
+                    ) : (
+                        null
+                    )}
+                </View>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                }}>
+                    <View>
+                        {address.firstName || address.lastName ? (
+                            <View style={[styles.cardRow, { marginBottom: 5 }]}>
+                                <Typography style={{
+                                    color: Colors.COLORS.ON_SURFACE,
+                                    fontWeight: 'bold', marginRight: 5,
+                                }}>
+                                    {address.firstName}
+                                </Typography>
+                                <Typography style={{
+                                    color: Colors.COLORS.ON_SURFACE,
+                                    fontWeight: 'bold',
+                                }}>
+                                    {address.lastName}
+                                </Typography>
+                            </View>
+                        ) : (null)}
+
+                        {address.companyName ? (
+                            <View style={styles.cardRow}>
+                                <Typography bold style={{
+                                    color: Colors.COLORS.ON_SURFACE,
+                                    fontSize: 15,
+                                    fontWeight: 'bold',
+                                    marginRight: 5,
+                                }}>
+                                    Empresa:
+                                </Typography>
+                                <Typography style={{ color: colors.ON_SURFACE }}>
+                                    {address.companyName}
+                                </Typography>
+                            </View>
+                        ) : (null)}
                         <View style={styles.cardRow}>
                             <Typography bold style={{
                                 color: Colors.COLORS.ON_SURFACE,
@@ -70,27 +162,27 @@ const AddressCard = ({
                                 fontWeight: 'bold',
                                 marginRight: 5,
                             }}>
-                                Empresa:
+                                Calle:
                             </Typography>
                             <Typography style={{ color: colors.ON_SURFACE }}>
-                                {address.companyName}
+                                {address.streetAddress1}
                             </Typography>
                         </View>
-                    ) : (null)}
-                    <View style={styles.cardRow}>
-                        <Typography bold style={{
-                            color: Colors.COLORS.ON_SURFACE,
-                            fontSize: 15,
-                            fontWeight: 'bold',
-                            marginRight: 5,
-                        }}>
-                            Calle:
-                        </Typography>
-                        <Typography style={{ color: colors.ON_SURFACE }}>
-                            {address.streetAddress1}
-                        </Typography>
-                    </View>
-                    {address.streetAddress2 ? (
+                        {address.streetAddress2 ? (
+                            <View style={styles.cardRow}>
+                                <Typography bold style={{
+                                    color: Colors.COLORS.ON_SURFACE,
+                                    fontSize: 15,
+                                    fontWeight: 'bold',
+                                    marginRight: 5,
+                                }}>
+                                    Edificio:
+                                </Typography>
+                                <Typography style={{ color: colors.ON_SURFACE }}>
+                                    {address.streetAddress2}
+                                </Typography>
+                            </View>
+                        ) : (null)}
                         <View style={styles.cardRow}>
                             <Typography bold style={{
                                 color: Colors.COLORS.ON_SURFACE,
@@ -98,66 +190,38 @@ const AddressCard = ({
                                 fontWeight: 'bold',
                                 marginRight: 5,
                             }}>
-                                Edificio:
+                                Municipio:
                             </Typography>
-                            <Typography style={{ color: colors.ON_SURFACE }}>
-                                {address.streetAddress2}
+                            <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
+                                {address.city}
                             </Typography>
                         </View>
-                    ) : (null)}
-                    <View style={styles.cardRow}>
-                        <Typography bold style={{
-                            color: Colors.COLORS.ON_SURFACE,
-                            fontSize: 15,
-                            fontWeight: 'bold',
-                            marginRight: 5,
-                        }}>
-                            Municipio:
-                        </Typography>
-                        <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
-                            {address.city}
-                        </Typography>
-                    </View>
-                    <View style={styles.cardRow}>
-                        <Typography bold style={{
-                            color: Colors.COLORS.ON_SURFACE,
-                            fontSize: 15,
-                            fontWeight: 'bold',
-                            marginRight: 5,
-                        }}>
-                            Provincia:
-                        </Typography>
-                        <Typography style={{ color: colors.ON_SURFACE }}>
-                            {address.countryArea}
-                        </Typography>
-                    </View>
-                    <View style={styles.cardRow}>
-                        <Typography bold style={{
-                            color: Colors.COLORS.ON_SURFACE,
-                            fontSize: 15,
-                            fontWeight: 'bold',
-                            marginRight: 5,
-                        }}>
-                            Código postal:
-                        </Typography>
-                        <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
-                            {address.postalCode}
-                        </Typography>
-                    </View>
-                    <View style={{ flexDirection: 'row', marginTop: 3 }}>
-                        <Typography bold style={{
-                            color: Colors.COLORS.ON_SURFACE,
-                            fontSize: 15,
-                            fontWeight: 'bold',
-                            marginRight: 5,
-                        }}>
-                            País:
-                        </Typography>
-                        <Typography color={colors.ON_SURFACE}>
-                            {address.country.country}
-                        </Typography>
-                    </View>
-                    {address.phone ? (
+                        <View style={styles.cardRow}>
+                            <Typography bold style={{
+                                color: Colors.COLORS.ON_SURFACE,
+                                fontSize: 15,
+                                fontWeight: 'bold',
+                                marginRight: 5,
+                            }}>
+                                Provincia:
+                            </Typography>
+                            <Typography style={{ color: colors.ON_SURFACE }}>
+                                {address.countryArea}
+                            </Typography>
+                        </View>
+                        <View style={styles.cardRow}>
+                            <Typography bold style={{
+                                color: Colors.COLORS.ON_SURFACE,
+                                fontSize: 15,
+                                fontWeight: 'bold',
+                                marginRight: 5,
+                            }}>
+                                Código postal:
+                            </Typography>
+                            <Typography style={{ color: colors.ON_SURFACE, marginRight: 5, }}>
+                                {address.postalCode}
+                            </Typography>
+                        </View>
                         <View style={{ flexDirection: 'row', marginTop: 3 }}>
                             <Typography bold style={{
                                 color: Colors.COLORS.ON_SURFACE,
@@ -165,44 +229,104 @@ const AddressCard = ({
                                 fontWeight: 'bold',
                                 marginRight: 5,
                             }}>
-                                Teléfono:
+                                País:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {address.phone}
+                                {address.country.country}
                             </Typography>
                         </View>
-                    ) : (null)}
-                </View>
-                <View>
-                    <TouchableOpacity
+                        {address.phone ? (
+                            <View style={{ flexDirection: 'row', marginTop: 3 }}>
+                                <Typography bold style={{
+                                    color: Colors.COLORS.ON_SURFACE,
+                                    fontSize: 15,
+                                    fontWeight: 'bold',
+                                    marginRight: 5,
+                                }}>
+                                    Teléfono:
+                                </Typography>
+                                <Typography color={colors.ON_SURFACE}>
+                                    {address.phone}
+                                </Typography>
+                            </View>
+                        ) : (null)}
+                    </View>
+                    <View
                         style={{
-                            padding: 5
-                        }}
-                        onPress={() => {
-                            setFirstName(address.firstName)
-                            setLastName(address.lastName)
-                            setCountry(address.country.country)
-                            setCountryArea(address.countryArea)
-                            setCity(address.city) // municipio
-                            setCityArea(address.cityArea) // municipio
-                            setAddress(address.streetAddress1)
-                            setAddress2(address.streetAddress2)
-                            setPostalCode(address.postalCode)
-                            setPhone(address.phone)
-                            setCompanyName(address.companyName)
-                            setEditAddressModal(true)
+                            //backgroundColor: 'red',
+                            justifyContent: 'space-between'
                         }}
                     >
-                        <MaterialCommunityIcons
-                            style={styles.editNameIcon}
-                            name="notebook-edit-outline"
-                            color={Colors.COLORS.PRIMARY}
-                            size={20}
-                        />
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                padding: 5
+                            }}
+                            onPress={() => {
+                                let indexCountry = COUNTRIES.findIndex(obj => obj.code == address.country.code)
+                                setActionToDo('EDIT')
+                                setCodigoTelefono(indexCountry)
+                                setSelectedAddress(address)
+                                setFirstName(address.firstName)
+                                setLastName(address.lastName)
+                                setCountry(address.country.country)
+                                setCountryCode(address.country.code)
+                                setCountryArea(address.countryArea) // provincia
+                                setCity(address.city) // municipio
+                                setCityArea(address.cityArea)
+                                setAddress(address.streetAddress1)
+                                setAddress2(address.streetAddress2)
+                                setPostalCode(address.postalCode)
+                                setPhone(address.phone)
+                                setCompanyName(address.companyName)
+                                setEditAddressModal(true)
+
+                                //console.log("address.country.country >> ", indexProv)
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name="notebook-edit-outline"
+                                color={Colors.COLORS.PRIMARY}
+                                size={20}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={{
+                                padding: 5
+                            }}
+                            onPress={() => {
+                                setShowAlertAw(true)
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name="notebook-remove-outline"
+                                color={Colors.COLORS.WEB_GRAY}
+                                size={20}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-        </View>
+            <AwesomeAlert
+                show={showAlertAw}
+                showProgress={deletingAddress}
+                title={"Eliminar Dirección"}
+                message={"Está seguro que desea eliminar esta dirección"}
+                closeOnTouchOutside={false}
+                closeOnHardwareBackPress={false}
+                showCancelButton={true}
+                showConfirmButton={true}
+                cancelText="Cancelar"
+                confirmText="Eliminar"
+                confirmButtonColor={Colors.COLORS.WARNING}
+                onCancelPressed={() => {
+                    setShowAlertAw(false)
+                }}
+                onConfirmPressed={() => {
+                    deleteAddress()
+                }}
+            />
+        </>
     )
 }
 

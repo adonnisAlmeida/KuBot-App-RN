@@ -13,7 +13,7 @@ import SecondComponent from './components/SecondComponent'
 import { useRef } from 'react';
 import { containsOnlyNumbers } from '../../utils/CommonFunctions';
 import { COUNTRIES } from '../../constants/Other';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setCarrierInfo, setUserAddresses } from '../../redux/userlogin/userLoginSlice';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { allDeliveryAreas, setAllDeliveryAreas } from '../../redux/deliveryareas/deliveryareasSlice';
@@ -209,7 +209,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 							cityArea: provinciasList[provincia].name,
 							postalCode: codigoPostal,
 							country: COUNTRIES[pais].code,
-							countryArea: municipio,
+							countryArea: provinciasList[provincia].name,
 							phone: telefono == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + telefono,
 						}
 					}

@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator } from 'react-native'
+import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Platform, ToastAndroid } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,19 +10,31 @@ import ProfilePhoto from './components/ProfilePhoto'
 import ProfileUpdate from './components/ProfileUpdate'
 import AddressCard from './components/AddressCard'
 import { allDeliveryAreas, setAllDeliveryAreas } from '../../redux/deliveryareas/deliveryareasSlice'
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { DELIVERY_ZONES } from '../../graphql/deliveryAreas'
 import { COUNTRIES } from '../../constants/Other'
+import { Picker } from '@react-native-picker/picker'
+import { containsOnlyNumbers } from '../../utils/CommonFunctions'
+import { ADDRESS_CREATE, ADDRESS_DELETE, ADDRESS_UPDATE } from '../../graphql/customers'
+import { FloatingAction } from 'react-native-floating-action'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Entypo from 'react-native-vector-icons/Entypo'
+import AwesomeAlert from 'react-native-awesome-alerts'
 
 const ContactDetails = ({ navigation }) => {
     const user_state = useSelector(user)
+    
     const [userInfo, setUserInfo] = useState(user_state)
     const [editAddressModal, setEditAddressModal] = useState(false)
+    const [selectedAddress, setSelectedAddress] = useState('')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [country, setCountry] = useState('')
+    const [countryCode, setCountryCode] = useState('')
     const [countryArea, setCountryArea] = useState('')
+    const [countryAreaIndex, setCountryAreaIndex] = useState(0)
     const [city, setCity] = useState('')
+    const [cityIndex, setCityIndex] = useState(0)
     const [cityArea, setCityArea] = useState('')
     const [address, setAddress] = useState('')
     const [address2, setAddress2] = useState('')
@@ -31,7 +43,10 @@ const ContactDetails = ({ navigation }) => {
     const [companyName, setCompanyName] = useState('')
     const [provinciasList, setProvinciasList] = useState([])
     const [loadingZones, setLoadingZones] = useState(false)
+    const [updatingAddress, setUpdatingAddress] = useState(false)
     const [errors, setErrors] = useState([])
+    const [codigoTelefono, setCodigoTelefono] = useState(0)
+    const [actionToDo, setActionToDo] = useState(null)
     const dispatch = useDispatch()
     const allDeliveryAreasStorage = useSelector(allDeliveryAreas)
 
@@ -95,9 +110,55 @@ const ContactDetails = ({ navigation }) => {
         }
     })
 
+    const [addressUpdate, { loadingAddressUpdate, errorAddressUpdate, dataAddressUpdate }] = useMutation(ADDRESS_UPDATE, {
+        onCompleted: (dataAddressUpdate) => {
+            console.log("Actualizo la direccion >> ", dataAddressUpdate.accountAddressUpdate.user)
+            setUpdatingAddress(false)
+            dispatch(setUserAddresses(dataAddressUpdate.accountAddressUpdate.user.addresses))
+            setEditAddressModal(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Dirección actualizada correctamente.', ToastAndroid.LONG)
+            }
+        },
+        onError: (errorAddressUpdate, dataAddressUpdate) => {
+            setUpdatingAddress(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show(`Error actualizando dirección. ${errorAddressUpdate.message}`, ToastAndroid.LONG)
+            }
+            //console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
+            console.log('ERROR Actualizando direccion >> ', errorAddressUpdate)
+            console.log('ERROR actualizando direccion dataCarrierRegister>> ', dataAddressUpdate)
+        },
+        fetchPolicy: "no-cache"
+    })
+
+    const [addressCreate, { loadingAddressCreate, errorAddressCreate, dataAddressCreate }] = useMutation(ADDRESS_CREATE, {
+        onCompleted: (dataAddressCreate) => {
+            console.log("Creando la direccion >> ", dataAddressCreate.accountAddressCreate.user)
+            setUpdatingAddress(false)
+            dispatch(setUserAddresses(dataAddressCreate.accountAddressCreate.user.addresses))
+            setEditAddressModal(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Dirección creada correctamente.', ToastAndroid.LONG)
+            }
+        },
+        onError: (errorAddressCreate, dataAddressCreate) => {
+            setUpdatingAddress(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show(`Error actualizando dirección. ${errorAddressCreate.message}`, ToastAndroid.LONG)
+            }
+            //console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
+            console.log('ERROR Creando direccion >> ', JSON.stringify(errorAddressCreate, null, 2))
+            console.log('ERROR Creando direccion dataCarrierRegister>> ', dataAddressCreate)
+        },
+        fetchPolicy: "no-cache"
+    })
+
     useEffect(() => {
         setUserInfo(user_state)
     }, [user_state])
+
+    //console.log("userInfo.addresses > ", userInfo.addresses)
 
     useEffect(() => {
         setAvatar(userInfo.avatar
@@ -113,10 +174,126 @@ const ContactDetails = ({ navigation }) => {
         }
     }, [])
 
+    useEffect(() => {
+        if (editAddressModal && !loadingZones) {
+            let indexProv = 0
+            if (selectedAddress != '') {
+                indexProv = provinciasList.findIndex(obj => obj.name == selectedAddress.countryArea)
+            }
+            let indexMun = provinciasList[indexProv].municipios.findIndex(obj => obj.node.name == selectedAddress.city)
+            setCountryAreaIndex(indexProv)
+            setCityIndex(indexMun)
+        }
+    }, [editAddressModal])
+
+    useEffect(() => {
+        if ((containsOnlyNumbers(phone) && phone.length == 8) || phone.length == 0) {
+            setErrors(pre => pre.filter((key) => key != 'phone'))
+        }
+    }, [phone])
+
+    const updateAddress = () => {
+        let error_data = []
+        if (phone != '') {
+            if (!containsOnlyNumbers(phone) || phone.length != 8) {
+                error_data.push('phone')
+            }
+        }
+
+        if (error_data.length > 0) {
+            setErrors(error_data)
+        } else {
+            setUpdatingAddress(true)
+            if (actionToDo == 'EDIT') {
+                addressUpdate({
+                    variables: {
+                        id: selectedAddress.id,
+                        input: {
+                            firstName: firstName,
+                            lastName: lastName,
+                            companyName: companyName,
+                            streetAddress1: address,
+                            streetAddress2: address2,
+                            city: city,
+                            postalCode: postalCode,
+                            country: countryCode,
+                            countryArea: countryArea,
+                            phone: phone == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + phone,
+                        }
+                    }
+                })
+            } else if (actionToDo == 'CREATE') {
+                addressCreate({
+                    variables: {
+                        input: {
+                            firstName: firstName,
+                            lastName: lastName,
+                            companyName: companyName,
+                            streetAddress1: address,
+                            streetAddress2: address2,
+                            city: city,
+                            postalCode: postalCode,
+                            country: countryCode,
+                            countryArea: countryArea,
+                            phone: phone == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + phone,
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    const actionIcon = (name) => {
+        return (
+            <>
+                <MaterialCommunityIcons
+                    name={name}
+                    size={25}
+                    color={colors.SURFACE}
+                />
+            </>
+        )
+    }
+
+    const actionsTrash = [
+        {
+            text: "Eliminar",
+            icon: actionIcon('notebook-plus-outline'),
+            name: "add_address",
+            position: 2,
+            color: Colors.COLORS.PRIMARY
+        }
+    ];
+
+    const doAddAddress = () => {
+        setAddress('')
+        setAddress2('')
+        setFirstName('')
+        setLastName('')
+        setPhone('')
+        setCompanyName('')
+        setPostalCode('')
+        setCountryCode('CU')
+        setCountry('Cuba')
+        setCodigoTelefono(57)
+        setCountryAreaIndex(0)
+        setCity('')
+        setCountryArea(provinciasList[0]?.name)
+        setActionToDo('CREATE')
+        setEditAddressModal(true)
+    }
+
+    const doAction = (action) => {
+        switch (action) {
+            case 'add_address':
+                doAddAddress()
+                break;
+        }
+    }
+
     return (
         <>
             <ScrollView keyboardShouldPersistTaps={'handled'} showsVerticalScrollIndicator={false} style={styles.container}>
-                {alert}
                 <View style={[styles.card, { backgroundColor: colors.SURFACE, marginBottom: 30 }]}>
                     <ProfilePhoto avatar={avatar} setAvatar={() => setAvatar()} />
                     <ProfileUpdate />
@@ -126,11 +303,15 @@ const ContactDetails = ({ navigation }) => {
                         <AddressCard
                             key={index}
                             navigation={navigation}
+                            setActionToDo={setActionToDo}
                             address={address}
+                            setSelectedAddress={setSelectedAddress}
                             setEditAddressModal={setEditAddressModal}
+                            setCodigoTelefono={setCodigoTelefono}
                             setFirstName={setFirstName}
                             setLastName={setLastName}
                             setCountry={setCountry}
+                            setCountryCode={setCountryCode}
                             setCountryArea={setCountryArea}
                             setCity={setCity}
                             setCityArea={setCityArea}
@@ -141,6 +322,11 @@ const ContactDetails = ({ navigation }) => {
                             setCompanyName={setCompanyName}
                         />)
                 }
+                <Typography></Typography>
+                <Typography></Typography>
+                <Typography></Typography>
+                <Typography></Typography>
+                <Typography></Typography>
                 <Typography></Typography>
             </ScrollView>
             <Modal
@@ -215,19 +401,9 @@ const ContactDetails = ({ navigation }) => {
                                 >
                                     País
                                 </Typography>
-                                <TextInput
-                                    value={country}
-                                    style={[
-                                        styles.input,
-                                        hasErrors('lastName'),
-                                        { color: colors.ON_BACKGROUND },
-                                    ]}
-                                    placeholder='Apellidos'
-                                    onChangeText={(text) => setCountry(text)}
-                                />
-                                {/* <Picker
+                                <Picker
                                     themeVariant={'dark'}
-                                    selectedValue={pais}
+                                    selectedValue={countryCode}
                                     style={[
                                         //styles.select,
                                         {
@@ -237,16 +413,20 @@ const ContactDetails = ({ navigation }) => {
                                         },
                                     ]}
                                     onValueChange={(itemValue, itemIndex) => {
-                                        setPais(itemValue)
-                                        setCodigoTelefono(itemValue)
+                                        setCountryCode(itemValue)
+                                        let result = COUNTRIES.find(obj => {
+                                            return obj.code == itemValue
+                                        })
+                                        setCountry(result.name)
+                                        setCodigoTelefono(itemIndex)
                                     }
                                     }>
                                     {
                                         COUNTRIES.map((item, index) => {
-                                            return <Picker.Item key={index} themeVariant={'dark'} label={item.name} value={index} />
+                                            return <Picker.Item key={item} themeVariant={'dark'} label={item.name} value={item.code} />
                                         })
                                     }
-                                </Picker> */}
+                                </Picker>
                             </View>
                             <View
                                 style={{
@@ -261,42 +441,33 @@ const ContactDetails = ({ navigation }) => {
                                 >
                                     Provincia
                                 </Typography>
-                                <TextInput
-                                    value={countryArea}
+                                <Picker
+                                    themeVariant={'dark'}
+                                    selectedValue={countryArea}
                                     style={[
-                                        styles.input,
-                                        hasErrors('lastName'),
-                                        { color: colors.ON_BACKGROUND },
-                                    ]}
-                                    placeholder='Apellidos'
-                                    onChangeText={(text) => setCountryArea(text)}
-                                />
-                                {/* {loadingZones ? (
-                                    <ActivityIndicator style={{ padding: 15 }}></ActivityIndicator>
-                                ) : (
-                                    <Picker
-                                        themeVariant={'dark'}
-                                        selectedValue={provincia}
-                                        style={[
-                                            //styles.select,
-                                            {
-                                                color: colors.ON_BACKGROUND,
-                                                padding: 0,
-                                                marginLeft: -14,
-                                            },
-                                        ]}
-                                        onValueChange={(itemValue, itemIndex) => {
-                                            setProvincia(itemValue)
-                                            setMunicipio(0)
-                                        }
-                                        }>
+                                        //styles.select,
                                         {
-                                            provinciasList.map((item, index) => {
-                                                return <Picker.Item key={index} themeVariant={'dark'} label={item.name} value={index} />
-                                            })
-                                        }
-                                    </Picker>
-                                )} */}
+                                            color: colors.ON_BACKGROUND,
+                                            padding: 0,
+                                            marginLeft: -14,
+                                        },
+                                    ]}
+                                    onValueChange={(itemValue, itemIndex) => {
+                                        setCountryArea(itemValue)
+                                        let result = provinciasList.find(obj => {
+                                            return obj.name == itemValue
+                                        })
+                                        setCountryAreaIndex(itemIndex)
+                                        setCity(result.municipios[0].node.name)
+                                        setCityIndex(0)
+                                    }
+                                    }>
+                                    {
+                                        provinciasList.map((item, index) => {
+                                            return <Picker.Item key={index} themeVariant={'dark'} label={item.name} value={item.name} />
+                                        })
+                                    }
+                                </Picker>
                             </View>
                             <View
                                 style={{
@@ -321,6 +492,27 @@ const ContactDetails = ({ navigation }) => {
                                     placeholder='Apellidos'
                                     onChangeText={(text) => setCity(text)}
                                 />
+                                {/* <Picker
+                                        themeVariant={'dark'}
+                                        selectedValue={city}
+                                        style={[
+                                            //styles.select,
+                                            {
+                                                color: colors.ON_BACKGROUND,
+                                                padding: 0,
+                                                marginLeft: -14,
+                                            },
+                                        ]}
+                                        onValueChange={(itemValue, itemIndex) => {
+                                            setCity(itemValue)
+                                        }
+                                        }>
+                                        {
+                                            provinciasList[countryAreaIndex]?.municipios.map((item, index) => {
+                                                return <Picker.Item key={index} themeVariant={'dark'} label={item.node.name} value={item.node.name} />
+                                            })
+                                        }
+                                    </Picker> */}
                                 {/* {loadingZones ? (
                                     <ActivityIndicator style={{ padding: 15 }}></ActivityIndicator>
                                 ) : (
@@ -409,13 +601,13 @@ const ContactDetails = ({ navigation }) => {
                             </View>
                             <View style={{ marginTop: 15 }}>
                                 <Typography
-                                    color={hasErrors('telefono') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}
+                                    color={hasErrors('phone') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}
                                 //style={{ marginVertical: 10 }}
                                 >
                                     Número de teléfono
                                 </Typography>
                                 <View style={{ flexDirection: 'row' }}>
-                                    {/* <Typography
+                                    <Typography
                                         style={{
                                             fontSize: 16,
                                             marginTop: 11,
@@ -424,7 +616,7 @@ const ContactDetails = ({ navigation }) => {
                                             borderBottomWidth: StyleSheet.hairlineWidth,
                                         }}>
                                         {COUNTRIES[codigoTelefono].mobileCode}
-                                    </Typography> */}
+                                    </Typography>
                                     <TextInput
                                         keyboardType='phone-pad'
                                         inputMode='tel'
@@ -481,22 +673,42 @@ const ContactDetails = ({ navigation }) => {
                         >
                             <Typography bold color={Colors.COLORS.PRIMARY}>Cancelar</Typography>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                paddingVertical: 5,
-                                paddingHorizontal: 8,
-                            }}
-                        >
-                            <Typography bold color={Colors.COLORS.PRIMARY}>Guardar</Typography>
-                        </TouchableOpacity>
+                        {
+                            updatingAddress ? (
+                                <ActivityIndicator color={Colors.COLORS.PRIMARY} />
+                            ) : (
+                                <TouchableOpacity
+                                    onPress={() => updateAddress()}
+                                    style={{
+                                        paddingVertical: 5,
+                                        paddingHorizontal: 8,
+                                    }}
+                                >
+                                    <Typography bold color={Colors.COLORS.PRIMARY}>Guardar</Typography>
+                                </TouchableOpacity>
+                            )
+                        }
+
                     </View>
                 </View>
             </Modal>
+            <FloatingAction
+                color={Colors.COLORS.PRIMARY}
+                floatingIcon={actionIcon('notebook-plus-outline')}
+                overrideWithAction={true}
+                actions={actionsTrash}
+                onPressItem={name => {
+                    doAction(name)
+                }}
+            />
         </>
     )
 }
 
 const styles = StyleSheet.create({
+    hasErrors: {
+        borderBottomColor: '#CF6679',
+    },
     modalButtons: {
         //position: 'absolute',
         /* bottom: 50,

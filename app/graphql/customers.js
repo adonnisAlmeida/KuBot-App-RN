@@ -48,10 +48,20 @@ export const CUSTOMER_DELETE = gql`
 `
 
 export const ADDRESS_UPDATE = gql`
-	mutation addressUpdate($id: ID!, $input: AddressInput! ) {
-		addressUpdate(id: $id, input: $input) {
-			address {
-				id
+	mutation accountAddressUpdate($id: ID!, $input: AddressInput! ) {
+		accountAddressUpdate(id: $id, input: $input) {
+			errors{
+				field
+				message
+			}
+			accountErrors{
+				field
+				message
+				code
+			}
+			user{
+				addresses{
+					id
 					companyName
 					isDefaultBillingAddress
 					isDefaultShippingAddress
@@ -64,9 +74,85 @@ export const ADDRESS_UPDATE = gql`
 					postalCode
 					country{
 					  country
+					  code
 					}
 					countryArea
 					phone
+				}
+			}
+		}
+	}
+`
+
+export const ADDRESS_CREATE = gql`
+	mutation accountAddressCreate($input: AddressInput!, $type: AddressTypeEnum ) {
+		accountAddressCreate(input: $input, type: $type) {
+			errors{
+				field
+				message
+			}
+			accountErrors{
+				field
+				message
+				code
+			}
+			user{
+				addresses{
+					id
+					companyName
+					isDefaultBillingAddress
+					isDefaultShippingAddress
+					streetAddress1
+					firstName
+					lastName
+					streetAddress2
+					city
+					cityArea
+					postalCode
+					country{
+					  country
+					  code
+					}
+					countryArea
+					phone
+				}
+			}
+		}
+	}
+`
+
+export const ADDRESS_DELETE = gql`
+	mutation accountAddressDelete($id: ID! ) {
+		accountAddressDelete(id: $id) {
+			errors{
+				field
+				message
+			}
+			accountErrors{
+				field
+				message
+				code
+			}
+			user{
+				addresses{
+					id
+					companyName
+					isDefaultBillingAddress
+					isDefaultShippingAddress
+					streetAddress1
+					firstName
+					lastName
+					streetAddress2
+					city
+					cityArea
+					postalCode
+					country{
+					  country
+					  code
+					}
+					countryArea
+					phone
+				}
 			}
 		}
 	}

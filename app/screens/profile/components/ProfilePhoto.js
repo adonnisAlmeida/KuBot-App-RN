@@ -34,8 +34,6 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
         setAvatarURL(avatar)
     }, [avatar])
 
-    console.log(avatar)
-
     const [userAvatarUpdate, { loadingAvatar, errorAvatar, dataAvatar }] = useMutation(USER_AVATAR_UPDATE, {
         onCompleted: (dataAvatar) => {
             console.log("userAvatarUpdate Actualizoooo ", dataAvatar)

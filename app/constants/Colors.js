@@ -24,6 +24,7 @@ const COLORS = {
 	WEB_LINK: '#039BE5',
 	WEB_BUTTON: '#26A5D4',
 	WEB_RED: '#ee4f55',
+	WEB_GRAY: '#6c757d;',
 }
 
 const ORDER_STATUS = {
