@@ -116,20 +116,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 case 'ACCEPTED_CARRIER':
                     setGifSource(require('../../../../../assets/product.gif'))
                     setActionsButton([
-                        /* {
-                            text: "En tránsito",
-                            icon: actionIcon('truck-moving'),
-                            name: "in_transit",
-                            position: 2,
-                            color: Colors.COLORS.PRIMARY
-                        },
-                        {
-                            text: "Perdida",
-                            icon: actionIcon('question'),
-                            name: "lost",
-                            position: 1,
-                            color: Colors.COLORS.PRIMARY
-                        } */
+                        
                     ])
                     break;
                 case 'PICKED_UP_CARRIER':
@@ -147,7 +134,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             color: Colors.COLORS.PRIMARY
                         },
                         {
-                            text: "Perdida",
+                            text: "Perdido",
                             icon: actionIcon('question'),
                             name: "lost",
                             position: 1,
@@ -177,7 +164,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             color: Colors.COLORS.PRIMARY
                         }, */
                         {
-                            text: "Perdida",
+                            text: "Perdido",
                             icon: actionIcon('question'),
                             name: "lost",
                             position: 1,
@@ -201,7 +188,7 @@ const DetailsNavView = ({ navigation, route }) => {
                     setGifSource(require('../../../../../assets/unsubscribed.gif'))
                     setActionsButton([
                         /* {
-                            text: "Perdida",
+                            text: "Perdido",
                             icon: actionIcon('question'),
                             name: "lost",
                             position: 1,
@@ -223,20 +210,7 @@ const DetailsNavView = ({ navigation, route }) => {
             case 'ACCEPTED_CARRIER':
                 setGifSource(require('../../../../../assets/product.gif'))
                 setActionsButton([
-                    /* {
-                        text: "En tránsito",
-                        icon: actionIcon('truck-moving'),
-                        name: "in_transit",
-                        position: 2,
-                        color: Colors.COLORS.PRIMARY
-                    },
-                    {
-                        text: "Perdida",
-                        icon: actionIcon('question'),
-                        name: "lost",
-                        position: 1,
-                        color: Colors.COLORS.PRIMARY
-                    } */
+                    
                 ])
                 break;
             case 'PICKED_UP_CARRIER':
@@ -250,7 +224,7 @@ const DetailsNavView = ({ navigation, route }) => {
                         color: Colors.COLORS.PRIMARY
                     },
                     {
-                        text: "Perdida",
+                        text: "Perdido",
                         icon: actionIcon('question'),
                         name: "lost",
                         position: 1,
@@ -276,7 +250,7 @@ const DetailsNavView = ({ navigation, route }) => {
                         color: Colors.COLORS.PRIMARY
                     }, */
                     {
-                        text: "Perdida",
+                        text: "Perdido",
                         icon: actionIcon('question'),
                         name: "lost",
                         position: 1,
@@ -300,7 +274,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 setGifSource(require('../../../../../assets/unsubscribed.gif'))
                 setActionsButton([
                     /* {
-                        text: "Perdida",
+                        text: "Perdido",
                         icon: actionIcon('question'),
                         name: "lost",
                         position: 1,
@@ -546,7 +520,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                     </Typography>
                                 ) : (
                                     <Typography color={colors.ON_SURFACE}>
-                                        'No especificado'
+                                        No especificado
                                     </Typography>
                                 )
                         }
@@ -559,7 +533,7 @@ const DetailsNavView = ({ navigation, route }) => {
                     {sellers.map((seller, index) => (
                         <TouchableOpacity
                             key={index}
-                            onPress={() => navigation.navigate('SellerDetails', { seller: seller.user })}
+                            onPress={() => navigation.navigate('SellerDetails', { seller: seller })}
                         >
                             <Typography color={colors.primary}>
                                 {seller.user.firstName + ' ' + seller.user.lastName}
@@ -671,7 +645,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 showConfirmButton={true}
                 cancelText="Cancelar"
                 confirmText="Aceptar"
-                confirmButtonColor="#F5365C"
+                confirmButtonColor={Colors.COLORS.WARNING}
                 onCancelPressed={() => {
                     setShowAlert(false)
                 }}

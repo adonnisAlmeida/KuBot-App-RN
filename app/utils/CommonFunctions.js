@@ -245,7 +245,7 @@ export function orderStatusDisplay(status) {
         case 'DRAFT':
             return "Borrador"
         case 'UNFULFILLED':
-            return "No complemtada"
+            return "No completada"
         case 'PARTIALLY_FULFILLED':
             return "Parcialmente completada"
         case 'FULFILLED':
@@ -253,7 +253,7 @@ export function orderStatusDisplay(status) {
         case 'CANCELED':
             return "Cancelada"
         case 'LOST':
-            return "Perdida"
+            return "Perdido"
         default:
             return "Borrador"
     }
@@ -274,7 +274,7 @@ export function orderShippingStatusDisplay(status) {
         case 'REJECTED':
             return "Rechazado"
         case 'LOST':
-            return "Perdida"
+            return "Perdido"
         default:
             return "Sin estado"
     }

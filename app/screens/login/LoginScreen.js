@@ -33,7 +33,7 @@ export default function LoginScreen({ navigation }) {
 	const [errors, setErrors] = useState([])
 	const [errorLogin, setErrorLogin] = useState(false)
 	const [isSecure, setIsSecure] = useState(true)
-	const [secureIcon, setSecureIcon] = useState('eye')
+	const [secureIcon, setSecureIcon] = useState('eye-slash')
 	const [errorMessage, setErrorMessage] = useState("")
 	const [token, setToken] = useState(null)
 	const [pushyToken, setPushyToken] = useState(null)
@@ -86,12 +86,12 @@ export default function LoginScreen({ navigation }) {
 			}
 			setLoadingButton(false)
 		},
-		onError: (errorToken) => {
+		onError: (errorToken, dataToken) => {
 			setLoadingButton(false)
 			setErrorLogin(true)
 			setErrorMessage(`Error de conexión >>> ${errorToken}`)
-			console.log('ERROR LOGIN >> ', errorToken)
-			console.log('ERROR LOGIN >> ', dataToken)
+			console.log('ERROR LOGIN errorToken >> ', JSON.stringify(errorToken, 2, null))
+			console.log('ERROR LOGIN dataToken >> ', dataToken)
 		},
 		fetchPolicy: "no-cache"
 	})
@@ -111,9 +111,9 @@ export default function LoginScreen({ navigation }) {
 	const changeSecure = () => {
 		setIsSecure(!isSecure)
 		if (isSecure) {
-			setSecureIcon('eye-slash')
-		} else {
 			setSecureIcon('eye')
+		} else {
+			setSecureIcon('eye-slash')
 		}
 	}
 
@@ -170,6 +170,7 @@ export default function LoginScreen({ navigation }) {
 						</Typography>
 						<TextInput
 							keyboardType='email-address'
+							//caretHidden={false}
 							value={email}
 							style={[
 								styles.input,

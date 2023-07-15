@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Typography } from '../../components'
 import { useTheme } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
-import { carrierInfo, setCarrierInfo, setCarrierInfoOtro } from '../../redux/userlogin/userLoginSlice'
+import { carrierInfo, setCarrierInfo, setCarrierInfoOtro, user } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
 import { kycAmigable, kycColor } from '../../utils/CommonFunctions'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -43,21 +43,49 @@ const CarrierDetails = () => {
     const [aborterRefBust, setAbortRefBust] = useState(new AbortController());
     const [reviews, setReviews] = useState(null);
     const carrier_info = useSelector(carrierInfo)
+    const user_state = useSelector(user)
     const dispatch = useDispatch()
 
-    //console.log("carrier_info >> ", carrier_info)
+    //console.log("carrier_info >> ", carrier_info.isActive)
+    console.log("piPhotoFrontal >> ", piPhotoFrontal)
+
+    const correctImageURI = (type) => {
+        switch (type) {
+            case 'FRONTAL':
+                if(carrier_info.piPhotoFrontal.image){
+                    return carrier_info.piPhotoFrontal.image.url
+                }else {
+                    return carrier_info.piPhotoFrontal.uri
+                }
+            case 'BACK':
+                if(carrier_info.piPhotoBack.image){
+                    return carrier_info.piPhotoBack.image.url
+                }else {
+                    return carrier_info.piPhotoBack.uri
+                }
+            case 'BUST':
+                if(carrier_info.bustPhoto.image){
+                    return carrier_info.bustPhoto.image.url
+                }else {
+                    return carrier_info.bustPhoto.uri
+                }
+        
+            default:
+                break;
+        }
+    }
 
     useEffect(() => {
-        setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
-        setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
-        setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
+        setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: correctImageURI('FRONTAL'), } : require('../../../assets/page404.png'))
+        setPiPhotoBack(carrier_info.piPhotoBack ? { uri: correctImageURI('BACK'), } : require('../../../assets/page404.png'))
+        setBustPhoto(carrier_info.bustPhoto ? { uri: correctImageURI('BUST'), } : require('../../../assets/page404.png'))
         setReviews(carrier_info.reviews)
     }, [])
 
     useEffect(() => {
-        setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
-        setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
-        setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
+        setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: correctImageURI('FRONTAL'), } : require('../../../assets/page404.png'))
+        setPiPhotoBack(carrier_info.piPhotoBack ? { uri: correctImageURI('BACK'), } : require('../../../assets/page404.png'))
+        setBustPhoto(carrier_info.bustPhoto ? { uri: correctImageURI('BUST'), } : require('../../../assets/page404.png'))
         setReviews(carrier_info.reviews)
     }, [carrier_info])
 
@@ -66,7 +94,7 @@ const CarrierDetails = () => {
             console.log('LO ACTUALIZOO >> ', data)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
-                piPhotoFrontal: data.carrierPiPhotoFrontalUpdate.carrier.piPhotoFrontal,
+                piPhotoFrontal: vistaPrevia,
             }))
             setUploadFrontal(false)
             if (Platform.OS === 'android')
@@ -84,7 +112,7 @@ const CarrierDetails = () => {
                 if (Platform.OS === 'android')
                     ToastAndroid.show('Error actualizando Imagen delantera.', ToastAndroid.LONG)
             }
-            setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: carrier_info.piPhotoFrontal.image.url, } : require('../../../assets/page404.png'))
+            setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: correctImageURI('FRONTAL'), } : require('../../../assets/page404.png'))
             console.log('Error actalizando info de lcarrier >> ', error)
             console.log('Error actalizando info de data >> ', data)
         },
@@ -100,7 +128,7 @@ const CarrierDetails = () => {
             console.log('LO ACTUALIZOO >> ', dataBust)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
-                piPhotoBack: dataBust.carrierPiPhotoBackUpdate.carrier.piPhotoBack,
+                piPhotoBack: vistaPrevia,
             }))
             setUploadBack(false)
             if (Platform.OS === 'android')
@@ -116,7 +144,7 @@ const CarrierDetails = () => {
                 if (Platform.OS === 'android')
                     ToastAndroid.show('Error actualizando Imagen trasera.', ToastAndroid.LONG)
             }
-            setPiPhotoBack(carrier_info.piPhotoBack ? { uri: carrier_info.piPhotoBack.image.url, } : require('../../../assets/page404.png'))
+            setPiPhotoBack(carrier_info.piPhotoBack ? { uri: correctImageURI('BACK'), } : require('../../../assets/page404.png'))
             /* console.log('Error actalizando info del carrier >> ', typeof(errorBack))
             console.log('Error actalizando info del carrier >> ', Object.keys(errorBack))
             console.log('Error actalizando info del carrier >> ', errorBack.message) */
@@ -135,7 +163,7 @@ const CarrierDetails = () => {
             console.log('LO ACTUALIZOO >> ', dataBust)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
-                bustPhoto: dataBust.carrierBustPhotoUpdate.carrier.bustPhoto,
+                bustPhoto: vistaPrevia,
             }))
             setUploadBust(false)
             if (Platform.OS === 'android')
@@ -156,7 +184,7 @@ const CarrierDetails = () => {
             }
             console.log('Error actalizando info de lcarrier >> ', errorBust)
             console.log('Error actalizando info de data >> ', dataBust)
-            setBustPhoto(carrier_info.bustPhoto ? { uri: carrier_info.bustPhoto.image.url, } : require('../../../assets/page404.png'))
+            setBustPhoto(carrier_info.bustPhoto ? { uri: correctImageURI('BUST'), } : require('../../../assets/page404.png'))
         },
         context: {
             fetchOptions: {
@@ -230,6 +258,7 @@ const CarrierDetails = () => {
     const updatePiPhotoFrontal = () => {
         setUploadFrontal(true)
         setPiPhotoFrontal(vistaPrevia)
+        console.log("vistaPrevia >> ", vistaPrevia)
         piPhotoFrontalUpdate({
             variables: { id: carrier_info.id, image: photoFile }
         })
@@ -311,8 +340,8 @@ const CarrierDetails = () => {
                     <View style={styles.cardRow}>
                         <Typography style={{ marginRight: 5, }}>Estado de la cuenta de Mensajero:</Typography>
                         <Typography bold color={
-                            carrier_info.kyc == 'APPROVED' ? Colors.COLORS.PRIMARY : '#eb5757'
-                        }>{carrier_info.kyc == 'APPROVED' ? 'Activa'.toUpperCase() : 'Inactiva'.toUpperCase()}</Typography>
+                            carrier_info.isActive ? Colors.COLORS.PRIMARY : '#eb5757'
+                        }>{carrier_info.isActive ? 'Activa'.toUpperCase() : 'Inactiva'.toUpperCase()}</Typography>
                     </View>
                     <View style={styles.headerContainer}><Typography style={{ marginRight: 5, }}>{'Información de KYC'.toUpperCase()}</Typography></View>
                     <View style={styles.cardRow}>
@@ -439,10 +468,22 @@ const CarrierDetails = () => {
                 <View style={{ marginTop: 15, paddingVertical: 8, alignItems: 'center' }} >
                     <Typography style={{ color: Colors.COLORS.ON_SURFACE }} h3 bold>Calificación y opiniones:</Typography>
                 </View>
-                {reviews ? (
-                    reviews.slice(0).reverse().map((review, index) => <ReviewsCard key={index} review={review}/>)
+                {reviews && reviews.length > 0 ? (
+                    reviews.slice(0).reverse().map((review, index) => {
+                        if (review.approvalStatus == 'PENDING' || review.approvalStatus == 'DISAPPROVED') {
+                            if (review.user.serverId == user_state.serverId) {
+                                return <ReviewsCard key={index} review={review} />
+                            } else {
+                                return null
+                            }
+                        } else {
+                            return <ReviewsCard key={index} review={review} />
+                        }
+                    })
                 ) : (
-                    null
+                    <View style={{alignItems: 'center'}}>
+                        <Typography color={Colors.COLORS.WEB_LINK}>Aún no tienes calificaciones.</Typography>
+                    </View>
                 )}
                 <Typography></Typography>
                 <Typography></Typography>

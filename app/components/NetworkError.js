@@ -5,13 +5,13 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 import { Button, Typography } from './'
 
-export default function NetworkError({ accion }) {
+export default function NetworkError({ accion, mTop }) {
 	const { dark, colors } = useTheme()
 
 	const cicle_color = dark ? '#0062DA1F' : '#0062DA1F'
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, {marginTop: mTop? mTop: -80}]}>
 			<View
 				style={[
 					styles.cicle,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		marginHorizontal: 20,
-		marginTop: -80,
+		//marginTop:-80,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},

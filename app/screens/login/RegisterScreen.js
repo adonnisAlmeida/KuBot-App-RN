@@ -8,6 +8,7 @@ import {
 	Platform,
 	ToastAndroid,
 	ScrollView,
+	TouchableOpacity,
 } from 'react-native'
 import { useMutation } from '@apollo/client'
 import { useTheme } from '@react-navigation/native'
@@ -15,6 +16,7 @@ import { useTheme } from '@react-navigation/native'
 import { Button, Typography } from '../../components'
 import { ACCOUNT_REGISTER } from '../../graphql/login'
 import Colors from '../../constants/Colors'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 export default function RegisterScreen({ navigation }) {
 	const { colors } = useTheme()
@@ -24,6 +26,10 @@ export default function RegisterScreen({ navigation }) {
 	const [password, setPassword] = useState('')
 	const [repeatPassword, setRepeatPassword] = useState('')
 	const [errors, setErrors] = useState([])
+	const [isSecure1, setIsSecure1] = useState(true)
+	const [isSecure2, setIsSecure2] = useState(true)
+	const [secureIcon1, setSecureIcon1] = useState('eye-slash')
+	const [secureIcon2, setSecureIcon2] = useState('eye-slash')
 
 	//console.log("user_state TOKEN >>", user_state.token)
 
@@ -106,6 +112,25 @@ export default function RegisterScreen({ navigation }) {
 		}
 	}
 
+	const changeSecure = (input) => {
+		if (input == 1) {
+			setIsSecure1(!isSecure1)
+			if (isSecure1) {
+				setSecureIcon1('eye')
+			} else {
+				setSecureIcon1('eye-slash')
+			}
+		}else{
+			setIsSecure2(!isSecure2)
+			if (isSecure2) {
+				setSecureIcon2('eye')
+			} else {
+				setSecureIcon2('eye-slash')
+			}
+		}
+
+	}
+
 	return (
 
 		<KeyboardAvoidingView
@@ -116,7 +141,7 @@ export default function RegisterScreen({ navigation }) {
 			<ScrollView
 				keyboardShouldPersistTaps='handled' /* esto hace que sea cliqueable el contenido con el keyboard open */
 				showsVerticalScrollIndicator={false}
-			> 
+			>
 				<View style={{ alignItems: 'center', }}>
 					<Typography color={colors.ON_BACKGROUND} style={styles.title}>
 						Crear Cuenta
@@ -131,11 +156,16 @@ export default function RegisterScreen({ navigation }) {
 					</Typography>
 					<TextInput
 						keyboardType='email-address'
+						caretHidden={false}
 						value={email}
 						style={[
 							styles.input,
 							hasErrors('email'),
-							{ color: colors.ON_BACKGROUND },
+							{
+								color: colors.ON_BACKGROUND,
+								borderBottomColor: '#8E8E8E',
+								borderBottomWidth: StyleSheet.hairlineWidth,
+							},
 						]}
 						onChangeText={(text) => setEmail(text)}
 					/>
@@ -152,16 +182,30 @@ export default function RegisterScreen({ navigation }) {
 					>
 						Contraseña
 					</Typography>
-					<TextInput
-						secureTextEntry
-						value={password}
-						style={[
-							styles.input,
-							hasErrors('password'),
-							{ color: colors.ON_BACKGROUND },
-						]}
-						onChangeText={(text) => setPassword(text)}
-					/>
+					<View style={{
+						flexDirection: 'row',
+						borderBottomColor: '#8E8E8E',
+						borderBottomWidth: StyleSheet.hairlineWidth,
+					}}>
+						<TextInput
+							secureTextEntry={isSecure1}
+							value={password}
+							style={[
+								styles.input,
+								hasErrors('password'),
+								{ color: colors.ON_BACKGROUND, flex: 1 },
+							]}
+							onChangeText={(text) => setPassword(text)}
+						/>
+						<TouchableOpacity onPress={() => changeSecure(1)}>
+							<FontAwesome
+								style={{ marginTop: 10 }}
+								name={secureIcon1}
+								size={24}
+							//color={colors.SURFACE}
+							/>
+						</TouchableOpacity>
+					</View>
 				</View>
 				<View style={{ marginTop: 20 }}>
 					<Typography
@@ -170,16 +214,30 @@ export default function RegisterScreen({ navigation }) {
 					>
 						Repetir Contraseña
 					</Typography>
-					<TextInput
-						secureTextEntry
-						value={repeatPassword}
-						style={[
-							styles.input,
-							hasErrors('password'),
-							{ color: colors.ON_BACKGROUND },
-						]}
-						onChangeText={(text) => setRepeatPassword(text)}
-					/>
+					<View style={{
+						flexDirection: 'row',
+						borderBottomColor: '#8E8E8E',
+						borderBottomWidth: StyleSheet.hairlineWidth,
+					}}>
+						<TextInput
+							secureTextEntry={isSecure2}
+							value={repeatPassword}
+							style={[
+								styles.input,
+								hasErrors('password'),
+								{ color: colors.ON_BACKGROUND, flex: 1 },
+							]}
+							onChangeText={(text) => setRepeatPassword(text)}
+						/>
+						<TouchableOpacity onPress={() => changeSecure(2)}>
+							<FontAwesome
+								style={{ marginTop: 10 }}
+								name={secureIcon2}
+								size={24}
+							//color={colors.SURFACE}
+							/>
+						</TouchableOpacity>
+					</View>
 				</View>
 				{passError ? (
 					<Typography small color="red" style={{ marginVertical: 10 }} >
@@ -240,8 +298,6 @@ const styles = StyleSheet.create({
 	input: {
 		borderRadius: 0,
 		borderWidth: 0,
-		borderBottomColor: '#8E8E8E',
-		borderBottomWidth: StyleSheet.hairlineWidth,
 		height: 45,
 		fontSize: 16,
 	},

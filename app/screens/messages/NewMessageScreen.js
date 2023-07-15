@@ -155,34 +155,6 @@ const NewMessageScreen = ({ navigation }) => {
         ),
     })
 
-    const [sendMessageMutation, { loadingSend, errorSend, dataSend }] = useMutation(SEND_MESSAGE, {
-        onCompleted: (dataSend) => {
-            console.log('LO ENVIO >> ', dataSend.messageCreate.message.recipients)
-            dataSend.messageCreate.message.recipients.forEach(item => {
-                let newM = {
-                    usuario: item,
-                    mensaje: dataSend.messageCreate.message
-                }
-                dispatch(addMessageToConversation(newM))
-            })
-            if (Platform.OS === 'android')
-                ToastAndroid.show('Mensaje Enviado correctamente.', ToastAndroid.LONG)
-            navigation.navigate('MessagesScreen')
-            setTitle('')
-            setContent('')
-            setSelectedItems([])
-            //dispatch(addMessageToConversation(newM))
-            setEnviando(false)
-        },
-        onError: (errorSend, dataSend) => {
-            if (Platform.OS === 'android')
-                ToastAndroid.show('Error enviando mensaje.', ToastAndroid.LONG)
-            console.log('Error enviando mensaje >> ', errorSend)
-            console.log('Error enviando mensaje data >> ', dataSend)
-            setEnviando(false)
-        },
-    })
-
     const actualizarUsuarios = (orders) => {
         console.log("entro a actualizar")
         let temp = []
@@ -287,43 +259,7 @@ const NewMessageScreen = ({ navigation }) => {
         }
     }
 
-    const sendMessage = () => {
-        if (content == '') {
-            setErrors([...errors, 'content'])
-        } else {
-            if (selectedItems.length == 0) {
-                setErrors([...errors, 'destinatarios'])
-            } else {
-                setEnviando(true)
-                console.log(`selectedItems >> ${user_state.serverId} >>`, selectedItems)
-                sendMessageMutation({
-                    variables: {
-                        messageInput: {
-                            "title": title,
-                            "content": content,
-                            "author": user_state.serverId,
-                            "recipients": selectedItems
-                        }
-                    }
-                })
-            }
-
-        }
-
-    }
-
-
-    const onSelectedItemsChange = (selectedItems) => {
-        setSelectedItems(selectedItems);
-        /* for (let i = 0; i < selectedItems.length; i++) {
-            var tempItem = DATA.find(item => item.id === selectedItems[i]);
-            console.log(tempItem);
-        } */
-    };
-
-
     if (loadingUsers) return <Loading />
-
 
     return (
         <View style={{ flex: 1 }}>
@@ -375,97 +311,6 @@ const NewMessageScreen = ({ navigation }) => {
                 )}
             />
         </View>
-
-        /* <ScrollView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={{ flex: 1 }}
-                keyboardVerticalOffset={90}
-            >
-                <View style={styles.inputLabel}>
-                    <Input
-                        label="Título (opcional)"
-                        value={title}
-                        setValue={setTitle}
-                    />
-                </View>
-                <MultiSelect
-                    //hideTags
-                    items={allUsers}
-                    fixedHeight={true}
-                    hideSubmitButton={true}
-                    //hideDropdown={true}
-                    //flatListProps={{style: {position: 'absolute', height: 200, width: '100%', zIndex: 999}}}
-                    uniqueKey="id"
-                    styleDropdownMenu={{
-                        backgroundColor: 'transparent',
-                        height: 50,
-                        borderBottomColor: '#000',
-                    }}
-                    selectedText='seleccionados'
-                    styleItemsContainer={{ backgroundColor: 'transparent', height: 210 }}
-                    //styleListContainer={{backgroundColor : 'red'}}
-                    styleMainWrapper={{ backgroundColor: 'transparent', marginBottom: 5 }}
-                    styleRowList={{ paddingVertical: 3 }}
-                    styleInputGroup={{ paddingRight: 15, backgroundColor: 'transparent' }}
-                    styleDropdownMenuSubsection={{
-                        backgroundColor: 'transparent',
-                        borderBottomColor: '#8E8E8E',
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                        paddingRight: 10,
-                    }}
-                    onSelectedItemsChange={onSelectedItemsChange}
-                    selectedItems={selectedItems}
-                    selectText="Destinatarios"
-                    searchInputPlaceholderText="Buscar destinatario..."
-                    onChangeInput={(text) => console.log(text)}
-                    tagRemoveIconColor="rgba(0,0,0,0.2)"
-                    tagBorderColor="rgba(0,0,0,0.2)"
-                    tagTextColor="rgba(0,0,0,0.6)"
-                    selectedItemTextColor={Colors.COLORS.WEB_BUTTON}
-                    selectedItemIconColor={Colors.COLORS.WEB_BUTTON}
-                    itemTextColor="#8E8E8E"
-                    displayKey="userName"
-                    searchInputStyle={{ color: '#8E8E8E' }}
-                    submitButtonColor={Colors.COLORS.PRIMARY}
-                    submitButtonText="Aceptar"
-                />
-                {hasErrors('destinatarios') ? (
-                    <Typography style={{ marginTop: 0 }} color={Colors.COLORS.ERROR}>
-                        El campo destinatarios no pueden estar vacío.
-                    </Typography>
-                ) : (
-                    null
-                )}
-                <View style={styles.inputLabel}>
-                    <Input
-                        error={hasErrors('content')}
-                        label="Cuerpo"
-                        value={content}
-                        setValue={setContent}
-                        onSubmitEditing={sendMessage}
-                    />
-                    {hasErrors('content') ? (
-                        <Typography style={{ marginTop: 10 }} color={Colors.COLORS.ERROR}>
-                            El campo cuerpo no pueden estar vacío.
-                        </Typography>
-                    ) : (
-                        null
-                    )}
-                </View>
-                <Button
-                    color={Colors.COLORS.WEB_BUTTON}
-                    style={{ alignItems: 'center', borderRadius: 10, marginVertical: 20 }}
-                    onPress={() => sendMessage()}
-                >
-                    {(enviando) ? (
-                        <ActivityIndicator size="small" color="white" />
-                    ) : (
-                        <Typography color="#ffffff">Enviar</Typography>
-                    )}
-                </Button>
-            </KeyboardAvoidingView>
-        </ScrollView> */
     )
 }
 

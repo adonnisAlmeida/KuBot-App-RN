@@ -109,7 +109,7 @@ export function DrawerItemLogout(props) {
 				showConfirmButton={true}
 				cancelText="Cancelar"
 				confirmText="Aceptar"
-				confirmButtonColor="#F5365C"
+				confirmButtonColor={Colors.COLORS.WARNING}
 				onCancelPressed={() => {
 					setShowAlert(false)
 				}}

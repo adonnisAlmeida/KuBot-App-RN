@@ -308,7 +308,7 @@ export const ACCEPT_ORDERS_LIST = gql`
 						}
 					}
 					getDistance
-					shippingAddress{
+					defaultPickupAddress{
 						city
 						postalCode
 						countryArea
@@ -356,7 +356,7 @@ export const ACCEPT_ORDER_ID = gql`
 				unit
 				value
 			}
-			shippingAddress{
+			defaultPickupAddress{
 				city
 				postalCode
 				countryArea
@@ -462,6 +462,7 @@ export const ORDER_ID = gql`
 			number
 			sellers{
 				user{
+					serverId
 					userName
 					avatar{
 						url
@@ -469,6 +470,7 @@ export const ORDER_ID = gql`
 					}
 					firstName
 					lastName
+					dateJoined
 					addresses{
 					  country {
 							country
@@ -487,6 +489,7 @@ export const ORDER_ID = gql`
 			created
 			status
 			user {
+				serverId
 				userName
 				avatar{
 					url

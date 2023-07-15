@@ -19,15 +19,15 @@ import { useTheme } from '@react-navigation/native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 //import { LinearGradient } from 'expo-linear-gradient'
 import LinearGradient from 'react-native-linear-gradient';
-import { useLazyQuery, useQuery } from '@apollo/client'
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
 
 import Theme from '../../constants/Theme'
 import { Typography, FloatingActionButton } from '../../components'
 import { PRODUCT_TYPES } from '../../graphql/product'
-import { setCarrierInfo, user, carrierInfo } from '../../redux/userlogin/userLoginSlice'
+import { setCarrierInfo, user, carrierInfo, login, userInfoUpdate } from '../../redux/userlogin/userLoginSlice'
 import { URL } from '../../constants/Other'
 import Pushy from 'pushy-react-native';
-import { GET_CARRIER_BY_USER_EMAIL } from '../../graphql/login'
+import { GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 
 const { width } = Dimensions.get('window')
@@ -38,13 +38,15 @@ export default function HomeScreen({ navigation }) {
 	const dispatch = useDispatch()
 	const user_state = useSelector(user)
 	const carrier_state = useSelector(carrierInfo)
+	const [initTockenLoading, setInitTockenLoading] = useState(false)
+	const [initCarrierLoading, setInitCarrierLoading] = useState(false)
 	const [pushyToken, setPushyToken] = useState(null)
 
 	/* console.log("countryArea >>>>", user_state.addresses[0].countryArea)
 	console.log("cityArea >>>>", user_state.addresses[0].cityArea) */
 	//console.log("carrier_state >> ", carrier_state)
 	//console.log("localCarreirInfo >> ", localCarreirInfo)
-	//console.log("user_state.isCarrier >> ", user_state.isCarrier)
+	//console.log("user_state.isCarrier >> ", user_state)
 
 	const [getCarrierByUserEmail, { loading, error, data }] = useLazyQuery(GET_CARRIER_BY_USER_EMAIL, {
 		onCompleted: (data) => {
@@ -53,15 +55,38 @@ export default function HomeScreen({ navigation }) {
 			} else {
 				dispatch(setCarrierInfo({}))
 			}
-
+			setInitCarrierLoading(false)
+			//console.log('termino  getCarrierByUserEmail>> ', data.carriers.edges)
 		},
 		onError: (error) => {
-			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', error)
+			setInitCarrierLoading(false)
+			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', JSON.stringify(error, null, 2))
+		},
+		fetchPolicy: "no-cache"
+	})
+
+	const [tokenVerify, { loadingToken, errorToken, dataToken }] = useMutation(TOKEN_VERIFY, {
+		onCompleted: (dataToken) => {
+			const userInfo = {
+				isCarrier: dataToken.tokenVerify.user.isCarrier,
+				isStaff: dataToken.tokenVerify.user.isStaff,
+				isSeller: dataToken.tokenVerify.user.isSeller,
+			}
+			dispatch(userInfoUpdate(userInfo))
+			setInitTockenLoading(false)
+		},
+		onError: (errorToken, dataToken) => {
+			setInitTockenLoading(false)
+			console.log('ERROR Token Verift >> ', JSON.stringify(errorToken, null, 2))
+			//console.log('ERROR Token Verift DATA >> ', JSON.stringify(dataToken, null, 2))
 		},
 		fetchPolicy: "no-cache"
 	})
 
 	useEffect(() => {
+		setInitTockenLoading(true)
+		setInitCarrierLoading(true)
+		tokenVerify({ variables: { token: user_state.token } })
 		getCarrierByUserEmail({ variables: { userEmail: user_state.email } })
 		// Register the user for push notifications
 		Pushy.register().then(async (deviceToken) => {
@@ -136,7 +161,7 @@ export default function HomeScreen({ navigation }) {
 
 	const carrierApplication = () => {
 		//console.log("carrierApplication >>", localCarreirInfo.kyc)
-		if (loading) {
+		if (initCarrierLoading || initTockenLoading) {
 			return null
 		} else {
 			if (Object.keys(localCarreirInfo).length == 0) {// elcarrier no ha terminado el registro
@@ -244,27 +269,43 @@ export default function HomeScreen({ navigation }) {
 	}
 
 	const recent = () => {
-		const { loading, error, data } = useQuery(PRODUCT_TYPES)
+		const [products, setProducts] = useState([])
+		const [loading, setLoading] = useState([])
+
+		const [recentsProducts, { loadingProducts, errorProducts, dataProducts }] = useLazyQuery(PRODUCT_TYPES, {
+			onCompleted: (dataProducts) => {
+				setProducts(dataProducts)
+				setLoading(false)
+			},
+			onError: (errorProducts) => {
+				setLoading(false)
+				console.log('ERROR recentsProducts >> ', JSON.stringify(errorProducts, null, 2))
+			},
+			fetchPolicy: "no-cache"
+		})
+
+		useEffect(() => {
+			setLoading(true)
+			recentsProducts()
+		}, [])
 
 		return (
 			<View>
 				<Typography color={colors.ON_BACKGROUND} style={{ marginBottom: 10 }}>
 					TIPOS DE PRODUCTOS
 				</Typography>
-				{(loading || error) && (
+				{loading ? (
 					<ActivityIndicator size="small" color={colors.primary} />
-				)}
-
-				<View
-					style={{
-						display: 'flex',
-						flexDirection: 'row',
-						justifyContent: 'space-between',
-						flexWrap: 'wrap',
-					}}
-				>
-					{!(loading || error) &&
-						data.productTypes.edges.map((edges, index) => {
+				) : (
+					<View
+						style={{
+							display: 'flex',
+							flexDirection: 'row',
+							justifyContent: 'space-between',
+							flexWrap: 'wrap',
+						}}
+					>
+						{products?.productTypes.edges.map((edges, index) => {
 							return (
 								<View
 									key={index}
@@ -282,7 +323,40 @@ export default function HomeScreen({ navigation }) {
 								</View>
 							)
 						})}
-				</View>
+					</View>
+				)}
+				{/* {(loading || error || initTockenLoading || initCarrierLoading) && (
+					<ActivityIndicator size="small" color={colors.primary} />
+				)}
+
+				<View
+					style={{
+						display: 'flex',
+						flexDirection: 'row',
+						justifyContent: 'space-between',
+						flexWrap: 'wrap',
+					}}
+				>
+					{!(loading || error || initTockenLoading || initCarrierLoading) &&
+						products.productTypes.edges.map((edges, index) => {
+							return (
+								<View
+									key={index}
+									style={[
+										styles.product_type,
+										{ backgroundColor: colors.SURFACE },
+									]}
+								>
+									<Typography bold regular color={colors.ON_SURFACE}>
+										{edges.node.name}
+									</Typography>
+									<Typography regular color={colors.ON_SURFACE}>
+										{edges.node.products.totalCount} unidades
+									</Typography>
+								</View>
+							)
+						})}
+				</View> */}
 			</View>
 		)
 	}

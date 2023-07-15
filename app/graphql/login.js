@@ -45,6 +45,84 @@ export const TOKEN_CREATE = gql`
 	}
 `
 
+export const TOKEN_VERIFY = gql`
+	mutation TokenVerify($token: String!) {
+		tokenVerify(token: $token) {
+			user {
+				id
+				isCarrier
+				isStaff
+				isSeller
+				serverId
+				firstName
+				lastName
+				addresses{
+					id
+					companyName
+					isDefaultBillingAddress
+					isDefaultShippingAddress
+					streetAddress1
+					firstName
+					lastName
+					streetAddress2
+					city
+					cityArea
+					postalCode
+					country{
+					country
+					code
+					}
+					countryArea
+					phone
+				}
+				avatar {
+					url
+					alt
+				}
+				email
+			}
+		}
+	}
+`
+
+export const USER_INFO = gql`
+	query User($id:ID!) {
+		user(id: $id) {
+			id
+				isCarrier
+				isStaff
+		isSeller
+				serverId
+				firstName
+				lastName
+				addresses{
+					id
+					companyName
+					isDefaultBillingAddress
+					isDefaultShippingAddress
+					streetAddress1
+							firstName
+					lastName
+					streetAddress2
+					city
+					cityArea
+					postalCode
+					country{
+					country
+					code
+					}
+					countryArea
+					phone
+				}
+				avatar {
+					url
+					alt
+				}
+				email
+		}
+	}	
+`
+
 export const ACCOUNT_REGISTER = gql`
 	mutation AccountRegister($email: String!, $password: String!) {
 		accountRegister(input: { email: $email, password: $password }) {
@@ -144,25 +222,26 @@ export const GET_CARRIER_BY_USER_EMAIL = gql`
 					reviews{
 						createdAt
 						user{
-						  firstName
-						  lastName
-						  userName
-						  avatar{
-							url
-							alt
-						  }
+							serverId
+							firstName
+							lastName
+							userName
+							avatar{
+								url
+								alt
+							}
 						}
 						title
 						message
 						rating
 						approvalStatus
 						option{
-						  name
-						  description
-						  serverId
+							name
+							description
+							serverId
 						}
 						order{
-						  number
+						  	number	
 						}
 					}
 				}

@@ -7,12 +7,16 @@ export const userLoginSlice = createSlice({
 		carrierInfo: {},
 		user: {},
 		isLogin: false,
+		isCarrier: false,
+		isStaff: false,
+		isSeller: false
 	},
 	extraReducers(builder) {
 		builder
 			.addCase(login.fulfilled, (state, action) => {
 				state.user = action.payload
 				state.isLogin = true
+				state.isCarrier = action.payload.isCarrier
 			})
 			.addCase(setUser.fulfilled, (state, action) => {
 				state.user = action.payload
@@ -37,10 +41,21 @@ export const userLoginSlice = createSlice({
 				state.carrierInfo = (carrierInfo && state.isLogin) ? carrierInfo : {}
 			})
 			.addCase(setToken.fulfilled, (state, action) => {
-				state.user = {token: action.payload, ...state.user}
+				state.user = {  ...state.user, token: action.payload }
 			})
 			.addCase(setUserAddresses.fulfilled, (state, action) => {
 				state.user.addresses = action.payload
+			})
+			.addCase(userInfoUpdate.fulfilled, (state, action) => {
+				/* state.isCarrier = action.payload.isCarrier
+				state.isStaff = action.payload.isStaff
+				state.isSeller = action.payload.isSeller */
+				state.user = {
+					...state.user,
+					isCarrier: action.payload.isCarrier,
+					isStaff: action.payload.isStaff,
+					isSeller: action.payload.isSeller
+				}
 			})
 	},
 })
@@ -48,6 +63,7 @@ export const userLoginSlice = createSlice({
 export const user = (state) => state.userlogin.user
 export const carrierInfo = (state) => state.userlogin.carrierInfo
 export const isLogin = (state) => state.userlogin.isLogin
+export const isCarrier = (state) => state.userlogin.isCarrier
 
 export const login = createAsyncThunk('userlogin/login', service.login)
 export const logout = createAsyncThunk('userlogin/logout', service.logout)
@@ -58,5 +74,6 @@ export const setCarrierInfoOtro = createAsyncThunk('userlogin/setCarrierInfoOtro
 export const getCarrierInfo = createAsyncThunk('userlogin/getCarrierInfo', service.getCarrierInfo)
 export const setToken = createAsyncThunk('userlogin/setToken', service.setToken)
 export const setUserAddresses = createAsyncThunk('userlogin/setUserAddresses', service.setUserAddresses)
+export const userInfoUpdate = createAsyncThunk('userlogin/userInfoUpdate', service.userInfoUpdate)
 
 export default userLoginSlice.reducer

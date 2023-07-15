@@ -10,6 +10,7 @@ export default {
 	setCarrierInfoOtro,
 	setToken,
 	setUserAddresses,
+	userInfoUpdate,
 }
 
 function login(user) {
@@ -63,4 +64,17 @@ async function setUserAddresses(addresses) {
 	userInfo.addresses = addresses
 	await AsyncStorage.setItem('@userlogin', JSON.stringify(userInfo))
 	return addresses
+}
+
+async function userInfoUpdate(userInfo) {
+	const data = await AsyncStorage.getItem('@userlogin')
+	let userInfoFull = JSON.parse(data)
+	userInfoFull = {
+		...userInfoFull,
+		isCarrier: userInfo.isCarrier,
+		isStaff: userInfo.isStaff,
+		isSeller: userInfo.isSeller
+	}
+	await AsyncStorage.setItem('@userlogin', JSON.stringify(userInfoFull))
+	return userInfo
 }

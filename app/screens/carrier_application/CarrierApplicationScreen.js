@@ -42,6 +42,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 	const [provinciasList, setProvinciasList] = useState([])
 	const [registerCarrier, setRegisterCarrier] = useState(false)
 	const [loadingZones, setLoadingZones] = useState(false)
+	const [terms, setTerms] = useState(false)
 	const dispatch = useDispatch()
 	const allDeliveryAreasStorage = useSelector(allDeliveryAreas)
 
@@ -170,10 +171,17 @@ const CarrierApplicationScreen = ({ navigation }) => {
 		if (bustPhotoFile == null) {
 			errorData.push('bustPhotoFile')
 		}
+		if (!terms) {
+			errorData.push('terms')
+			if (Platform.OS === 'android') {
+				ToastAndroid.show('Debe aceptar los términos y condiciones de uso de datos.', ToastAndroid.LONG)
+			}
+		}
 		if (errorData.length > 0) {
 			setErrors(errorData)
 			console.log("TIENE ERRORESSS >> ", errorData)
 		} else {
+			console.log('ESTA OKOK')
 			/* let carrierApplication = {
 				piPhotoFrontal: piPhotoFrontalFile,
 				piPhotoBack: piPhotoBackFile,
@@ -251,18 +259,18 @@ const CarrierApplicationScreen = ({ navigation }) => {
 	return (
 		<View style={{ flex: 1 }}>
 			{/* <View style={{ overflow: 'hidden', paddingBottom: 5 }}> */}
-				<View
-					style={{
-						paddingTop: 10,
-						paddingHorizontal: 10,
-					}}>
-					<StepIndicator
-						stepCount={2}
-						customStyles={customStyles}
-						currentPosition={currentPosition}
-						labels={labels}
-					/>
-				</View>
+			<View
+				style={{
+					paddingTop: 10,
+					paddingHorizontal: 10,
+				}}>
+				<StepIndicator
+					stepCount={2}
+					customStyles={customStyles}
+					currentPosition={currentPosition}
+					labels={labels}
+				/>
+			</View>
 			{/* </View> */}
 			{currentPosition == 0 ? (
 				<FirstComponent
@@ -310,6 +318,8 @@ const CarrierApplicationScreen = ({ navigation }) => {
 					setPiPhotoFrontalFile={setPiPhotoFrontalFile}
 					setPiPhotoBackFile={setPiPhotoBackFile}
 					setBustPhotoFile={setBustPhotoFile}
+					setTerms={setTerms}
+					terms={terms}
 					hasErrors={hasErrors}
 					setErrors={setErrors}
 				/>

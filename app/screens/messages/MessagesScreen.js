@@ -2,7 +2,7 @@ import { View, Text } from 'react-native'
 import { useEffect, useState } from 'react'
 import { useTheme } from '@react-navigation/native'
 import { useLazyQuery } from '@apollo/client'
-import { Loading, NetworkError } from '../../components'
+import { Loading, NetworkError, Typography } from '../../components'
 import MessagesList from './components/MessagesList'
 import { RECEIVED_MESSAGES, SENT_MESSAGES } from '../../graphql/messages'
 import { useDispatch, useSelector } from 'react-redux'
@@ -25,7 +25,7 @@ const MessagesScreen = ({ navigation }) => {
     const carrier_state = useSelector(carrierInfo)
     const conversation_reducer = useSelector(conversations)
     const dispatch = useDispatch()
-    
+
     const [tempConversation, setTempConversation] = useState([])
 
     const [getSentMessages, { loadingSent, errorSent, dataSent }] = useLazyQuery(SENT_MESSAGES, {
@@ -150,10 +150,10 @@ const MessagesScreen = ({ navigation }) => {
         if (!refreshing && !firstTime) {//cunado esta refrescando y no es primera vez
             tempConversation.forEach(item => tem.push(item))
             console.log("Entro 1")
-        }else if(refreshing && firstTime){
+        } else if (refreshing && firstTime) {
             console.log("Entro 2")
             setFirstTime(false)
-        }else if (refreshing && !firstTime){
+        } else if (refreshing && !firstTime) {
             console.log("Entro 3")
             tempConversation.forEach(item => tem.push(item))
         }
@@ -276,19 +276,34 @@ const MessagesScreen = ({ navigation }) => {
                 ) :
                 (
                     <>
-                        <View>
-                            <MessagesList
-                                navigation={navigation}
-                                list={tempConversation}
-                                doRefresh={() => doRefresh()}
-                                //loadMore={() => loadMore()}
-                                renderLoader={renderLoader}
-                                refreshing={refreshing}
-                            />
+                        <View style={{flex: 1}}>
+                            {tempConversation.length == 0 ? (
+                                <>
+                                    <View style={{
+                                        flex: 1,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                        <Typography style={{marginBottom: 10}} h2>Usted no tiene mensajes aún. </Typography>
+                                        <Typography >Puede comenzar a comunicarse con sus compañeros. Recuerde, una buena comunicación es la clave del éxito. </Typography>
+                                    </View>
+                                </>
+
+                            ) : (
+                                <MessagesList
+                                    navigation={navigation}
+                                    list={tempConversation}
+                                    doRefresh={() => doRefresh()}
+                                    //loadMore={() => loadMore()}
+                                    renderLoader={renderLoader}
+                                    refreshing={refreshing}
+                                />
+                            )}
+
                         </View>
                         <FloatingAction
                             color={Colors.COLORS.PRIMARY}
-                            actions={carrier_state.kyc == 'APPROVED'?  actionNewMessageCarrier: actionNewMessage}
+                            actions={carrier_state.kyc == 'APPROVED' ? actionNewMessageCarrier : actionNewMessage}
                             onPressItem={name => {
                                 doAction(name)
                             }}

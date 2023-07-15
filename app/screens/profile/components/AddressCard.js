@@ -31,6 +31,8 @@ const AddressCard = ({
     setSelectedAddress,
     setCodigoTelefono,
     setActionToDo,
+    provinciasList,
+    openEdit,
 }) => {
     const [showAlertAw, setShowAlertAw] = useState(false)
     const [deletingAddress, setDeletingAddress] = useState(false)
@@ -76,9 +78,38 @@ const AddressCard = ({
         }, 1000); */
     }
 
+    const editAction = () => {
+        //console.log("A editar >> ", provinciasList)
+        openEdit(address)
+        /* let indexCountry = COUNTRIES.findIndex(obj => obj.code == address.country.code)
+        let goodPhone = address.phone
+        if (address.phone.includes(COUNTRIES[indexCountry].mobileCode)) {
+            goodPhone = address.phone.substring(COUNTRIES[indexCountry].mobileCode, COUNTRIES[indexCountry].mobileCode.length)
+        }
+        setActionToDo('EDIT')
+        setCodigoTelefono(indexCountry)
+        setSelectedAddress(address)
+        setFirstName(address.firstName)
+        setLastName(address.lastName)
+        setCountry(address.country.country)
+        setCountryCode(address.country.code)
+        setCountryArea(address.countryArea) // provincia
+        setCity(address.city) // municipio
+        setCityArea(address.cityArea)
+        setAddress(address.streetAddress1)
+        setAddress2(address.streetAddress2)
+        setPostalCode(address.postalCode)
+        setPhone(goodPhone)
+        setCompanyName(address.companyName)
+        setEditAddressModal(true) */
+    }
+
     return (
         <>
-            <View style={[styles.card, { backgroundColor: colors.SURFACE, marginTop: 10, paddingTop: 5, }]}>
+            <View style={[styles.card, {
+                marginTop: 10,
+                paddingTop: address.isDefaultBillingAddress ? address.isDefaultShippingAddress ? 46 : 25 : address.isDefaultShippingAddress ? 25 : 5,
+            }]}>
                 {deletingAddress ? (
                     <View
                         style={{
@@ -100,12 +131,57 @@ const AddressCard = ({
                         />
                     </View>
                 ) : (null)}
+                {address.isDefaultBillingAddress ? (
+                    <View style={{
+                        backgroundColor: Colors.COLORS.INFO,
+                        position: 'absolute',
+                        paddingTop: 5,
+                        paddingLeft: 18,
+                        paddingBottom: 3,
+                        left: 0,
+                        right: 0,
+                        zIndex: 99,
+                        borderTopLeftRadius: 7,
+                        borderTopRightRadius: 7,
+                        /* borderBottomWidth: 1,
+                        borderBottomColor: 'red', */
+                    }}>
+                        <Typography style={{
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontWeight: 'bold',
+                        }}>Dirección de Facturación</Typography>
+                    </View>
+                ) : (
+                    null
+                )}
+                {address.isDefaultShippingAddress ? (
+                    <View style={{
+                        backgroundColor: Colors.COLORS.INFO,
+                        position: 'absolute',
+                        top: 0,
+                        paddingTop: address.isDefaultBillingAddress ? 28 : 5,
+                        borderTopLeftRadius: 7,
+                        borderTopRightRadius: 7,
+                        paddingBottom: 3,
+                        paddingLeft: 18,
+                        left: 0,
+                        right: 0,
+                    }}>
+                        <Typography style={{
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontWeight: 'bold',
+                        }}>Dirección de Entrega</Typography>
+                    </View>
+                ) : (
+                    null
+                )}
+
                 <View style={styles.seccionCorner}>
-                    {address.isDefaultBillingAddress ? (
+                    {/* {address.isDefaultBillingAddress ? (
                         <Typography style={{
                             color: Colors.COLORS.ON_SURFACE,
                             fontWeight: 'bold',
-                        }}>Dirección de facturación</Typography>
+                        }}>Facturación</Typography>
                     ) : (
                         null
                     )}
@@ -113,10 +189,10 @@ const AddressCard = ({
                         <Typography style={{
                             color: Colors.COLORS.ON_SURFACE,
                             fontWeight: 'bold',
-                        }}>Dirección de entrega</Typography>
+                        }}>Entrega</Typography>
                     ) : (
                         null
-                    )}
+                    )} */}
                 </View>
                 <View style={{
                     flexDirection: 'row',
@@ -261,27 +337,7 @@ const AddressCard = ({
                             style={{
                                 padding: 5
                             }}
-                            onPress={() => {
-                                let indexCountry = COUNTRIES.findIndex(obj => obj.code == address.country.code)
-                                setActionToDo('EDIT')
-                                setCodigoTelefono(indexCountry)
-                                setSelectedAddress(address)
-                                setFirstName(address.firstName)
-                                setLastName(address.lastName)
-                                setCountry(address.country.country)
-                                setCountryCode(address.country.code)
-                                setCountryArea(address.countryArea) // provincia
-                                setCity(address.city) // municipio
-                                setCityArea(address.cityArea)
-                                setAddress(address.streetAddress1)
-                                setAddress2(address.streetAddress2)
-                                setPostalCode(address.postalCode)
-                                setPhone(address.phone)
-                                setCompanyName(address.companyName)
-                                setEditAddressModal(true)
-
-                                //console.log("address.country.country >> ", indexProv)
-                            }}
+                            onPress={() => editAction()}
                         >
                             <MaterialCommunityIcons
                                 name="notebook-edit-outline"
@@ -300,7 +356,7 @@ const AddressCard = ({
                         >
                             <MaterialCommunityIcons
                                 name="notebook-remove-outline"
-                                color={Colors.COLORS.WEB_GRAY}
+                                color={Colors.COLORS.WARNING}
                                 size={20}
                             />
                         </TouchableOpacity>
@@ -310,8 +366,8 @@ const AddressCard = ({
             <AwesomeAlert
                 show={showAlertAw}
                 showProgress={deletingAddress}
-                title={"Eliminar Dirección"}
-                message={"Está seguro que desea eliminar esta dirección"}
+                title={"¿Eliminar Dirección?"}
+                message={"¿Está seguro que desea eliminar esta dirección?"}
                 closeOnTouchOutside={false}
                 closeOnHardwareBackPress={false}
                 showCancelButton={true}
@@ -348,6 +404,7 @@ const styles = StyleSheet.create({
     },
     card: {
         flexDirection: 'column',
+        backgroundColor: '#fff',
         borderColor: 'rgba(0, 0, 0, 0.125)',
         borderWidth: 1,
         borderRadius: 8,

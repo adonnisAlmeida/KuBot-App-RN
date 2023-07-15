@@ -13,14 +13,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useSelector } from 'react-redux'
 import { conversations } from '../../redux/messages/messagesSlice'
 import ReviewsCard from '../profile/components/ReviewsCard'
+import { user } from '../../redux/userlogin/userLoginSlice'
 
 const SellerDetailsScreen = ({ navigation, route }) => {
     const [seller, setSeller] = useState(route.params?.seller)
     const { dark, colors } = useTheme()
-    const joinDate = moment(seller.user.dateJoined).format('YYYY-MM-DD')
     const conversation_reducer = useSelector(conversations)
+    const user_state = useSelector(user)
 
-    console.log("seller >> ", seller)
+    //console.log("seller >> ", seller)
 
     const avatar =
         seller.user.avatar !== null
@@ -55,7 +56,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
             }
         })
         if (!flag) {
-            navigation.navigate('WriteMessageScreen', { selecteds: [seller] })
+            navigation.navigate('WriteMessageScreen', { selecteds: [seller.user] })
         }
     }
 
@@ -94,7 +95,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                     <Typography style={styles.textHeader} h3 bold>
                         Dirección:
                     </Typography>
-                    {seller.defaultAddress? (
+                    {seller.defaultAddress ? (
                         <Typography >
                             {seller.defaultAddress.streetAddress1}, {seller.defaultAddress.city}, {seller.defaultAddress.country.country}
                         </Typography>
@@ -109,69 +110,32 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                         Fecha de Ingreso:
                     </Typography>
                     <Typography>
-                        {printCreated(seller.user.dateJoined)}
+                        {printCreated(seller.user?.dateJoined)}
                     </Typography>
                 </View>
             </View>
             <View style={{ paddingVertical: 8 }} >
                 <Typography h3 bold>Calificación y opiniones:</Typography>
             </View>
-            {seller.reviews ? (
-                seller.reviews.slice(0).reverse().map((review, index) => review.approvalStatus == 'APPROVED'? <ReviewsCard key={index} review={review}/>: null)
+            {seller.reviews && seller.reviews.length > 0 ? (
+                seller.reviews.slice(0).reverse().map((review, index) => {
+                    if (review.approvalStatus == 'PENDING' || review.approvalStatus == 'DISAPPROVED') {
+                        if (review.user.serverId == user_state.serverId) {
+                            return <ReviewsCard key={index} review={review} />
+                        } else {
+                            return null
+                        }
+                    } else {
+                        return <ReviewsCard key={index} review={review} />
+                    }
+                }
+                    /* review.approvalStatus == 'APPROVED' ? <ReviewsCard key={index} review={review} /> : null */
+                )
             ) : (
-                null
-            )}
-            {/* <View
-                style={[dark ? styles.cardDark : styles.card]}
-            >
-                <View style={{ flexDirection: 'row' }}>
-                    <Image
-                        backgroundColor='white'
-                        source={avatar}
-                        imageStyle={styles.opinionAvatar}
-                        indicator={Progress.Pie}
-                        indicatorProps={{
-                            color: Colors.COLORS.PRIMARY,
-                            borderWidth: 0,
-                        }}
-                    />
-                    <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
-                        <View>
-                            <Typography style={{ color: '#333' }}>Samantha Lambert </Typography>
-                            <Typography style={{ color: '#828282' }}>22 de Febrero de 2023 </Typography>
-                        </View>
-                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
-                            <MaterialIcons
-                                name='star'
-                                size={20}
-                                color={Colors.COLORS.WEB_START_ON}
-                            />
-                            <MaterialIcons
-                                name='star'
-                                size={20}
-                                color={Colors.COLORS.WEB_START_ON}
-                            />
-                            <MaterialIcons
-                                name='star-half'
-                                size={20}
-                                color={Colors.COLORS.WEB_START_ON}
-                            />
-                            <MaterialIcons
-                                name='star-border'
-                                size={20}
-                                color={Colors.COLORS.WEB_START_OFF}
-                            />
-                            <MaterialIcons
-                                name='star-border'
-                                size={20}
-                                color={Colors.COLORS.WEB_START_OFF}
-                            />
-                        </View>
-                    </View>
+                <View style={{ alignItems: 'center' }}>
+                    <Typography color={Colors.COLORS.WEB_LINK}>No hay calificaciones para este vendedor.</Typography>
                 </View>
-                <Typography style={{ marginTop: 10, color: '#333' }} bold>buena</Typography>
-                <Typography style={{ color: '#333' }}>Muy buena</Typography>
-            </View> */}
+            )}
         </ScrollView>
     )
 }

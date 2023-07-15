@@ -1,10 +1,10 @@
-import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Platform, ToastAndroid } from 'react-native'
+import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Platform, ToastAndroid, RefreshControl } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setUserAddresses, user } from '../../redux/userlogin/userLoginSlice'
+import { login, setUserAddresses, user } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
-import { Typography } from '../../components'
+import { NetworkError, Typography } from '../../components'
 
 import ProfilePhoto from './components/ProfilePhoto'
 import ProfileUpdate from './components/ProfileUpdate'
@@ -18,12 +18,12 @@ import { containsOnlyNumbers } from '../../utils/CommonFunctions'
 import { ADDRESS_CREATE, ADDRESS_DELETE, ADDRESS_UPDATE } from '../../graphql/customers'
 import { FloatingAction } from 'react-native-floating-action'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import Entypo from 'react-native-vector-icons/Entypo'
-import AwesomeAlert from 'react-native-awesome-alerts'
+import CustomPicker from './components/CustomPicker'
+import { TOKEN_VERIFY, USER_INFO } from '../../graphql/login'
 
 const ContactDetails = ({ navigation }) => {
     const user_state = useSelector(user)
-    
+
     const [userInfo, setUserInfo] = useState(user_state)
     const [editAddressModal, setEditAddressModal] = useState(false)
     const [selectedAddress, setSelectedAddress] = useState('')
@@ -32,9 +32,9 @@ const ContactDetails = ({ navigation }) => {
     const [country, setCountry] = useState('')
     const [countryCode, setCountryCode] = useState('')
     const [countryArea, setCountryArea] = useState('')
-    const [countryAreaIndex, setCountryAreaIndex] = useState(0)
+    const [countryAreaIndex, setCountryAreaIndex] = useState(-1)
     const [city, setCity] = useState('')
-    const [cityIndex, setCityIndex] = useState(0)
+    const [cityIndex, setCityIndex] = useState(-1)
     const [cityArea, setCityArea] = useState('')
     const [address, setAddress] = useState('')
     const [address2, setAddress2] = useState('')
@@ -42,13 +42,19 @@ const ContactDetails = ({ navigation }) => {
     const [phone, setPhone] = useState('')
     const [companyName, setCompanyName] = useState('')
     const [provinciasList, setProvinciasList] = useState([])
+    const [provinciasListTemp, setProvinciasListTemp] = useState([])
     const [loadingZones, setLoadingZones] = useState(false)
+    const [loadingZonesError, setLoadingZonesError] = useState(false)
     const [updatingAddress, setUpdatingAddress] = useState(false)
+    const [invalidMun, setInvalidMun] = useState(false)
+    const [invalidProv, setInvalidProv] = useState(false)
+    const [selectedInvalidProv, setSelectedInvalidProv] = useState(false)
     const [errors, setErrors] = useState([])
     const [codigoTelefono, setCodigoTelefono] = useState(0)
     const [actionToDo, setActionToDo] = useState(null)
     const dispatch = useDispatch()
     const allDeliveryAreasStorage = useSelector(allDeliveryAreas)
+    const [refreshing, setRefreshing] = useState(false)
 
     const { colors } = useTheme()
     const [avatar, setAvatar] = useState()
@@ -82,11 +88,12 @@ const ContactDetails = ({ navigation }) => {
                 }
             })
             if (dataProvincias.deliveryZones.pageInfo.hasNextPage) {
-                setProvinciasList(groupedProvinces)
+                setProvinciasListTemp(groupedProvinces)
+                setLoadingZonesError(false)
                 getDeliveryZones({ variables: { after: dataProvincias.deliveryZones.pageInfo.endCursor, before: '' } })
             } else {
                 let temporal = []
-                provinciasList.forEach(item => temporal.push(item))
+                provinciasListTemp.forEach(item => temporal.push(item))
                 groupedProvinces.map((groupProv) => {
                     let flag = false
                     temporal.map((prov) => {
@@ -106,8 +113,35 @@ const ContactDetails = ({ navigation }) => {
         },
         onError: (errorProvincias) => {
             setLoadingZones(false)
+            setLoadingZonesError(true)
             console.log('Error cargando todas las zonas de entrega', errorProvincias)
         }
+    })
+    const [getUserInfo, { loadingUserInfo, errorUserInfo, dataUserInfo }] = useLazyQuery(USER_INFO, {
+        onCompleted: (dataUserInfo) => {
+            setRefreshing(false)
+            console.log(dataUserInfo)
+        },
+        onError: (errorUserInfo) => {
+            setRefreshing(false)
+            console.log('Error cargando user INfo', errorUserInfo)
+        }
+    })
+
+    const [tokenVerify, { loadingToken, errorToken, dataToken }] = useMutation(TOKEN_VERIFY, {
+        onCompleted: (dataToken) => {
+            dispatch(setUserAddresses(dataToken.tokenVerify.user.addresses))
+            setRefreshing(false)
+        },
+        onError: (errorToken, dataToken) => {
+            setRefreshing(false)
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Error actualizando direcciones.', ToastAndroid.LONG)
+            }
+            console.log('ERROR Token Verift >> ', JSON.stringify(errorToken, null, 2))
+            console.log('ERROR Token Verift DATA >> ', dataToken)
+        },
+        fetchPolicy: "no-cache"
     })
 
     const [addressUpdate, { loadingAddressUpdate, errorAddressUpdate, dataAddressUpdate }] = useMutation(ADDRESS_UPDATE, {
@@ -154,6 +188,14 @@ const ContactDetails = ({ navigation }) => {
         fetchPolicy: "no-cache"
     })
 
+    const autoLoad = () => {
+        setLoadingZones(true)
+
+        setLoadingZonesError(false)
+        getDeliveryZones({ variables: { after: '', before: '' } })
+    }
+
+
     useEffect(() => {
         setUserInfo(user_state)
     }, [user_state])
@@ -168,29 +210,55 @@ const ContactDetails = ({ navigation }) => {
             : require('../../../assets/user_avatar.png'))
         if (allDeliveryAreasStorage.length == 0) {// no ha cargado todas las zonas todavia
             setLoadingZones(true)
-            getDeliveryZones({ variables: { after: '', before: '' } })
+            autoLoad()
+            /* setLoadingZonesError(false)
+            getDeliveryZones({ variables: { after: '', before: '' } }) */
         } else { // ya los cargo estane l localstorage
             setProvinciasList(allDeliveryAreasStorage)
         }
     }, [])
 
     useEffect(() => {
-        if (editAddressModal && !loadingZones) {
-            let indexProv = 0
-            if (selectedAddress != '') {
-                indexProv = provinciasList.findIndex(obj => obj.name == selectedAddress.countryArea)
-            }
-            let indexMun = provinciasList[indexProv].municipios.findIndex(obj => obj.node.name == selectedAddress.city)
-            setCountryAreaIndex(indexProv)
-            setCityIndex(indexMun)
-        }
-    }, [editAddressModal])
-
-    useEffect(() => {
         if ((containsOnlyNumbers(phone) && phone.length == 8) || phone.length == 0) {
             setErrors(pre => pre.filter((key) => key != 'phone'))
         }
     }, [phone])
+
+    const openEdit = (address) => {
+        let indexCountry = COUNTRIES.findIndex(obj => obj.code == address.country.code)
+        let goodPhone = address.phone
+        if (address.phone.includes(COUNTRIES[indexCountry].mobileCode)) {
+            goodPhone = address.phone.substring(COUNTRIES[indexCountry].mobileCode, COUNTRIES[indexCountry].mobileCode.length)
+        }
+        setActionToDo('EDIT')
+        setCodigoTelefono(indexCountry)
+        setSelectedAddress(address)
+        setFirstName(address.firstName)
+        setLastName(address.lastName)
+        setCountry(address.country.country)
+        setCountryCode(address.country.code)
+        setCountryArea(address.countryArea) // provincia
+        setCity(address.city) // municipio
+        setCityArea(address.cityArea)
+        setAddress(address.streetAddress1)
+        setAddress2(address.streetAddress2)
+        setPostalCode(address.postalCode)
+        setPhone(goodPhone)
+        setCompanyName(address.companyName)
+        let indexProv = provinciasList.findIndex(obj => obj.name == address.countryArea)
+        if (indexProv == -1) {
+            setInvalidProv(true)
+            setSelectedInvalidProv(true)
+            setCountryAreaIndex(0)
+            setCityIndex(0)
+        } else {
+            let indexMun = provinciasList[indexProv].municipios.findIndex(obj => obj.node.name == address.city)
+            setCountryAreaIndex(indexProv)
+            setCityIndex(indexMun)
+            setSelectedInvalidProv(false)
+        }
+        setEditAddressModal(true)
+    }
 
     const updateAddress = () => {
         let error_data = []
@@ -203,26 +271,43 @@ const ContactDetails = ({ navigation }) => {
         if (error_data.length > 0) {
             setErrors(error_data)
         } else {
-            setUpdatingAddress(true)
+            
             if (actionToDo == 'EDIT') {
-                addressUpdate({
-                    variables: {
-                        id: selectedAddress.id,
-                        input: {
-                            firstName: firstName,
-                            lastName: lastName,
-                            companyName: companyName,
-                            streetAddress1: address,
-                            streetAddress2: address2,
-                            city: city,
-                            postalCode: postalCode,
-                            country: countryCode,
-                            countryArea: countryArea,
-                            phone: phone == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + phone,
-                        }
+                console.log("A editar invalidMun >> ", invalidMun)
+                console.log("A editar invalidProv >> ", invalidProv)
+                if (invalidProv) {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show(`La provincia seleccionada no es válida.`, ToastAndroid.LONG)
                     }
-                })
+                } else {
+                    if (invalidMun) {
+                        if (Platform.OS === 'android') {
+                            ToastAndroid.show(`El municipio seleccionado no es válido.`, ToastAndroid.LONG)
+                        }
+                    } else {
+                        setUpdatingAddress(true)
+                        addressUpdate({
+                            variables: {
+                                id: selectedAddress.id,
+                                input: {
+                                    firstName: firstName,
+                                    lastName: lastName,
+                                    companyName: companyName,
+                                    streetAddress1: address,
+                                    streetAddress2: address2,
+                                    city: city,
+                                    postalCode: postalCode,
+                                    country: countryCode,
+                                    countryArea: countryArea,
+                                    phone: phone == '' ? '' : COUNTRIES[codigoTelefono].mobileCode + phone,
+                                }
+                            }
+                        })
+                    }
+
+                }
             } else if (actionToDo == 'CREATE') {
+                setUpdatingAddress(true)
                 addressCreate({
                     variables: {
                         input: {
@@ -277,7 +362,8 @@ const ContactDetails = ({ navigation }) => {
         setCountry('Cuba')
         setCodigoTelefono(57)
         setCountryAreaIndex(0)
-        setCity('')
+        setCity(provinciasList[0]?.municipios[0].node.name)
+        setCityIndex(0)
         setCountryArea(provinciasList[0]?.name)
         setActionToDo('CREATE')
         setEditAddressModal(true)
@@ -291,36 +377,72 @@ const ContactDetails = ({ navigation }) => {
         }
     }
 
+    const onRefresh = () => {
+        setRefreshing(true)
+        //getUserInfo({ variables: { id: user_state.id } })
+        tokenVerify({ variables: { token: user_state.token } })
+    }
+
+
     return (
         <>
-            <ScrollView keyboardShouldPersistTaps={'handled'} showsVerticalScrollIndicator={false} style={styles.container}>
-                <View style={[styles.card, { backgroundColor: colors.SURFACE, marginBottom: 30 }]}>
+            <View style={{ padding: 16 }}>
+                <View style={[styles.card, { backgroundColor: colors.SURFACE }]}>
                     <ProfilePhoto avatar={avatar} setAvatar={() => setAvatar()} />
                     <ProfileUpdate />
                 </View>
+            </View>
+
+            <ScrollView
+                keyboardShouldPersistTaps={'handled'}
+                showsVerticalScrollIndicator={false}
+                style={styles.container}
+                refreshControl={
+                    <RefreshControl
+                        colors={[Colors.COLORS.PRIMARY]}
+                        refreshing={refreshing}
+                        onRefresh={() => onRefresh()}
+                    />
+                }
+            >
+
                 {
-                    userInfo.addresses.map((address, index) =>
-                        <AddressCard
-                            key={index}
-                            navigation={navigation}
-                            setActionToDo={setActionToDo}
-                            address={address}
-                            setSelectedAddress={setSelectedAddress}
-                            setEditAddressModal={setEditAddressModal}
-                            setCodigoTelefono={setCodigoTelefono}
-                            setFirstName={setFirstName}
-                            setLastName={setLastName}
-                            setCountry={setCountry}
-                            setCountryCode={setCountryCode}
-                            setCountryArea={setCountryArea}
-                            setCity={setCity}
-                            setCityArea={setCityArea}
-                            setAddress={setAddress}
-                            setAddress2={setAddress2}
-                            setPostalCode={setPostalCode}
-                            setPhone={setPhone}
-                            setCompanyName={setCompanyName}
-                        />)
+                    loadingZones ? (
+                        <ActivityIndicator size='large' color={Colors.COLORS.PRIMARY} />
+                    ) : (
+                        loadingZonesError ? (
+                            <View style={{
+                                //backgroundColor: 'red',
+                            }}>
+                                <NetworkError mTop={20} accion={autoLoad} />
+                            </View>
+                        ) : (
+                            userInfo.addresses.map((address, index) =>
+                                <AddressCard
+                                    key={index}
+                                    navigation={navigation}
+                                    openEdit={openEdit}
+                                    provinciasList={provinciasList}
+                                    setActionToDo={setActionToDo}
+                                    address={address}
+                                    setSelectedAddress={setSelectedAddress}
+                                    setEditAddressModal={setEditAddressModal}
+                                    setCodigoTelefono={setCodigoTelefono}
+                                    setFirstName={setFirstName}
+                                    setLastName={setLastName}
+                                    setCountry={setCountry}
+                                    setCountryCode={setCountryCode}
+                                    setCountryArea={setCountryArea}
+                                    setCity={setCity}
+                                    setCityArea={setCityArea}
+                                    setAddress={setAddress}
+                                    setAddress2={setAddress2}
+                                    setPostalCode={setPostalCode}
+                                    setPhone={setPhone}
+                                    setCompanyName={setCompanyName}
+                                />)
+                        )
+                    )
                 }
                 <Typography></Typography>
                 <Typography></Typography>
@@ -453,13 +575,24 @@ const ContactDetails = ({ navigation }) => {
                                         },
                                     ]}
                                     onValueChange={(itemValue, itemIndex) => {
-                                        setCountryArea(itemValue)
-                                        let result = provinciasList.find(obj => {
-                                            return obj.name == itemValue
-                                        })
-                                        setCountryAreaIndex(itemIndex)
-                                        setCity(result.municipios[0].node.name)
-                                        setCityIndex(0)
+                                        console.log("itemIndex >> ", itemIndex)
+                                        console.log("provinciasList.length >> ", provinciasList.length)
+
+                                        if (itemIndex == provinciasList.length) { // es el valor no valido
+                                            console.log("No hacer nada no es validp")
+                                            setCountryArea(itemValue)
+                                            setInvalidProv(true)
+                                        } else {
+                                            setInvalidProv(false)
+                                            setCountryArea(itemValue)
+                                            let result = provinciasList.find(obj => {
+                                                return obj.name == itemValue
+                                            })
+                                            setCountryAreaIndex(itemIndex)
+                                            setInvalidMun(false)
+                                            setCity(result.municipios[0].node.name)
+                                            setCityIndex(0)
+                                        }
                                     }
                                     }>
                                     {
@@ -467,6 +600,9 @@ const ContactDetails = ({ navigation }) => {
                                             return <Picker.Item key={index} themeVariant={'dark'} label={item.name} value={item.name} />
                                         })
                                     }
+                                    {selectedInvalidProv ? (
+                                        <Picker.Item key={provinciasList.length + 1} themeVariant={'dark'} label={selectedAddress?.countryArea} value={selectedAddress?.countryArea} />
+                                    ) : (null)}
                                 </Picker>
                             </View>
                             <View
@@ -482,7 +618,15 @@ const ContactDetails = ({ navigation }) => {
                                 >
                                     Municipio
                                 </Typography>
-                                <TextInput
+                                <CustomPicker
+                                    setInvalidMun={setInvalidMun}
+                                    selectedValue={city}
+                                    onValueChange={(itemValue, itemIndex) => {
+                                        setCity(itemValue.node.name)
+                                    }}
+                                    values={provinciasList[countryAreaIndex]?.municipios}
+                                />
+                                {/* <TextInput
                                     value={city}
                                     style={[
                                         styles.input,
@@ -491,7 +635,7 @@ const ContactDetails = ({ navigation }) => {
                                     ]}
                                     placeholder='Apellidos'
                                     onChangeText={(text) => setCity(text)}
-                                />
+                                /> */}
                                 {/* <Picker
                                         themeVariant={'dark'}
                                         selectedValue={city}

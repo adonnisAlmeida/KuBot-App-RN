@@ -10,6 +10,7 @@ import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { ReactNativeFile } from 'apollo-upload-client'
+import { WebView } from 'react-native-webview';
 
 const SecondComponent = ({
     piPhotoFrontal,
@@ -26,9 +27,12 @@ const SecondComponent = ({
     bustPhotoFile,
     hasErrors,
     setErrors,
+    terms,
+    setTerms,
 }) => {
     const { colors } = useTheme()
     const [showModal, setShowModal] = useState(false)
+    const [showTerms, setShowTerms] = useState(false)
     const [vistaPrevia, setVistaPrevia] = useState(null)
     const [confirmModal, setConfirmModal] = useState(false)
     const [activity, setActivity] = useState(false)
@@ -49,6 +53,12 @@ const SecondComponent = ({
             setErrors(pre => pre.filter((key) => key != 'bustPhotoFile'))
         }
     }, [bustPhotoFile])
+
+    useEffect(() => {
+        if (terms) {
+            setErrors(pre => pre.filter((key) => key != 'terms'))
+        }
+    }, [terms])
 
     const piPhotoFrontalEdit = async () => {
         setSelectedImage('piPhotoFrontal')
@@ -150,10 +160,10 @@ const SecondComponent = ({
             style={{
                 flex: 1,
                 paddingTop: 20,
-                paddingHorizontal: 20,
+                //marginHorizontal: 20,
                 //marginBottom: 59,
             }}>
-            <View>
+            <View style={{ marginHorizontal: 20 }}>
                 <View style={styles.imageRow}>
                     <Typography color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen delantera del CI</Typography>
                     <View style={styles.imageContainer}>
@@ -233,6 +243,56 @@ const SecondComponent = ({
                         </TouchableOpacity>
                     </View>
                 </View>
+                <View style={{ alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', width: '100%' }}>
+                        <TouchableOpacity
+                            onPress={() => setTerms(!terms)}
+                            style={{
+                                //backgroundColor: 'red',
+                                padding: 5,
+                                alignContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            {terms ? (
+                                <FontAwesome
+                                    name="check-square-o"
+                                    color={Colors.COLORS.PRIMARY}
+                                    size={25}
+                                />
+                            ) : (
+                                <FontAwesome
+                                    style={{ marginRight: 3.7 }}
+                                    name="square-o"
+                                    color={hasErrors('terms') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                    size={25}
+                                />
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={{
+                            marginLeft: 2,
+                            marginTop: 5,
+                            flexDirection: 'row',
+                            width: '86%',
+
+                        }}>
+                            <Typography
+                                color={hasErrors('terms') ? Colors.COLORS.ERROR : '#000'}
+                            >Acepto los</Typography>
+                            <TouchableOpacity
+                                onPress={() => setShowTerms(true)}
+                                style={{
+                                    marginLeft: 2,
+                                }}>
+                                <Typography color={Colors.COLORS.WEB_LINK}>Términos y Condiciones de Uso de Datos</Typography>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+                <Typography />
+                <Typography />
+                <Typography />
                 <Typography />
                 <Typography />
                 <Typography />
@@ -308,6 +368,31 @@ const SecondComponent = ({
                                     size={35}
                                 />
                             </TouchableOpacity>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </TouchableOpacity>
+            </Modal>
+            <Modal
+                visible={showTerms}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowTerms(false)}
+            >
+                <TouchableOpacity
+                    style={styles.centeredView}
+                    onPressOut={() => setShowTerms(false)}
+                >
+                    <TouchableWithoutFeedback>
+                        <View style={{
+                            flex: 1,
+                            //backgroundColor: 'red',
+                            margin: 10,
+                            width: '95%'
+                        }}>
+                                <WebView
+                                    //originWhitelist={['*']}
+                                    source={{ uri: 'http://lajabitadelloco.com:8000/es/account/terms-cond-data' }}
+                                />
                         </View>
                     </TouchableWithoutFeedback>
                 </TouchableOpacity>
