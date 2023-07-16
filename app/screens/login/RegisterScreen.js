@@ -81,7 +81,7 @@ export default function RegisterScreen({ navigation }) {
 
 		},
 		onError: (error) => {
-			console.log("ERROR REGISTRANDO USUARIO >> ", error)
+			console.log("ERROR REGISTRANDO USUARIO >> ", JSON.stringify(error, null, 2))
 			if (Platform.OS === 'android') {
 				ToastAndroid.show(`Error registrando usuario: ${error}`, ToastAndroid.LONG)
 			}
@@ -120,7 +120,7 @@ export default function RegisterScreen({ navigation }) {
 			} else {
 				setSecureIcon1('eye-slash')
 			}
-		}else{
+		} else {
 			setIsSecure2(!isSecure2)
 			if (isSecure2) {
 				setSecureIcon2('eye')
@@ -136,7 +136,7 @@ export default function RegisterScreen({ navigation }) {
 		<KeyboardAvoidingView
 			style={styles.login}
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-			keyboardVerticalOffset={-300}
+			//keyboardVerticalOffset={0}
 		>
 			<ScrollView
 				keyboardShouldPersistTaps='handled' /* esto hace que sea cliqueable el contenido con el keyboard open */
@@ -156,6 +156,7 @@ export default function RegisterScreen({ navigation }) {
 					</Typography>
 					<TextInput
 						keyboardType='email-address'
+						autoCapitalize='none'
 						caretHidden={false}
 						value={email}
 						style={[

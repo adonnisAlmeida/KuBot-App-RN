@@ -357,6 +357,7 @@ export const ACCEPT_ORDER_ID = gql`
 				value
 			}
 			defaultPickupAddress{
+				id
 				city
 				postalCode
 				countryArea
@@ -472,6 +473,7 @@ export const ORDER_ID = gql`
 					lastName
 					dateJoined
 					addresses{
+						id
 					  country {
 							country
 						}
@@ -499,6 +501,7 @@ export const ORDER_ID = gql`
 				lastName
 				dateJoined
 				addresses {
+					id
 					country {
 						country
 					}

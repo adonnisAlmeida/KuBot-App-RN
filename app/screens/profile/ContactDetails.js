@@ -2,7 +2,7 @@ import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedbac
 import { useTheme } from '@react-navigation/native'
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { login, setUserAddresses, user } from '../../redux/userlogin/userLoginSlice'
+import { login, setUser, setUserAddresses, user } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
 import { NetworkError, Typography } from '../../components'
 
@@ -117,32 +117,21 @@ const ContactDetails = ({ navigation }) => {
             console.log('Error cargando todas las zonas de entrega', errorProvincias)
         }
     })
-    const [getUserInfo, { loadingUserInfo, errorUserInfo, dataUserInfo }] = useLazyQuery(USER_INFO, {
-        onCompleted: (dataUserInfo) => {
-            setRefreshing(false)
-            console.log(dataUserInfo)
-        },
-        onError: (errorUserInfo) => {
-            setRefreshing(false)
-            console.log('Error cargando user INfo', errorUserInfo)
-        }
-    })
 
-    const [tokenVerify, { loadingToken, errorToken, dataToken }] = useMutation(TOKEN_VERIFY, {
-        onCompleted: (dataToken) => {
-            dispatch(setUserAddresses(dataToken.tokenVerify.user.addresses))
+    const [getLogedUserInfo, { loadingUserInfo, errorUserInfo, dataUserInfo }] = useLazyQuery(USER_INFO, {
+		onCompleted: (dataUserInfo) => {
+			//console.log("Info del usuario logueado >> ", dataUserInfo.me)
+			if(dataUserInfo.me){
+				dispatch(setUser(dataUserInfo.me))
+			}
             setRefreshing(false)
-        },
-        onError: (errorToken, dataToken) => {
+		},
+		onError: (errorUserInfo) => {
             setRefreshing(false)
-            if (Platform.OS === 'android') {
-                ToastAndroid.show('Error actualizando direcciones.', ToastAndroid.LONG)
-            }
-            console.log('ERROR Token Verift >> ', JSON.stringify(errorToken, null, 2))
-            console.log('ERROR Token Verift DATA >> ', dataToken)
-        },
-        fetchPolicy: "no-cache"
-    })
+			console.log("Error Info User >> ", errorUserInfo)
+		},
+		fetchPolicy: "no-cache"
+	})
 
     const [addressUpdate, { loadingAddressUpdate, errorAddressUpdate, dataAddressUpdate }] = useMutation(ADDRESS_UPDATE, {
         onCompleted: (dataAddressUpdate) => {
@@ -219,6 +208,14 @@ const ContactDetails = ({ navigation }) => {
     }, [])
 
     useEffect(() => {
+        setAvatar(userInfo.avatar
+            ? {
+                uri: userInfo.avatar.url,
+            }
+            : require('../../../assets/user_avatar.png'))
+    }, [userInfo.avatar])
+
+    useEffect(() => {
         if ((containsOnlyNumbers(phone) && phone.length == 8) || phone.length == 0) {
             setErrors(pre => pre.filter((key) => key != 'phone'))
         }
@@ -227,6 +224,10 @@ const ContactDetails = ({ navigation }) => {
     const openEdit = (address) => {
         let indexCountry = COUNTRIES.findIndex(obj => obj.code == address.country.code)
         let goodPhone = address.phone
+        console.log("goodPhone >> ", goodPhone)
+        console.log("address.country.code >> ", address.country)
+        console.log("address.phone >> ", address.phone)
+        console.log("indexCountry >> ", indexCountry)
         if (address.phone.includes(COUNTRIES[indexCountry].mobileCode)) {
             goodPhone = address.phone.substring(COUNTRIES[indexCountry].mobileCode, COUNTRIES[indexCountry].mobileCode.length)
         }
@@ -380,7 +381,8 @@ const ContactDetails = ({ navigation }) => {
     const onRefresh = () => {
         setRefreshing(true)
         //getUserInfo({ variables: { id: user_state.id } })
-        tokenVerify({ variables: { token: user_state.token } })
+        getLogedUserInfo()
+        //tokenVerify({ variables: { token: user_state.token } })
     }
 
 
@@ -419,27 +421,10 @@ const ContactDetails = ({ navigation }) => {
                         ) : (
                             userInfo.addresses.map((address, index) =>
                                 <AddressCard
-                                    key={index}
-                                    navigation={navigation}
+                                    key={address.id}
                                     openEdit={openEdit}
-                                    provinciasList={provinciasList}
-                                    setActionToDo={setActionToDo}
                                     address={address}
-                                    setSelectedAddress={setSelectedAddress}
-                                    setEditAddressModal={setEditAddressModal}
-                                    setCodigoTelefono={setCodigoTelefono}
-                                    setFirstName={setFirstName}
-                                    setLastName={setLastName}
-                                    setCountry={setCountry}
-                                    setCountryCode={setCountryCode}
-                                    setCountryArea={setCountryArea}
-                                    setCity={setCity}
-                                    setCityArea={setCityArea}
-                                    setAddress={setAddress}
-                                    setAddress2={setAddress2}
-                                    setPostalCode={setPostalCode}
-                                    setPhone={setPhone}
-                                    setCompanyName={setCompanyName}
+                                    addressCount={userInfo.addresses.length}
                                 />)
                         )
                     )

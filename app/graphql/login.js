@@ -45,80 +45,40 @@ export const TOKEN_CREATE = gql`
 	}
 `
 
-export const TOKEN_VERIFY = gql`
-	mutation TokenVerify($token: String!) {
-		tokenVerify(token: $token) {
-			user {
-				id
-				isCarrier
-				isStaff
-				isSeller
-				serverId
-				firstName
-				lastName
-				addresses{
-					id
-					companyName
-					isDefaultBillingAddress
-					isDefaultShippingAddress
-					streetAddress1
-					firstName
-					lastName
-					streetAddress2
-					city
-					cityArea
-					postalCode
-					country{
-					country
-					code
-					}
-					countryArea
-					phone
-				}
-				avatar {
-					url
-					alt
-				}
-				email
-			}
-		}
-	}
-`
-
 export const USER_INFO = gql`
-	query User($id:ID!) {
-		user(id: $id) {
+	query user_info {
+		me {
 			id
-				isCarrier
-				isStaff
-		isSeller
-				serverId
+			isCarrier
+			isStaff
+			isSeller
+			serverId
+			firstName
+			lastName
+			addresses{
+				id
+				companyName
+				isDefaultBillingAddress
+				isDefaultShippingAddress
+				streetAddress1
 				firstName
 				lastName
-				addresses{
-					id
-					companyName
-					isDefaultBillingAddress
-					isDefaultShippingAddress
-					streetAddress1
-							firstName
-					lastName
-					streetAddress2
-					city
-					cityArea
-					postalCode
-					country{
+				streetAddress2
+				city
+				cityArea
+				postalCode
+				country{
 					country
 					code
-					}
-					countryArea
-					phone
 				}
-				avatar {
-					url
-					alt
-				}
-				email
+				countryArea
+				phone
+			}
+			avatar {
+				url
+				alt
+			}
+			email
 		}
 	}	
 `
@@ -166,6 +126,7 @@ export const CARRIER_REGISTER = gql`
 						postalCode
 						country{
 						  country
+						  code
 						}
 						countryArea
 						phone

@@ -18,6 +18,7 @@ export const ORDERS_LIST_CLIENTS = gql`
                         lastName
                         dateJoined
                         addresses {
+                            id
                             country {
                                 country
                             }
@@ -92,6 +93,7 @@ export const ORDERS_LIST_SELLERS = gql`
                             lastName
                             dateJoined
                             addresses {
+                                id
                                 country {
                                     country
                                 }

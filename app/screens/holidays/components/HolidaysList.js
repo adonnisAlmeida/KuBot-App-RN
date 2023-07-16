@@ -130,10 +130,18 @@ export default function HolidaysList({
 			<View style={{ flex: 1 }}>
 				{holidays_list.length === 0 ? (
 					<View
-						style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+						style={{
+							flex: 1,
+							alignItems: 'center',
+							justifyContent: 'center',
+							padding: 15,
+						}}
 					>
+						<Typography bold h3 color={colors.ON_BACKGROUND}>
+							No se encontraron vacaciones.
+						</Typography>
 						<Typography color={colors.ON_BACKGROUND}>
-							No hay elementos
+							Las vacaciones se utilizan para poner su servicio en vacaciones.
 						</Typography>
 					</View>
 				) : (

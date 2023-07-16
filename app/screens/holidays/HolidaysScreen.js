@@ -41,10 +41,10 @@ export default function HolidaysScreen({ navigation }) {
 				setHasNextPage(false)
 			}
 			if (loadingApp || refreshing) {
-				//setMyHolyDays(data.vacations.edges)
+				setMyHolyDays(data.vacations.edges)
 				dispatch(setHolyDaysByUser(data.vacations.edges))
 			} else {
-				//setMyHolyDays([...myHolyDays, ...data.vacations.edges])
+				setMyHolyDays([...myHolyDays, ...data.vacations.edges])
 				dispatch(setHolyDaysByUser([...myHolyDays, ...data.vacations.edges]))
 			}
 			//let fromStorage = holyDaysStore.hoylyDays
@@ -89,7 +89,6 @@ export default function HolidaysScreen({ navigation }) {
 	})
 
 	useEffect(() => {
-		console.log('CARRIER IDDDD >> ', carrierID)
 		dispatch(setHolyDaysByUser([]))
 		setLoadingApp(true)
 		getHolyDays({ variables: { carrierServerId: carrierID, after: '', before: '' } })

@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { StatusBar, Text, View } from 'react-native'
 
 import Theme from '../constants/Theme'
-import { isLogin, getUser, getCarrierInfo, user } from '../redux/userlogin/userLoginSlice'
+import { isLogin, getUser, getCarrierInfo, user, getToken } from '../redux/userlogin/userLoginSlice'
 import { isDarkMode } from '../redux/darkmode/darkModeSlice'
 import { active, getOnboarding } from '../redux/onboarding/onboardingSlice'
 import Screens from '../screens/index'
@@ -77,6 +77,7 @@ export default function Navigation(props) {
 	React.useEffect(() => {
 		if (!isLoginActive) {
 			dispatch(getUser())
+			dispatch(getToken())
 			dispatch(getCarrierInfo())
 		}
 	}, [])

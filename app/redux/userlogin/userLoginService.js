@@ -9,13 +9,51 @@ export default {
 	getCarrierInfo,
 	setCarrierInfoOtro,
 	setToken,
+	getToken,
 	setUserAddresses,
-	userInfoUpdate,
 }
 
 function login(user) {
 	AsyncStorage.setItem('@userlogin', JSON.stringify(user))
+	AsyncStorage.setItem('@usertoken', JSON.stringify(user.token))
 	return user
+}
+
+function setUser(user) {
+	AsyncStorage.setItem('@userlogin', JSON.stringify(user))
+	return user
+}
+
+async function getUser() {
+	const user = await AsyncStorage.getItem('@userlogin')
+	return user == null ? null : JSON.parse(user)
+}
+
+async function setToken(token) {
+	AsyncStorage.setItem('@usertoken', JSON.stringify(token))
+	return token
+}
+
+async function getToken() {
+	const token = await AsyncStorage.getItem('@usertoken')
+	return token == null ? null : JSON.parse(token)
+}
+
+function logout() {
+	try {
+		AsyncStorage.removeItem('@userlogin')
+		return {}
+	} catch (e) {
+		console.log('Error', { e })
+	}
+}
+
+async function setUserAddresses(addresses) {
+	const data = await AsyncStorage.getItem('@userlogin')
+	let userInfo = JSON.parse(data)
+	userInfo.addresses = addresses
+	await AsyncStorage.setItem('@userlogin', JSON.stringify(userInfo))
+	return addresses
 }
 
 function setCarrierInfo(carrier) {
@@ -32,49 +70,4 @@ function setCarrierInfoOtro(carrier) {
 async function getCarrierInfo() {
 	const carrier = await AsyncStorage.getItem('@carrierInfo')
 	return carrier == null ? null : JSON.parse(carrier)
-}
-
-function setUser(user) {
-	return login(user)
-}
-
-async function getUser() {
-	const user = await AsyncStorage.getItem('@userlogin')
-	return user == null ? null : JSON.parse(user)
-}
-
-function logout() {
-	try {
-		AsyncStorage.removeItem('@userlogin')
-		return {}
-	} catch (e) {
-		console.log('Error', { e })
-	}
-}
-
-async function setToken(token) {
-	const data = await AsyncStorage.getItem('@userlogin')
-	await AsyncStorage.setItem('@userlogin', JSON.stringify({token: token, ...data}))
-	return token
-}
-
-async function setUserAddresses(addresses) {
-	const data = await AsyncStorage.getItem('@userlogin')
-	let userInfo = JSON.parse(data)
-	userInfo.addresses = addresses
-	await AsyncStorage.setItem('@userlogin', JSON.stringify(userInfo))
-	return addresses
-}
-
-async function userInfoUpdate(userInfo) {
-	const data = await AsyncStorage.getItem('@userlogin')
-	let userInfoFull = JSON.parse(data)
-	userInfoFull = {
-		...userInfoFull,
-		isCarrier: userInfo.isCarrier,
-		isStaff: userInfo.isStaff,
-		isSeller: userInfo.isSeller
-	}
-	await AsyncStorage.setItem('@userlogin', JSON.stringify(userInfoFull))
-	return userInfo
 }

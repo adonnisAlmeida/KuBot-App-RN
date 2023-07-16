@@ -24,10 +24,10 @@ import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
 import Theme from '../../constants/Theme'
 import { Typography, FloatingActionButton } from '../../components'
 import { PRODUCT_TYPES } from '../../graphql/product'
-import { setCarrierInfo, user, carrierInfo, login, userInfoUpdate } from '../../redux/userlogin/userLoginSlice'
+import { setCarrierInfo, user, carrierInfo, setUser } from '../../redux/userlogin/userLoginSlice'
 import { URL } from '../../constants/Other'
 import Pushy from 'pushy-react-native';
-import { GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY } from '../../graphql/login'
+import { GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY, USER_INFO } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 
 const { width } = Dimensions.get('window')
@@ -38,15 +38,18 @@ export default function HomeScreen({ navigation }) {
 	const dispatch = useDispatch()
 	const user_state = useSelector(user)
 	const carrier_state = useSelector(carrierInfo)
-	const [initTockenLoading, setInitTockenLoading] = useState(false)
+	const [initUserLoading, setInitUserLoading] = useState(false)
 	const [initCarrierLoading, setInitCarrierLoading] = useState(false)
+	const [reloadInfo, setReloadInfo] = useState(false)
+	const [aborterRefCarrierInfo, setAborterRefCarrierInfo] = useState(new AbortController());
+	const [aborterRefUserInfo, setAborterRefUserInfo] = useState(new AbortController());
 	const [pushyToken, setPushyToken] = useState(null)
 
 	/* console.log("countryArea >>>>", user_state.addresses[0].countryArea)
 	console.log("cityArea >>>>", user_state.addresses[0].cityArea) */
 	//console.log("carrier_state >> ", carrier_state)
 	//console.log("localCarreirInfo >> ", localCarreirInfo)
-	//console.log("user_state.isCarrier >> ", user_state)
+	//console.log("user_state >> ", user_state)
 
 	const [getCarrierByUserEmail, { loading, error, data }] = useLazyQuery(GET_CARRIER_BY_USER_EMAIL, {
 		onCompleted: (data) => {
@@ -56,40 +59,55 @@ export default function HomeScreen({ navigation }) {
 				dispatch(setCarrierInfo({}))
 			}
 			setInitCarrierLoading(false)
-			//console.log('termino  getCarrierByUserEmail>> ', data.carriers.edges)
+			setReloadInfo(false)
 		},
 		onError: (error) => {
 			setInitCarrierLoading(false)
+			setReloadInfo(false)
 			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', JSON.stringify(error, null, 2))
 		},
-		fetchPolicy: "no-cache"
+		fetchPolicy: "no-cache",
+		context: {
+			fetchOptions: {
+				signal: aborterRefCarrierInfo.signal
+			}
+		},
 	})
 
-	const [tokenVerify, { loadingToken, errorToken, dataToken }] = useMutation(TOKEN_VERIFY, {
-		onCompleted: (dataToken) => {
-			const userInfo = {
-				isCarrier: dataToken.tokenVerify.user.isCarrier,
-				isStaff: dataToken.tokenVerify.user.isStaff,
-				isSeller: dataToken.tokenVerify.user.isSeller,
+	const [getLogedUserInfo, { loadingUserInfo, errorUserInfo, dataUserInfo }] = useLazyQuery(USER_INFO, {
+		onCompleted: (dataUserInfo) => {
+			//console.log("Info del usuario logueado >> ", dataUserInfo.me)
+			if (dataUserInfo.me) {
+				dispatch(setUser(dataUserInfo.me))
 			}
-			dispatch(userInfoUpdate(userInfo))
-			setInitTockenLoading(false)
+			getCarrierByUserEmail({ variables: { userEmail: user_state.email } })
+			setInitUserLoading(false)
+			setReloadInfo(false)
 		},
-		onError: (errorToken, dataToken) => {
-			setInitTockenLoading(false)
-			console.log('ERROR Token Verift >> ', JSON.stringify(errorToken, null, 2))
-			//console.log('ERROR Token Verift DATA >> ', JSON.stringify(dataToken, null, 2))
+		onError: (errorUserInfo) => {
+			console.log("Error Info User >> ", errorUserInfo)
+			setInitUserLoading(false)
+			setReloadInfo(false)
 		},
-		fetchPolicy: "no-cache"
+		fetchPolicy: "no-cache",
+		context: {
+			fetchOptions: {
+				signal: aborterRefUserInfo.signal
+			}
+		},
 	})
 
 	useEffect(() => {
-		setInitTockenLoading(true)
+		setInitUserLoading(true)
 		setInitCarrierLoading(true)
-		tokenVerify({ variables: { token: user_state.token } })
-		getCarrierByUserEmail({ variables: { userEmail: user_state.email } })
+		//tokenVerify({ variables: { token: user_state.token } })
+		//getCarrierByUserEmail({ variables: { userEmail: user_state.email } })
+		getLogedUserInfo()
+
+
+
 		// Register the user for push notifications
-		Pushy.register().then(async (deviceToken) => {
+		/* Pushy.register().then(async (deviceToken) => {
 			// Display an alert with device token
 			setPushyToken(deviceToken)
 			//console.log('Pushy device token: ' + deviceToken);
@@ -101,7 +119,7 @@ export default function HomeScreen({ navigation }) {
 		}).catch((err) => {
 			// Handle registration errors
 			console.error('Error en tomando pushy.me Token', err);
-		});
+		}); */
 	}, [])
 
 	useEffect(() => {
@@ -115,7 +133,7 @@ export default function HomeScreen({ navigation }) {
 					style={styles.headerRight}
 					name="user-circle-o"
 					color={'#fff'}
-					size={20}
+					size={23}
 					onPress={() => navigation.navigate('Profile')}
 				/>
 				{/* <FontAwesome
@@ -159,32 +177,42 @@ export default function HomeScreen({ navigation }) {
 		)
 	}
 
+	const reloadCarrier = () => {
+		setReloadInfo(true)
+		aborterRefUserInfo.abort();
+		setAborterRefUserInfo(new AbortController());
+		aborterRefCarrierInfo.abort();
+		setAborterRefCarrierInfo(new AbortController());
+		getLogedUserInfo()
+	}
+
 	const carrierApplication = () => {
 		//console.log("carrierApplication >>", localCarreirInfo.kyc)
-		if (initCarrierLoading || initTockenLoading) {
+		if (initCarrierLoading || initUserLoading) {
 			return null
 		} else {
 			if (Object.keys(localCarreirInfo).length == 0) {// elcarrier no ha terminado el registro
 				return (
-					<TouchableOpacity
-						onPress={() => navigation.navigate("CarrierApplicationScreen")}
+					<LinearGradient
+						start={{ x: 0, y: 0 }}
+						end={{ x: 1, y: 1 }}
+						colors={[Colors.COLORS.WARNING, '#FB6360']}
+						style={[
+							styles.recent,
+							{ backgroundColor: '#fff', marginBottom: 20 },
+						]}
 					>
-						<LinearGradient
-							start={{ x: 0, y: 0 }}
-							end={{ x: 1, y: 1 }}
-							colors={[Colors.COLORS.WARNING, '#FB6360']}
-							style={[
-								styles.recent,
-								{ backgroundColor: '#fff', marginBottom: 20 },
-							]}
+						<TouchableOpacity
+							onPress={() => navigation.navigate("CarrierApplicationScreen")}
 						>
 							<View>
 								<Typography h3 bold color="#ffffff">
 									Su registro de cuenta de mensajero no está completo, presione aquí para completarlo.
 								</Typography>
 							</View>
-						</LinearGradient>
-					</TouchableOpacity>
+						</TouchableOpacity>
+					</LinearGradient>
+
 				)
 			} else if (localCarreirInfo.kyc == "PENDING") {
 				return (
@@ -197,11 +225,26 @@ export default function HomeScreen({ navigation }) {
 							{ backgroundColor: '#fff', marginBottom: 20 },
 						]}
 					>
-						<View>
-							<Typography h3 bold color="#ffffff">
-								Su solicitud de cuenta de mensajero está siendo procesada.
-							</Typography>
-						</View>
+						{reloadInfo ? (
+							<ActivityIndicator
+								size={15}
+								color='#fff'
+								style={{
+									position: 'absolute',
+									right: 5,
+									top: 3,
+								}}
+							/>
+						) : (null)}
+						<TouchableOpacity
+							onPress={() => reloadCarrier()}
+						>
+							<View>
+								<Typography h3 bold color="#ffffff">
+									Su solicitud de cuenta de mensajero está siendo procesada.
+								</Typography>
+							</View>
+						</TouchableOpacity>
 					</LinearGradient>
 				)
 			} else if (localCarreirInfo.kyc == "DISAPPROVED") {
@@ -215,11 +258,27 @@ export default function HomeScreen({ navigation }) {
 							{ backgroundColor: '#fff', marginBottom: 20 },
 						]}
 					>
-						<View>
-							<Typography h3 bold color="#ffffff">
-								Lo sentimos su cuenta de mensajero no ha sido aprobada.
-							</Typography>
-						</View>
+						{reloadInfo ? (
+							<ActivityIndicator
+								size={15}
+								color='#fff'
+								style={{
+									position: 'absolute',
+									right: 5,
+									top: 3,
+								}}
+							/>
+						) : (null)}
+
+						<TouchableOpacity
+							onPress={() => reloadCarrier()}
+						>
+							<View>
+								<Typography h3 bold color="#ffffff">
+									Lo sentimos su cuenta de mensajero no ha sido aprobada.
+								</Typography>
+							</View>
+						</TouchableOpacity>
 					</LinearGradient>
 				)
 			} else if (localCarreirInfo.kyc == "APPROVED") {
@@ -325,7 +384,7 @@ export default function HomeScreen({ navigation }) {
 						})}
 					</View>
 				)}
-				{/* {(loading || error || initTockenLoading || initCarrierLoading) && (
+				{/* {(loading || error || initUserLoading || initCarrierLoading) && (
 					<ActivityIndicator size="small" color={colors.primary} />
 				)}
 
@@ -337,7 +396,7 @@ export default function HomeScreen({ navigation }) {
 						flexWrap: 'wrap',
 					}}
 				>
-					{!(loading || error || initTockenLoading || initCarrierLoading) &&
+					{!(loading || error || initUserLoading || initCarrierLoading) &&
 						products.productTypes.edges.map((edges, index) => {
 							return (
 								<View

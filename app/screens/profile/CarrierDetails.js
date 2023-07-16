@@ -46,8 +46,8 @@ const CarrierDetails = () => {
     const user_state = useSelector(user)
     const dispatch = useDispatch()
 
-    //console.log("carrier_info >> ", carrier_info.isActive)
-    console.log("piPhotoFrontal >> ", piPhotoFrontal)
+    /* console.log("carrier_info >> ", carrier_info.isActive)
+    console.log("piPhotoFrontal >> ", piPhotoFrontal) */
 
     const correctImageURI = (type) => {
         switch (type) {
@@ -95,6 +95,8 @@ const CarrierDetails = () => {
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoFrontal: vistaPrevia,
+                kyc: data.carrierPiPhotoFrontalUpdate.carrier.kyc,
+                isActive: data.carrierPiPhotoFrontalUpdate.carrier.isActive,
             }))
             setUploadFrontal(false)
             if (Platform.OS === 'android')
@@ -129,6 +131,8 @@ const CarrierDetails = () => {
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoBack: vistaPrevia,
+                kyc: data.carrierPiPhotoFrontalUpdate.carrier.kyc,
+                isActive: data.carrierPiPhotoFrontalUpdate.carrier.isActive,
             }))
             setUploadBack(false)
             if (Platform.OS === 'android')
@@ -164,6 +168,8 @@ const CarrierDetails = () => {
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 bustPhoto: vistaPrevia,
+                kyc: data.carrierPiPhotoFrontalUpdate.carrier.kyc,
+                isActive: data.carrierPiPhotoFrontalUpdate.carrier.isActive,
             }))
             setUploadBust(false)
             if (Platform.OS === 'android')

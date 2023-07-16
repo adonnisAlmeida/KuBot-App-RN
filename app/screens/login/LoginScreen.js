@@ -170,7 +170,8 @@ export default function LoginScreen({ navigation }) {
 						</Typography>
 						<TextInput
 							keyboardType='email-address'
-							//caretHidden={false}
+							autoCapitalize='none'
+							caretHidden={false}
 							value={email}
 							style={[
 								styles.input,

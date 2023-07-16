@@ -49,12 +49,12 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
                 })
             )
         },
-        onError: (errorAvatar) => {
+        onError: (errorAvatar, dataAvatar) => {
             setActivity(false)
             setConfirmModal(false)
             if (Platform.OS === 'android')
                 ToastAndroid.show('Error actualizando el avatar.', ToastAndroid.LONG)
-            console.log('Error userAvatarUpdate >> ', errorAvatar)
+            console.log('Error userAvatarUpdate >> ', JSON.stringify(errorAvatar, null, 2))
             console.log('Error userAvatarUpdate  dataAvatar >> ', dataAvatar)
         }
     })

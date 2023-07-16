@@ -181,6 +181,7 @@ export const ORDERS_LIST_CONTACTS = gql`
                         lastName
                         dateJoined
                         addresses {
+							id
                             country {
                                 country
                             }
@@ -202,6 +203,7 @@ export const ORDERS_LIST_CONTACTS = gql`
                             lastName
                             dateJoined
                             addresses {
+								id
                                 country {
                                     country
                                 }

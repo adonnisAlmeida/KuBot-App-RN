@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import Colors from '../../../constants/Colors'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -171,7 +172,7 @@ const SecondComponent = ({
                             <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
                                 <MaterialIcons
                                     name="add-photo-alternate"
-                                    color={colors.ON_SURFACE}
+                                    color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
                                     size={25}
                                 />
                             </TouchableOpacity>
@@ -198,7 +199,7 @@ const SecondComponent = ({
                             <TouchableOpacity onPress={() => piPhotoBackEdit()}>
                                 <MaterialIcons
                                     name="add-photo-alternate"
-                                    color={colors.ON_SURFACE}
+                                    color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
                                     size={25}
                                 />
                             </TouchableOpacity>
@@ -224,7 +225,7 @@ const SecondComponent = ({
                             <TouchableOpacity onPress={() => bustPhotoEdit()}>
                                 <MaterialIcons
                                     name="add-photo-alternate"
-                                    color={colors.ON_SURFACE}
+                                    color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
                                     size={25}
                                 />
                             </TouchableOpacity>
@@ -389,10 +390,29 @@ const SecondComponent = ({
                             margin: 10,
                             width: '95%'
                         }}>
-                                <WebView
-                                    //originWhitelist={['*']}
-                                    source={{ uri: 'http://lajabitadelloco.com:8000/es/account/terms-cond-data' }}
+                            <WebView
+                                //originWhitelist={['*']}
+                                source={{ uri: 'http://lajabitadelloco.com:8000/es/account/terms-cond-data' }}
+                            />
+                            <TouchableOpacity
+                                onPress={() => setShowTerms(false)}
+                                style={{
+                                    backgroundColor: Colors.COLORS.PRIMARY,
+                                    position: 'absolute',
+                                    padding: 10,
+                                    borderRadius: 100,
+                                    paddingVertical: 12,
+                                    bottom: 10,
+                                    right: 10,
+
+                                }}>
+                                <AntDesign
+                                    style={{ marginRight: 3.7 }}
+                                    name="back"
+                                    color='#fff'
+                                    size={25}
                                 />
+                            </TouchableOpacity>
                         </View>
                     </TouchableWithoutFeedback>
                 </TouchableOpacity>

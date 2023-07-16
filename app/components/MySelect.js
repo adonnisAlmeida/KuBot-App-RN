@@ -80,7 +80,7 @@ const MySelect = ({ label, items, value, setItem, setValue, ...props }) => {
                     <View style={styles.modalContent}>
                         {items.map((item, index) => {
                             return (
-                                <TouchableOpacity key={index} onPress={() => changeSelected(item, index)} style={styles.selectElement}>
+                                <TouchableOpacity key={item.id? item.id : index} onPress={() => changeSelected(item, index)} style={styles.selectElement}>
                                     <Typography size={16}>{item.nameSpanish}</Typography>
                                 </TouchableOpacity>
                             )

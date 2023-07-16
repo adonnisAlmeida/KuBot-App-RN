@@ -14,30 +14,15 @@ import { setUserAddresses } from '../../../redux/userlogin/userLoginSlice'
 
 const AddressCard = ({
     address,
-    setEditAddressModal,
-    setFirstName,
-    setLastName,
-    setCountry,
-    setCountryCode,
-    setCountryArea,
-
-    setCity,
-    setCityArea,
-    setAddress,
-    setAddress2,
-    setPostalCode,
-    setPhone,
-    setCompanyName,
-    setSelectedAddress,
-    setCodigoTelefono,
-    setActionToDo,
-    provinciasList,
     openEdit,
+    addressCount
 }) => {
     const [showAlertAw, setShowAlertAw] = useState(false)
     const [deletingAddress, setDeletingAddress] = useState(false)
     const { colors } = useTheme()
     const dispatch = useDispatch()
+
+    console.log(addressCount)
 
     const [addressDelete, { loadingAddressDelete, errorAddressDelete, dataAddressDelete }] = useMutation(ADDRESS_DELETE, {
         onCompleted: (dataAddressDelete) => {
@@ -70,38 +55,14 @@ const AddressCard = ({
                 id: address.id
             }
         })
-        /* console.log("Eliminar Direccion >> ", address.id)
-        setTimeout(() => {
-            setDeletingAddress(false)
-            setShowAlertAw(false)
-            console.log("Direccion Eliminada correctamente >> ", address.id)
-        }, 1000); */
     }
 
     const editAction = () => {
-        //console.log("A editar >> ", provinciasList)
         openEdit(address)
-        /* let indexCountry = COUNTRIES.findIndex(obj => obj.code == address.country.code)
-        let goodPhone = address.phone
-        if (address.phone.includes(COUNTRIES[indexCountry].mobileCode)) {
-            goodPhone = address.phone.substring(COUNTRIES[indexCountry].mobileCode, COUNTRIES[indexCountry].mobileCode.length)
-        }
-        setActionToDo('EDIT')
-        setCodigoTelefono(indexCountry)
-        setSelectedAddress(address)
-        setFirstName(address.firstName)
-        setLastName(address.lastName)
-        setCountry(address.country.country)
-        setCountryCode(address.country.code)
-        setCountryArea(address.countryArea) // provincia
-        setCity(address.city) // municipio
-        setCityArea(address.cityArea)
-        setAddress(address.streetAddress1)
-        setAddress2(address.streetAddress2)
-        setPostalCode(address.postalCode)
-        setPhone(goodPhone)
-        setCompanyName(address.companyName)
-        setEditAddressModal(true) */
+    }
+
+    const handleDelete = () => {
+        setShowAlertAw(true)
     }
 
     return (
@@ -345,21 +306,25 @@ const AddressCard = ({
                                 size={20}
                             />
                         </TouchableOpacity>
+                        {
+                            addressCount == 1 ? (
+                                null
+                            ) : (
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 5
+                                    }}
+                                    onPress={() => handleDelete()}
+                                >
+                                    <MaterialCommunityIcons
+                                        name="notebook-remove-outline"
+                                        color={Colors.COLORS.WARNING}
+                                        size={20}
+                                    />
+                                </TouchableOpacity>
+                            )
+                        }
 
-                        <TouchableOpacity
-                            style={{
-                                padding: 5
-                            }}
-                            onPress={() => {
-                                setShowAlertAw(true)
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="notebook-remove-outline"
-                                color={Colors.COLORS.WARNING}
-                                size={20}
-                            />
-                        </TouchableOpacity>
                     </View>
                 </View>
             </View>

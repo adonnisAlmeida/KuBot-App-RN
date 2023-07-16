@@ -19,46 +19,12 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 const Tab = createMaterialTopTabNavigator();
 
 export default function ProfileScreen({ navigation }) {
-	const { colors } = useTheme()
 	const dispatch = useDispatch()
 	const [showAlertAw, setShowAlert] = useState(false)
-	const user_state = useSelector(user)
 	const carrier_state = useSelector(carrierInfo)
-	const [customerDelete, result] = useMutation(CUSTOMER_DELETE)
-
-	const { alert, showAlert } = useAlert({
-		title: '¿Estas Seguro?',
-		subtitle: `Se eliminará el usuario ${user_state.firstName} ${user_state.lastName}.`,
-		buttons: [
-			{
-				title: 'Eliminar',
-				style: 'delete',
-				onPress: () => {
-					//customerDelete({ variables: { id: user_state.id } });
-					handleCerrarSesion()
-				},
-			},
-			{
-				title: 'Cancelar',
-				style: 'cancel',
-			},
-		],
-	})
-
-	const handleEliminar = () => {
-		showAlert()
-	}
 
 	const handleCerrarSesion = () => {
 		dispatch(logout())
-	}
-
-	const handleEditarProfile = () => {
-		navigation.navigate('EditarProfile', {
-			user_id: user_state.id,
-			user_firstName: `${user_state.firstName}`,
-			user_lastName: `${user_state.lastName}`,
-		})
 	}
 
 	//if (loading || error) return <Loading />
@@ -67,13 +33,6 @@ export default function ProfileScreen({ navigation }) {
 		title: 'Perfil',
 		headerRight: () => (
 			<View style={{ flexDirection: 'row' }}>
-				{/* <FontAwesome
-					style={styles.headerRight}
-					name="edit"
-					color={colors.ON_SURFACE}
-					size={20}
-					onPress={() => handleEditarProfile()}
-				/> */}
 				<FontAwesome
 					style={styles.headerRight}
 					name="sign-out"
@@ -84,12 +43,6 @@ export default function ProfileScreen({ navigation }) {
 			</View>
 		),
 	})
-
-	const avatar = user_state.avatar
-		? {
-			uri: user_state.avatar.url,
-		}
-		: require('../../../assets/user_avatar.png')
 
 	return (
 		<>

@@ -22,7 +22,7 @@ import { getDarkMode, loading } from './app/redux/darkmode/darkModeSlice'
 import store from './app/redux/store'
 import { URL_API } from './app/constants/Other'
 import { Loading } from './app/components'
-import { user } from './app/redux/userlogin/userLoginSlice'
+import { user, userToken } from './app/redux/userlogin/userLoginSlice'
 import Navigation from './app/navigation/Navigation'
 import Pushy from 'pushy-react-native';
 import SplashScreen from 'react-native-splash-screen'
@@ -67,14 +67,15 @@ const App: () => Node = () => {
     )
 };
 function Apollo(props) {
-    const user_state = useSelector(user)
+    //const user_state = useSelector(user)
+    const user_token = useSelector(userToken)
 
     const authLink = setContext((_, { headers }) => {
-        const token = user_state.token
+        //const token = user_state.token
         return {
             headers: {
                 ...headers,
-                authorization: token ? `JWT ${token}` : '',
+                authorization: user_token ? `JWT ${user_token}` : '',
             },
         }
     })

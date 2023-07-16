@@ -164,18 +164,31 @@ const CarrierApplicationScreen = ({ navigation }) => {
 		let errorData = []
 		if (piPhotoFrontalFile == null) {
 			errorData.push('piPhotoFrontalFile')
+			if (Platform.OS === 'android') {
+				ToastAndroid.show('No ha seleccionado la imagen delantera del CI.', ToastAndroid.LONG)
+			}
+			return
 		}
 		if (piPhotoBackFile == null) {
 			errorData.push('piPhotoBackFile')
+			if (Platform.OS === 'android') {
+				ToastAndroid.show('No ha seleccionado la imagen trasera del CI.', ToastAndroid.LONG)
+			}
+			return
 		}
 		if (bustPhotoFile == null) {
 			errorData.push('bustPhotoFile')
+			if (Platform.OS === 'android') {
+				ToastAndroid.show('No ha seleccionado la imagen de busto.', ToastAndroid.LONG)
+			}
+			return
 		}
 		if (!terms) {
 			errorData.push('terms')
 			if (Platform.OS === 'android') {
 				ToastAndroid.show('Debe aceptar los términos y condiciones de uso de datos.', ToastAndroid.LONG)
 			}
+			return
 		}
 		if (errorData.length > 0) {
 			setErrors(errorData)
