@@ -161,7 +161,7 @@ export default {
 	},
 	MESSENGER_ORDERS: {
 		component: MessengerOrdersScreen,
-		title: 'Orden de Mensajero',
+		title: 'Mis pedidos',
 		name: 'MessengerOrders',
 		icon: 'envelope-open',
 		drawer: true,
@@ -209,7 +209,7 @@ export default {
 	},
 	DELIVERY_AREAS: {
 		component: DeliveryAreasScreen,
-		title: 'Zonas de entregas',
+		title: 'Zonas de entrega',
 		name: 'DeliveryAreas',
 		icon: 'location-arrow',
 		drawer: true,
@@ -217,7 +217,7 @@ export default {
 	},
 	DELIVERY_AREAS_FORM: {
 		component: DeliveryAreasFormScreen,
-		title: 'Editar zonas de entregas',
+		title: 'Editar zonas de entrega',
 		name: 'DeliveryAreasForm',
 		icon: 'map',
 		drawer: false,

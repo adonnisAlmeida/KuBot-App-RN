@@ -63,7 +63,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                             dispatch(removeAcceptShipping(orderDetails.order.id))
                             setDisplayLoading(false)
                             if (Platform.OS === 'android') {
-                                ToastAndroid.show('Envío aceptado correctamente. Ahora puede acceder a los detalles de la orden desde el menú “Orden de Mensajero”', ToastAndroid.LONG)
+                                ToastAndroid.show('Envío aceptado correctamente. Ahora puede acceder a los detalles de la orden desde el menú “Mis pedidos”', ToastAndroid.LONG)
                             }
                             navigation.goBack()
                         }

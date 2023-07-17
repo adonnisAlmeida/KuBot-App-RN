@@ -29,7 +29,7 @@ export default function MessengerOrdersList({
 		title:
 			selected.length > 0
 				? `${selected.length} elemento${selected.length == 1 ? '' : 's'}`
-				: 'Orden de Mensajero',
+				: 'Mis pedidos',
 	})
 
 	const onLongPressMessengerOrders = (messenger_orders) => {
@@ -75,8 +75,11 @@ export default function MessengerOrdersList({
 					<View
 						style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
 					>
+						<Typography bold h3 color={colors.ON_BACKGROUND}>
+							No se encontraron pedidos.
+						</Typography>
 						<Typography color={colors.ON_BACKGROUND}>
-							No hay elementos
+							Los pedidos aparecerán aquí después de que los clientes finalicen el proceso de pago.
 						</Typography>
 					</View>
 				) : (

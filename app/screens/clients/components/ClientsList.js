@@ -12,20 +12,23 @@ import Colors from '../../../constants/Colors'
 
 const ClientsList = ({ navigation, clients_list, doRefresh, refreshing }) => {
     const { colors } = useTheme()
-    
+
     const onRefresh = () => {
-		doRefresh()
-	}
+        doRefresh()
+    }
 
     return (
         <TouchableWithoutFeedback>
             <View style={{ flex: 1 }}>
                 {clients_list.length === 0 ? (
                     <View
-                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 15 }}
                     >
+                        <Typography bold h3 color={colors.ON_BACKGROUND}>
+                            No se encontraron clientes.
+                        </Typography>
                         <Typography color={colors.ON_BACKGROUND}>
-                            No hay Clientes para mostrar
+                            Las cuentas de clientes aparecerán aquí una vez que los usuarios se registren en la tienda.
                         </Typography>
                     </View>
                 ) : (
@@ -35,12 +38,12 @@ const ClientsList = ({ navigation, clients_list, doRefresh, refreshing }) => {
                             showsVerticalScrollIndicator={false}
                             data={clients_list}
                             refreshControl={
-								<RefreshControl
-									colors={[Colors.COLORS.PRIMARY]}
-									refreshing={refreshing}
-									onRefresh={onRefresh}
-								/>
-							}
+                                <RefreshControl
+                                    colors={[Colors.COLORS.PRIMARY]}
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                />
+                            }
                             keyExtractor={(item, index) => index.toString()}
                             renderItem={({ item, index, separators }) => (
                                 <ClientItem

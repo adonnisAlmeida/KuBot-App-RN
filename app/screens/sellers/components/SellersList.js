@@ -25,10 +25,13 @@ const SellersList = ({ navigation, sellers_list, doRefresh, refreshing }) => {
             <View style={{ flex: 1 }}>
                 {sellers_list.length === 0 ? (
                     <View
-                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 15 }}
                     >
+                        <Typography bold h3 color={colors.ON_BACKGROUND}>
+                            No se encontraron vendedores.
+                        </Typography>
                         <Typography color={colors.ON_BACKGROUND}>
-                            No hay Vendedores para mostrar
+                            Las cuentas de vendedores aparecerán aquí una vez que los usuarios se registren en la tienda.
                         </Typography>
                     </View>
                 ) : (

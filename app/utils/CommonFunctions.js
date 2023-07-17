@@ -1,5 +1,6 @@
 import moment from "moment"
 import { DAY_NAMES, MONTH_NAMES } from "../constants/Other"
+import { Typography } from "../components"
 
 export function printCreated(date) {
     let output = ''
@@ -240,6 +241,14 @@ export function kycColor(kyc) {
     }
 }
 
+export function count_elementos_str(length) {
+    return (
+        <Typography light color='#000'>
+            {`(${length} municipio${length === 1 ? '' : 's'})`}
+        </Typography>
+    )
+}
+
 export function orderStatusDisplay(status) {
     switch (status) {
         case 'DRAFT':
@@ -370,9 +379,9 @@ const makeYearlyRule = (key, item, restData) => {
         restData[key].push(item)
     }
     let end = null
-    if(item.endRecurringPeriod == null){
+    if (item.endRecurringPeriod == null) {
         end = new Date(2024, 0, 24)
-    }else{
+    } else {
         end = item.endRecurringPeriod
     }
     if (item.start) {
@@ -402,9 +411,9 @@ const makeMonthlyRule = (key, item, restData) => {
     }
     let cont = 1
     let end = null
-    if(item.endRecurringPeriod == null){
+    if (item.endRecurringPeriod == null) {
         end = new Date(2024, 0, 24)
-    }else{
+    } else {
         end = item.endRecurringPeriod
     }
     if (item.start) {
@@ -436,9 +445,9 @@ const makeWeeklyRule = (key, item, restData) => {
         restData[key].push(item)
     }
     let end = null
-    if(item.endRecurringPeriod == null){
+    if (item.endRecurringPeriod == null) {
         end = new Date(2024, 0, 24)
-    }else{
+    } else {
         end = item.endRecurringPeriod
     }
     if (item.start) {
@@ -467,9 +476,9 @@ const makeDailyRule = (key, item, restData) => {
         restData[key].push(item)
     }
     let end = null
-    if(item.endRecurringPeriod == null){
+    if (item.endRecurringPeriod == null) {
         end = new Date(2024, 0, 24)
-    }else{
+    } else {
         end = item.endRecurringPeriod
     }
     if (item.start) {

@@ -32,10 +32,13 @@ const AcceptShippingList = ({
         <View style={{ flex: 1 }}>
             {orders_list.length === 0 ? (
                 <View
-                    style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                    style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 15, }}
                 >
+                    <Typography bold h3 color={colors.ON_BACKGROUND}>
+                        No se encontraron pedidos para enviar.
+                    </Typography>
                     <Typography color={colors.ON_BACKGROUND}>
-                        No se encontraron pedidos para aceptar.
+                        Los pedidos aparecerán aquí después de que los clientes finalicen el proceso de pago.
                     </Typography>
                 </View>
             ) : (
