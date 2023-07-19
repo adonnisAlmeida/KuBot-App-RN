@@ -120,7 +120,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                         País:
                                     </Typography>
                                     <Typography color={colors.ON_SURFACE}>
-                                        {orderDetails.order.shippingAddress.country.country}
+                                        {orderDetails.order.defaultPickupAddress.country.country}
                                     </Typography>
                                 </View>
                                 <View style={{ flexDirection: 'row' }}>
@@ -128,7 +128,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                         Municipio:
                                     </Typography>
                                     <Typography color={colors.ON_SURFACE}>
-                                        {orderDetails.order.shippingAddress.countryArea}
+                                        {orderDetails.order.defaultPickupAddress.countryArea}
                                     </Typography>
                                 </View>
                                 <View style={{ flexDirection: 'row' }}>
@@ -136,7 +136,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                         Ciudad:
                                     </Typography>
                                     <Typography color={colors.ON_SURFACE}>
-                                        {orderDetails.order.shippingAddress.city}
+                                        {orderDetails.order.defaultPickupAddress.city}
                                     </Typography>
                                 </View>
                                 <View style={{ flexDirection: 'row' }}>
@@ -144,7 +144,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                         Código postal:
                                     </Typography>
                                     <Typography color={colors.ON_SURFACE}>
-                                        {orderDetails.order.shippingAddress.postalCode}
+                                        {orderDetails.order.defaultPickupAddress.postalCode}
                                     </Typography>
                                 </View>
                             </View>

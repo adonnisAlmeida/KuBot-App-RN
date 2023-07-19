@@ -18,6 +18,21 @@ const ClientsScreen = ({ navigation }) => {
 
     const [getClients, { loading, error, data }] = useLazyQuery(ORDERS_LIST_CLIENTS, {
         onCompleted: (data) => {
+            const ordenes = data.orders.edges
+            let temp = []
+            ordenes.forEach(el => {
+                if (el.node.user != null && el.node.user) {
+                    if (temp.filter(e => e.user.id === el.node.user.id).length > 0) {
+                        return
+                    } else {
+                        temp.push(el.node)
+                    }
+                }
+            })
+
+            dispatch(setClientsByUser(temp))
+            setMyClients(temp)
+
             setLoadingApp(false)
             setRefreshing(false)
         },
@@ -35,35 +50,8 @@ const ClientsScreen = ({ navigation }) => {
     }, [])
 
     useEffect(() => {
-        if (data) {
-            const ordenes = data.orders.edges
-            let temp = []
-            ordenes.forEach(el => {
-                if (el.node.user != null && el.node.user) {
-                    if (temp.filter(e => e.user.id === el.node.user.id).length > 0) {
-                        return
-                    } else {
-                        temp.push(el.node)
-                    }
-                }
-            })
-
-            dispatch(setClientsByUser(temp))
-            setMyClients(temp)
-            setLoadingApp(false)
-
-            /* const groupedItems = ordenes.reduce((results, item) => {
-                if (item.node.user !== null) {
-                    (results[item.node.user.id] = results[item.node.user.id] || []).push(item.node.user)
-                }
-                return results
-            }, {})
-            const propertyValues = Object.values(groupedItems)
-            dispatch(setClientsByUser(propertyValues))
-            setMyClients(propertyValues)
-            setLoadingApp(false) */
-        }
-    }, [clientsStore.clients, data])
+        setMyClients(clientsStore.clients)
+    }, [clientsStore.clients])
 
     const reloadApp = () => {
         setLoadingApp(true)

@@ -15,7 +15,6 @@ import { useTheme } from '@react-navigation/native'
 
 
 const AcceptShippingScreen = ({ route, navigation }) => {
-    let reload = route.params?.reload
     const [loadingApp, setLoadingApp] = useState(false)
     const [orders, setOrders] = useState([])
     const [refreshing, setRefreshing] = useState(false)
@@ -23,9 +22,7 @@ const AcceptShippingScreen = ({ route, navigation }) => {
     const [hasNextPage, setHasNextPage] = useState(false)
     const [endCursor, setEndCursor] = useState("")
     const dispatch = useDispatch()
-    const userStore = useSelector(state => state.userlogin)
     const acceptShippingStore = useSelector(state => state.accepShipping)
-    const carrierID = userStore.carrierInfo.serverId;
     const { colors } = useTheme()
 
     const [getOrdersList, { loading, error, data }] = useLazyQuery(ACCEPT_ORDERS_LIST, {
@@ -39,12 +36,12 @@ const AcceptShippingScreen = ({ route, navigation }) => {
             if (loadingApp || refreshing) {
                 let elementos = []
                 data.orders.edges.map((edges) => elementos.push(edges.node))
-                //setOrders(elementos)
+                setOrders(elementos)
                 dispatch(setAcceptShipping(elementos))
             } else {
                 let elementos = []
                 data.orders.edges.map((edges) => elementos.push(edges.node))
-                //setOrders([...orders, ...elementos])
+                setOrders([...orders, ...elementos])
                 dispatch(setAcceptShipping(elementos))
             }
             /* let elementos = []

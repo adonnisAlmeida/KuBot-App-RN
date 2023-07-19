@@ -14,12 +14,12 @@ const AcceptShippingItem = ({
 	navigation,
 	...props
 }) => {
-	const { dark, colors } = useTheme()
+	//const { dark, colors } = useTheme()
 
 	return (
 		<TouchableOpacity {...props}>
 			<View
-				style={[dark ? styles.cardDark : styles.card]}
+				style={[false ? styles.cardDark : styles.card]}
 			>
 				<View style={styles.card_details}>
 					<View
@@ -31,7 +31,7 @@ const AcceptShippingItem = ({
 					>
 						<Typography
 							bold
-							color={colors.ON_SURFACE}
+							color={'#000'}
 							style={{ marginBottom: 8 }}
 						>
 							Orden # {select_order.number}
@@ -40,25 +40,25 @@ const AcceptShippingItem = ({
 							<Typography bold>
 								Dirección de Envío:
 							</Typography>
-							<Typography style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
-								{select_order.shippingAddress.city +
-									', ' + select_order.shippingAddress.countryArea +
-									', ' + select_order.shippingAddress.country.country +
-									', ' + select_order.shippingAddress.postalCode}
+							<Typography style={{ marginRight: 5 }} color={'#000'}>
+								{select_order.defaultPickupAddress.city +
+									', ' + select_order.defaultPickupAddress.countryArea +
+									', ' + select_order.defaultPickupAddress.country.country +
+									', ' + select_order.defaultPickupAddress.postalCode}
 							</Typography>
 							<View style={{ flexDirection: 'row' }}>
-								<Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+								<Typography bold style={{ marginRight: 5 }} color={'#000'}>
 									Distancia (kms):
 								</Typography>
-								<Typography color={colors.ON_SURFACE}>
+								<Typography color={'#000'}>
 									{select_order.getDistance}
 								</Typography>
 							</View>
 							<View style={{ flexDirection: 'row' }}>
-								<Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
+								<Typography bold style={{ marginRight: 5 }} color={'#000'}>
 									Costo de envío:
 								</Typography>
-								<Typography color={colors.ON_SURFACE}>
+								<Typography color={'#000'}>
 									{select_order.shippingPrice.gross.amount} {getCurrencySimbol(select_order.shippingPrice.gross.currency)}	
 								</Typography>
 							</View>
