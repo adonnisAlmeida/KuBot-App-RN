@@ -21,14 +21,6 @@ const SellersScreen = ({ navigation }) => {
     const [getSellers, { loading, error, data }] = useLazyQuery(ORDERS_LIST_SELLERS, {
         onCompleted: (data) => {
             const ordenes = data.orders.edges
-            /* const groupedItems = ordenes.reduce((results, item) => {
-                item.node.sellers.forEach((seller) => {
-                    if (seller !== null) {
-                        (results[seller.id] = results[seller.id] || []).push(seller)
-                    }
-                })
-                return results
-            }, {}) */
             let temp = []
             ordenes.forEach(el => {
                 el.node.sellers.forEach(use => {
@@ -39,17 +31,11 @@ const SellersScreen = ({ navigation }) => {
                     }
                 })
             })
-            console.log("IDDDD >>> ", temp[0].user.id)
-            console.log("IDDDD >>> ", temp)
             dispatch(setSellersByUser(temp))
-            //setMySellers(temp)
+            setMySellers(temp)
             setLoadingApp(false)
             setRefreshing(false)
 
-            /* const propertyValues = Object.values(groupedItems)
-            dispatch(setSellersByUser(propertyValues))
-            setMySellers(propertyValues)
-            setLoadingApp(false) */
         },
         onError: () => {
             setLoadingApp(false)
@@ -60,6 +46,7 @@ const SellersScreen = ({ navigation }) => {
     })
 
     useEffect(() => {
+        setLoadingApp(true)
         getSellers({ variables: { carrier: carrierID } })
     }, [])
 
@@ -77,15 +64,7 @@ const SellersScreen = ({ navigation }) => {
         getSellers({ variables: { carrier: carrierID } })
     }
 
-
-    setTimeout(() => {
-        if (loadingApp) setLoadingApp(false)
-    }, 2000)
-
     if (loadingApp) return <Loading />
-    if (loading && mySellers.length === 0 ) return <Loading />
-
-    //console.log(mySellers.length)
 
     return (
         <View style={{ flex: 1 }}>
@@ -99,14 +78,6 @@ const SellersScreen = ({ navigation }) => {
                         doRefresh={doRefresh}
                         refreshing={refreshing}
                     />
-                    /* mySellers.length != 0 ? (
-                        mySellers.map(e => (
-                            <Text>ID >> {e.user.id}</Text>
-                        ))
-                    ) :
-                        (
-                            <Text>Est es una prueba</Text>
-                        ) */
                 )}
         </View>
     )

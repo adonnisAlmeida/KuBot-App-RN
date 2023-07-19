@@ -49,7 +49,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             setShippingStatus('IN_TRANSIT')
                             setDisplayLoading(false)
                             if (Platform.OS === 'android') {
-                                ToastAndroid.show('Estado de la Envío actualizado correctamente.', ToastAndroid.LONG)
+                                ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             const parametros = {
                                 "id": data.order.id,
@@ -82,7 +82,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             setShippingStatus('LOST')
                             setDisplayLoading(false)
                             if (Platform.OS === 'android') {
-                                ToastAndroid.show('Estado de la Envío actualizado correctamente.', ToastAndroid.LONG)
+                                ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             const parametros = {
                                 "id": data.order.id,
@@ -133,13 +133,13 @@ const DetailsNavView = ({ navigation, route }) => {
                             position: 2,
                             color: Colors.COLORS.PRIMARY
                         },
-                        {
+                        /* {
                             text: "Perdido",
                             icon: actionIcon('question'),
                             name: "lost",
                             position: 1,
                             color: Colors.COLORS.PRIMARY
-                        }
+                        } */
                     ])
                     break;
                 case 'IN_TRANSIT':
@@ -163,13 +163,13 @@ const DetailsNavView = ({ navigation, route }) => {
                             position: 1,
                             color: Colors.COLORS.PRIMARY
                         }, */
-                        {
+                        /* {
                             text: "Perdido",
                             icon: actionIcon('question'),
                             name: "lost",
                             position: 1,
                             color: Colors.COLORS.PRIMARY
-                        }
+                        } */
                     ])
                     break;
                 case 'DELIVERED':
@@ -223,13 +223,13 @@ const DetailsNavView = ({ navigation, route }) => {
                         position: 2,
                         color: Colors.COLORS.PRIMARY
                     },
-                    {
+                    /* {
                         text: "Perdido",
                         icon: actionIcon('question'),
                         name: "lost",
                         position: 1,
                         color: Colors.COLORS.PRIMARY
-                    }
+                    } */
                 ])
                 break;
             case 'IN_TRANSIT':
@@ -249,13 +249,13 @@ const DetailsNavView = ({ navigation, route }) => {
                         position: 1,
                         color: Colors.COLORS.PRIMARY
                     }, */
-                    {
+                    /* {
                         text: "Perdido",
                         icon: actionIcon('question'),
                         name: "lost",
                         position: 1,
                         color: Colors.COLORS.PRIMARY
-                    }
+                    } */
                 ])
                 break;
             case 'DELIVERED':

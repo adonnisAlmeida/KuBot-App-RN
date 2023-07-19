@@ -120,7 +120,7 @@ const ModalRejected = ({
                             dispatch(setOrderShippingStatus(parametros))
                             dispatch(setSelectedOrderShippingStatus('REJECTED'))
                             if (Platform.OS === 'android') {
-                                ToastAndroid.show('Estado de la Envío actualizado correctamente.', ToastAndroid.LONG)
+                                ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             setActualizando(false)
                             setShowModalRejected(false)

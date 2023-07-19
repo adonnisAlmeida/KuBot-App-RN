@@ -45,6 +45,7 @@ const ClientsScreen = ({ navigation }) => {
     })
 
     useEffect(() => {
+        setLoadingApp(true)
         getClients({ variables: { carrier: carrierID } })
         dispatch(getClientsByUser())
     }, [])
@@ -63,12 +64,7 @@ const ClientsScreen = ({ navigation }) => {
         getClients({ variables: { carrier: carrierID } })
     }
 
-    setTimeout(() => {
-        if (loadingApp) setLoadingApp(false)
-    }, 2000)
-
     if (loadingApp) return <Loading />
-    if (loading && (Object.keys(myClients).length === 0 && myClients.constructor === Object)) return <Loading />
 
     return (
         <View style={{ flex: 1 }}>

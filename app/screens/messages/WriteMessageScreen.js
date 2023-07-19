@@ -180,6 +180,7 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
                             <FlatList
                                 data={localMessages}
                                 style={{ paddingLeft: 14, paddingHorizontal: 10 }}
+                                contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end',}}
                                 inverted={-1}
                                 keyExtractor={item => item.id}
                                 renderItem={({ item, index }) => {

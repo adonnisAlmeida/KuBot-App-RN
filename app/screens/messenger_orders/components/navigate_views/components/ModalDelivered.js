@@ -48,7 +48,7 @@ const ModalDelivered = ({
                             envio.order.shippingStatus = 'DELIVERED'
                             setShippingStatus('DELIVERED')
                             if (Platform.OS === 'android') {
-                                ToastAndroid.show('Estado de la Envío actualizado correctamente.', ToastAndroid.LONG)
+                                ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             const parametros = {
                                 "id": envio.order.id,
@@ -73,7 +73,7 @@ const ModalDelivered = ({
     const [signatureDeliveredImages, { loadingSignature, errorSignature, dataSignature }] = useMutation(SIGNATURE_IMAGES, {
         onCompleted: (dataSignature) => {
             //console.log("CREOO LA IMAGEN >> ", dataSignature)
-            //envio.order.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
+            envio.order.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
             setSignatureImages(dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery)
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
@@ -105,7 +105,7 @@ const ModalDelivered = ({
     const [packageDeliveredImages, { loadingPackage, errorPackage, dataPackage }] = useMutation(PACKAGE_IMAGES, {
         onCompleted: (dataPackage) => {
             //console.log("CREOO LA IMAGEN >> ", dataPackage)
-            //envio.order.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
+            envio.order.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
             setPackageImages(dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery)
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de paquete correctamente.', ToastAndroid.LONG)
