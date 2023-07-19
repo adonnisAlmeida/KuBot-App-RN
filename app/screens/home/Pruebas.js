@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, StatusBar } from 'react-native'
 import React, { useState } from 'react'
-import { Typography } from '../../components'
-import { TimePickerInputLineal, DatePickerInputLineal } from '../../components/DatePickerInput'
+//import { Typography } from '../../components'
+//import { TimePickerInputLineal, DatePickerInputLineal } from '../../components/DatePickerInput'
 import MySelect from '../../components/MySelect'
 import { useEffect } from 'react'
 import Colors from '../../constants/Colors'
@@ -115,12 +115,12 @@ const Pruebas = () => {
                     paddingHorizontal: 16,
                     paddingVertical: 20,
                 }}>
-                    <Typography>
+                    <Text>
                         Desde
-                    </Typography>
-                    <Typography>
+                    </Text>
+                    <Text>
                         {printCreated('2023-04-03')}
-                    </Typography>
+                    </Text>
                 </View>
                 <View style={{
                     backgroundColor: '#fff',

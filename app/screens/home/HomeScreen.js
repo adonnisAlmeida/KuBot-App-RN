@@ -26,7 +26,7 @@ import { Typography, FloatingActionButton } from '../../components'
 import { PRODUCT_TYPES } from '../../graphql/product'
 import { setCarrierInfo, user, carrierInfo, setUser } from '../../redux/userlogin/userLoginSlice'
 import { URL } from '../../constants/Other'
-import Pushy from 'pushy-react-native';
+//import Pushy from 'pushy-react-native';
 import { GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY, USER_INFO } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 
@@ -364,7 +364,7 @@ export default function HomeScreen({ navigation }) {
 							flexWrap: 'wrap',
 						}}
 					>
-						{products?.productTypes.edges.map((edges, index) => {
+						{products?.productTypes?.edges.map((edges, index) => {
 							return (
 								<View
 									key={index}

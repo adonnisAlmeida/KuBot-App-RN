@@ -20,7 +20,7 @@ import { login, setCarrierInfo } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
 import { ComplexAnimationBuilder } from 'react-native-reanimated'
 
-import Pushy from 'pushy-react-native';
+//import Pushy from 'pushy-react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 export default function LoginScreen({ navigation }) {
@@ -43,7 +43,7 @@ export default function LoginScreen({ navigation }) {
 
 	useEffect(() => {
 		// Register the user for push notifications
-		Pushy.register().then(async (deviceToken) => {
+		/* Pushy.register().then(async (deviceToken) => {
 			// Display an alert with device token
 			setPushyToken(deviceToken)
 			console.log('Pushy device token: ' + deviceToken);
@@ -55,7 +55,7 @@ export default function LoginScreen({ navigation }) {
 		}).catch((err) => {
 			// Handle registration errors
 			console.error('Error en tomando pushy.me Token', err);
-		});
+		}); */
 	}, [])
 
 	useEffect(() => {

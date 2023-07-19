@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { getDeliveryAreasLoading } from './deliveryareasSlice';
 
 export default {
 	getAcceptShipping,

@@ -9,11 +9,11 @@ import {
 	ToastAndroid,
 	ScrollView,
 	TouchableOpacity,
+	Text,
 } from 'react-native'
 import { useMutation } from '@apollo/client'
 import { useTheme } from '@react-navigation/native'
 
-import { Button, Typography } from '../../components'
 import { ACCOUNT_REGISTER } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -143,17 +143,17 @@ export default function RegisterScreen({ navigation }) {
 				showsVerticalScrollIndicator={false}
 			>
 				<View style={{ alignItems: 'center', }}>
-					<Typography color={colors.ON_BACKGROUND} style={styles.title}>
+					<Text color={colors.ON_BACKGROUND} style={styles.title}>
 						Crear Cuenta
-					</Typography>
+					</Text>
 				</View>
 				<View style={{ marginTop: 85 }}>
-					<Typography
+					<Text
 						color={colors.ON_SURFACE_VARIANT}
 					//style={{ marginVertical: 10 }}
 					>
 						Correo
-					</Typography>
+					</Text>
 					<TextInput
 						keyboardType='email-address'
 						autoCapitalize='none'
@@ -171,18 +171,18 @@ export default function RegisterScreen({ navigation }) {
 						onChangeText={(text) => setEmail(text)}
 					/>
 					{emailError ? (
-						<Typography small color="red" style={{ marginVertical: 10 }} >
+						<Text small color="red" style={{ marginVertical: 10 }} >
 							{emailError}
-						</Typography>
+						</Text>
 					) : (null)}
 				</View>
 				<View style={{ marginTop: 20 }}>
-					<Typography
+					<Text
 						color={colors.ON_SURFACE_VARIANT}
 					//style={{ marginVertical: 10 }}
 					>
 						Contraseña
-					</Typography>
+					</Text>
 					<View style={{
 						flexDirection: 'row',
 						borderBottomColor: '#8E8E8E',
@@ -209,12 +209,12 @@ export default function RegisterScreen({ navigation }) {
 					</View>
 				</View>
 				<View style={{ marginTop: 20 }}>
-					<Typography
+					<Text
 						color={colors.ON_SURFACE_VARIANT}
 					//style={{ marginVertical: 10 }}
 					>
 						Repetir Contraseña
-					</Typography>
+					</Text>
 					<View style={{
 						flexDirection: 'row',
 						borderBottomColor: '#8E8E8E',
@@ -241,35 +241,35 @@ export default function RegisterScreen({ navigation }) {
 					</View>
 				</View>
 				{passError ? (
-					<Typography small color="red" style={{ marginVertical: 10 }} >
+					<Text small color="red" style={{ marginVertical: 10 }} >
 						{passError}
-					</Typography>
+					</Text>
 				) : (null)}
 				<View style={{ marginTop: 50 }}>
-					<Button
+					<TouchableOpacity
 						style={{ alignItems: 'center', marginBottom: 10 }}
 						onPress={() => handleRegister(email, password, repeatPassword)}
 					>
 						{loading ? (
 							<ActivityIndicator size="small" color="white" />
 						) : (
-							<Typography color="#ffffff">Crear Cuenta</Typography>
+							<Text color="#ffffff">Crear Cuenta</Text>
 						)}
-					</Button>
-					<Button
+					</TouchableOpacity>
+					<TouchableOpacity
 						style={{ alignItems: 'center' }}
-						color="trasparent"
+						//color="trasparent"
 						onPress={() => navigation.navigate('Login')}
 					>
-						<Typography
+						<Text
 							color={colors.ON_SURFACE_VARIANT}
 							style={{
 								textDecorationLine: 'underline',
 							}}
 						>
 							Acceder
-						</Typography>
-					</Button>
+						</Text>
+					</TouchableOpacity>
 				</View>
 
 			</ScrollView>

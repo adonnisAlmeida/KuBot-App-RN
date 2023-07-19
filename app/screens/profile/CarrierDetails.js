@@ -22,7 +22,7 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import { ReactNativeFile } from 'apollo-upload-client'
 import ReviewsCard from './components/ReviewsCard'
 
-const Sound = require('react-native-sound')
+//const Sound = require('react-native-sound')
 
 const CarrierDetails = () => {
     const { dark, colors } = useTheme()

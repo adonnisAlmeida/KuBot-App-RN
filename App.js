@@ -66,6 +66,7 @@ const App: () => Node = () => {
         </Provider>
     )
 };
+
 function Apollo(props) {
     //const user_state = useSelector(user)
     const user_token = useSelector(userToken)
@@ -97,14 +98,14 @@ function Apollo(props) {
         ]),
         cache: new InMemoryCache(),
     })
-    /* const client = new ApolloClient({
-        link: createUploadLink({ URL_API }),
-        cache: new InMemoryCache(),
-    }) */
-    /* const client = new ApolloClient({
-        link: authLink.concat(uploadLink),
-        cache: new InMemoryCache(),
-    }) */
+    //const client = new ApolloClient({
+    //    link: createUploadLink({ URL_API }),
+    //    cache: new InMemoryCache(),
+    //})
+    //const client = new ApolloClient({
+    //    link: authLink.concat(uploadLink),
+    //    cache: new InMemoryCache(),
+    //})
 
     return (
         <ApolloProvider client={client}>
