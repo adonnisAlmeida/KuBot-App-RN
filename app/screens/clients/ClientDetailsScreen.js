@@ -11,6 +11,8 @@ import Colors from '../../constants/Colors'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useSelector } from 'react-redux'
 import { conversations } from '../../redux/messages/messagesSlice'
+import { useRef } from 'react'
+import { useEffect } from 'react'
 moment.locale('es')
 
 const ClientDetailsScreen = ({ navigation, route }) => {
@@ -45,9 +47,9 @@ const ClientDetailsScreen = ({ navigation, route }) => {
     const contactMessage = () => {
         let flag = false
         conversation_reducer.forEach(conv => {
-            if (conv.usuario.serverId == client.serverId) {
+            if (conv.node.conversationUser.serverId == client.user.serverId) {
                 flag = true
-                navigation.navigate('MessagesChatScreen', { message: conv })
+                navigation.navigate('MessagesChatScreen', { message: conv.node })
             }
         })
         if (!flag) {

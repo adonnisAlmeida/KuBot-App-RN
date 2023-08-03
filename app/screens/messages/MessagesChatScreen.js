@@ -29,13 +29,15 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
     const [titleVisible, setTitleVisible] = useState(false)
     const [sendVisible, setSendVisible] = useState(false)
     const [title, setTitle] = useState('')
-    const [allMessages, setAllMessages] = useState(messages.mensajes)
+    const [allMessages, setAllMessages] = useState(messages.messages)
     const [content, setContent] = useState('')
     const [messageModal, setMessageModal] = useState(false)
     const user_state = useSelector(user)
     const dispatch = useDispatch()
     const received_messages_state = useSelector(receivedMessages)
     const conversation_reducer = useSelector(conversations)
+
+    //console.log("conversation_reducer >> ", conversation_reducer)
 
     useEffect(() => {
         console.log("SE ACTUALIZARON LAS CONVERSAXIONES")
@@ -58,10 +60,10 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
     const [sendMessageMutation, { loading, error, data }] = useMutation(SEND_MESSAGE, {
         onCompleted: (data) => {
             setMessageModal(false)
-            console.log('LO ENVIO >> ', data.messageCreate.message.author)
+            console.log('LO ENVIO >> ', data.messageCreate)
             let newM = {
-                usuario: messages.usuario,
-                mensaje: data.messageCreate.message
+                conversationUser: messages.conversationUser,
+                message: data.messageCreate.message
             }
             setTitle('')
             setContent('')
@@ -92,7 +94,7 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                         "title": title,
                         "content": content,
                         "author": user_state.serverId,
-                        "recipients": [messages.usuario.serverId]
+                        "recipients": [messages.conversationUser.serverId]
                     }
                 }
             })
@@ -105,12 +107,12 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
         }, 2000); */
     }
 
-    const avatar = messages.usuario.avatar ? {
-        uri: messages.usuario.avatar.url,
+    const avatar = messages.conversationUser.avatar ? {
+        uri: messages.conversationUser.avatar.url,
     } : require('../../../assets/user_avatar.png')
 
     navigation.setOptions({
-        title: `${messages.usuario.firstName ? (messages.usuario.firstName) : (messages.usuario.userName)}`,
+        title: `${messages.conversationUser.firstName ? (messages.conversationUser.firstName) : (messages.conversationUser.userName)}`,
         /*  headerRight: () => (
              <View style={{ flexDirection: 'row' }}>
                  <TouchableOpacity onPress={() => setMessageModal(true)} style={styles.headerRight}>
@@ -195,8 +197,8 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                 >
                     <FlatList
                         data={allMessages}
-                        style={{ paddingLeft: 14, paddingHorizontal: 10}}
-                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end',}}
+                        style={{ paddingLeft: 14, paddingHorizontal: 10 }}
+                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', }}
                         inverted={-1}
                         //keyExtractor={item => item.id}
                         renderItem={({ item, index }) => {

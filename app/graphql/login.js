@@ -156,6 +156,57 @@ export const CARRIER_REGISTER = gql`
 	}
 `
 
+export const CARRIER_INFO = gql`
+	query MyCarrierInfo{
+		myCarrierInfo{
+			id
+			kyc
+			isActive
+			serverId
+			piPhotoFrontal{
+				image{
+					url
+				}
+			}
+			piPhotoBack{
+				image{
+					url
+				}
+			}
+			bustPhoto{
+				image{
+					url
+				}
+			}
+			reviews{
+				createdAt
+				user{
+					serverId
+					firstName
+					lastName
+					userName
+					avatar{
+						url
+						alt
+					}
+				}
+				title
+				message
+				rating
+				approvalStatus
+				option{
+					name
+					description
+					serverId
+				}
+				order{
+					number	
+				}
+			}
+		}
+	}
+`
+
 export const GET_CARRIER_BY_USER_EMAIL = gql`
 	query CarrierByUserEmail($userEmail: String!) {
 		carriers(first: 1, userEmail: $userEmail) {

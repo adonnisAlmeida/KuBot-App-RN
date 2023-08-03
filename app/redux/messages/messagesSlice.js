@@ -16,19 +16,21 @@ export const messagesSlice = createSlice({
 		addMessageToConversation: (state, action) => {
 			let flag = true
 			state.conversations.forEach(conver => {
-				if (conver.usuario.serverId == action.payload.usuario.serverId) {
-					conver.mensajes.unshift(action.payload.mensaje)
+				if (conver.node.conversationUser.serverId == action.payload.conversationUser.serverId) {
+					conver.node.messages.unshift(action.payload.message)
 					flag = false
 				}
 			});
 			if (flag) { // si no existe el usuario en la conversacion
 				let newConve = {
-					usuario: action.payload.usuario,
-					mensajes: [action.payload.mensaje]
+					node: {
+						conversationUser: action.payload.conversationUser,
+						messages: [action.payload.message]
+					}
 				}
 				state.conversations.unshift(newConve)
 			}
-			state.conversations = state.conversations.sort((a, b) => new Date(a.mensajes[0].createdAt) - new Date(b.mensajes[0].createdAt)).reverse()
+			state.conversations = state.conversations.sort((a, b) => new Date(a.node.messages[0].createdAt) - new Date(b.node.messages[0].createdAt)).reverse()
 		},
 	},
 	extraReducers(builder) {
@@ -115,7 +117,7 @@ export const addMessage = createAsyncThunk(
 		console.log('ENTRO AL tem', tem)
 		tem.forEach(conver => {
 			console.log('ENTRO AL SERVICESSSS FOR EAC')
-			if (conver.usuario.serverId == param.usuario.serverId) {
+			if (conver.conversationUser.serverId == param.conversationUser.serverId) {
 				conver.mensajes.push(param.mensaje)
 			}
 		});

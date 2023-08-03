@@ -21,7 +21,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
     const conversation_reducer = useSelector(conversations)
     const user_state = useSelector(user)
 
-    //console.log("seller >> ", seller)
+    console.log("seller >> ", seller)
 
     const avatar =
         seller.user.avatar !== null
@@ -50,9 +50,9 @@ const SellerDetailsScreen = ({ navigation, route }) => {
     const contactMessage = () => {
         let flag = false
         conversation_reducer.forEach(conv => {
-            if (conv.usuario.serverId == seller.serverId) {
+            if (conv.node.conversationUser.serverId == seller.user.serverId) {
                 flag = true
-                navigation.navigate('MessagesChatScreen', { message: conv })
+                navigation.navigate('MessagesChatScreen', { message: conv.node })
             }
         })
         if (!flag) {

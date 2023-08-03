@@ -10,14 +10,14 @@ const ClientItem = ({ navigation, client, ...props }) => {
     const { dark, colors } = useTheme()
 
     const avatar =
-        client.user.avatar !== null
+        client.avatar !== null
             ? {
-                uri: client.user.avatar.url,
+                uri: client.avatar.url,
             }
             : require('../../../../assets/user_avatar.png')
     return (
         <TouchableOpacity {...props}
-            onPress={() => navigation.navigate('ClientDetails', { client: client.user })}
+            onPress={() => navigation.navigate('ClientDetails', { client: client })}
         >
             <View
                 style={[dark ? styles.cardDark : styles.card]}
@@ -42,11 +42,11 @@ const ClientItem = ({ navigation, client, ...props }) => {
                             />
                             <View style={{ marginLeft: 15, marginTop: 15 }}>
                                 <Typography bold color={colors.ON_SURFACE}>
-                                    {client.user ? (
-                                        client.user.firstName ? (
-                                            client.user.firstName + " " + client.user.lastName
+                                    {client ? (
+                                        client.firstName ? (
+                                            client.firstName + " " + client.lastName
                                         ) : (
-                                            client.user.userName
+                                            client.userName
                                         )
                                     ) : (
                                         "Invitado"
@@ -56,10 +56,10 @@ const ClientItem = ({ navigation, client, ...props }) => {
                         </View>
                         <View style={{ marginTop: 10 }}>
                             <Typography>
-                                {client.user.addresses[0].streetAddress1}
+                                {client.addresses[0].streetAddress1}
                             </Typography>
                             <Typography>
-                                {client.user.addresses[0].city}, {client.user.addresses[0].country.country}
+                                {client.addresses[0].city}, {client.addresses[0].country.country}
                             </Typography>
                         </View>
                     </View>

@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import SellersList from './components/SellersList'
 import { useLazyQuery } from '@apollo/client'
-import { ORDERS_LIST_SELLERS } from '../../graphql/clients'
+import { MY_SELLERS, ORDERS_LIST_SELLERS } from '../../graphql/clients'
 import { getSellersByUser, setSellersByUser } from '../../redux/sellers/sellersSlice'
 import { useEffect } from 'react'
 import { Loading, NetworkError } from '../../components'
@@ -17,6 +17,9 @@ const SellersScreen = ({ navigation }) => {
     const sellersStore = useSelector(state => state.sellers)
     const userStore = useSelector(state => state.userlogin)
     const carrierID = userStore.carrierInfo.serverId;
+    const [loadingScroll, setLoadingScroll] = useState(false)
+    const [hasNextPage, setHasNextPage] = useState(false)
+    const [endCursor, setEndCursor] = useState("")
 
     const [getSellers, { loading, error, data }] = useLazyQuery(ORDERS_LIST_SELLERS, {
         onCompleted: (data) => {
@@ -45,30 +48,69 @@ const SellersScreen = ({ navigation }) => {
         fetchPolicy: "no-cache"
     })
 
-    useEffect(() => {
-        setLoadingApp(true)
-        getSellers({ variables: { carrier: carrierID } })
-    }, [])
+    const [getMySellers, { loadingMySellers, errorMySellers, dataMySellers }] = useLazyQuery(MY_SELLERS, {
+        onCompleted: (dataMySellers) => {
+            if (dataMySellers.mySellers.pageInfo.hasNextPage) {
+                setHasNextPage(dataMySellers.mySellers.pageInfo.hasNextPage)
+                setEndCursor(dataMySellers.mySellers.pageInfo.endCursor)
+            } else {
+                setHasNextPage(false)
+            }
+            if (loadingApp || refreshing) {
+                let elementos = []
+                dataMySellers.mySellers.edges.map((edges) => elementos.push(edges.node))
+                setMySellers(elementos)
+                dispatch(setSellersByUser(elementos))
+            } else {
+                let elementos = []
+                dataMySellers.mySellers.edges.map((edges) => elementos.push(edges.node))
+                setMySellers([...mySellers, ...elementos])
+                dispatch(setSellersByUser([...mySellers, ...elementos]))
+            }
+            setLoadingApp(false)
+            setRefreshing(false)
+            setLoadingScroll(false)
+        },
+        onError: (errorMySellers) => {
+            setLoadingApp(false)
+            setRefreshing(false)
+            console.log('Error cargando lista de clientes ', errorMySellers)
+        },
+        fetchPolicy: "no-cache"
+    })
 
     useEffect(() => {
-        setMySellers(sellersStore.sellers)
-    }, [sellersStore.sellers])
+        setLoadingApp(true)
+        //getSellers({ variables: { carrier: carrierID } })
+        getMySellers({ variables: { after: '', before: '' } })
+    }, [])
+
+    const renderLoader = () => {
+        return loadingScroll ? <Loading /> : null
+    }
+
+    const loadMore = () => {
+        if (hasNextPage) {
+            setLoadingScroll(true)
+            getMySellers({ variables: { after: endCursor, before: '' } })
+        }
+    }
 
     const reloadApp = () => {
         setLoadingApp(true)
-        getSellers({ variables: { carrier: carrierID } })
+        getMySellers({ variables: { after: '', before: '' } })
     }
 
     const doRefresh = () => {
         setRefreshing(true)
-        getSellers({ variables: { carrier: carrierID } })
+        getMySellers({ variables: { after: '', before: '' } })
     }
 
     if (loadingApp) return <Loading />
 
     return (
         <View style={{ flex: 1 }}>
-            {error ?
+            {errorMySellers ?
                 (
                     <NetworkError accion={reloadApp} />
                 ) : (
@@ -77,6 +119,8 @@ const SellersScreen = ({ navigation }) => {
                         sellers_list={mySellers}
                         doRefresh={doRefresh}
                         refreshing={refreshing}
+                        loadMore={loadMore}
+                        renderLoader={renderLoader}
                     />
                 )}
         </View>

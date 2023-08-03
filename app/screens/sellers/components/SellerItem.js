@@ -9,7 +9,6 @@ import Colors from '../../../constants/Colors'
 
 const SellerItem = ({ navigation, seller, ...props }) => {
     const { dark, colors } = useTheme()
-    console.log('SELLERRR >>> ', seller.user.avatar)
     const avatar =
         seller.user.avatar !== null
             ? {

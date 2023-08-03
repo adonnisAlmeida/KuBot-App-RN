@@ -10,7 +10,7 @@ import { useTheme } from '@react-navigation/native'
 import SellerItem from './SellerItem'
 import Colors from '../../../constants/Colors'
 
-const SellersList = ({ navigation, sellers_list, doRefresh, refreshing }) => {
+const SellersList = ({ navigation, sellers_list, doRefresh, refreshing, loadMore, renderLoader }) => {
     const { colors } = useTheme()
 
     const onRefresh = () => {
@@ -18,7 +18,7 @@ const SellersList = ({ navigation, sellers_list, doRefresh, refreshing }) => {
 	}
 
     //console.log("PREUBAAA >> ", sellers_list[0].user.avatar)
-    console.log(sellers_list.length)
+    //console.log(sellers_list.length)
 
     return (
         <TouchableWithoutFeedback>
@@ -40,6 +40,9 @@ const SellersList = ({ navigation, sellers_list, doRefresh, refreshing }) => {
                             style={styles.constains}
                             showsVerticalScrollIndicator={false}
                             data={sellers_list}
+                            ListFooterComponent={renderLoader}
+                            onEndReached={loadMore}
+                            onEndReachedThreshold={0.5}
                             refreshControl={
 								<RefreshControl
 									colors={[Colors.COLORS.PRIMARY]}
@@ -47,12 +50,11 @@ const SellersList = ({ navigation, sellers_list, doRefresh, refreshing }) => {
 									onRefresh={onRefresh}
 								/>
 							}
-                            keyExtractor={(item, index) => index.toString()}
                             renderItem={({ item, index, separators }) => (
                                 <SellerItem
                                     seller={item}
                                     navigation={navigation}
-                                    key={index}
+                                    key={item.serverId}
                                 />
                             )}
                         />

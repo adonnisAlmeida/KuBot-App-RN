@@ -3,6 +3,7 @@ import React from 'react'
 import { useTheme } from '@react-navigation/native'
 import Colors from '../../../constants/Colors'
 import MessagesItem from './MessagesItem'
+import { Typography } from '../../../components'
 
 const MessagesList = ({ navigation, list, doRefresh, loadMore, renderLoader, refreshing }) => {
     const { colors } = useTheme()
@@ -17,7 +18,7 @@ const MessagesList = ({ navigation, list, doRefresh, loadMore, renderLoader, ref
 				style={styles.constains}
 				showsVerticalScrollIndicator={true}
 				data={list}
-				ListFooterComponent={renderLoader}
+				//ListFooterComponent={renderLoader}
 				//onEndReached={loadMore}
 				//onEndReachedThreshold={0.5}
 				refreshControl={
@@ -28,7 +29,8 @@ const MessagesList = ({ navigation, list, doRefresh, loadMore, renderLoader, ref
 					/>
 				}
 				renderItem={({ item, index, separators }) => (
-					<MessagesItem navigation={navigation} message={item} key={index} />
+					/* <Typography>{item.node.conversationUser.userName}</Typography> */
+					<MessagesItem navigation={navigation} message={item} key={item.node.conversationUser.serverId} />
 				)}
 			/>
 		</View>

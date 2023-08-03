@@ -12,8 +12,8 @@ const MessagesItem = ({ navigation, message }) => {
     const { dark, colors } = useTheme()
 
     const avatar =
-        message.usuario.avatar ? {
-            uri: message.usuario.avatar.url,
+        message.node.conversationUser.avatar ? {
+            uri: message.node.conversationUser.avatar.url,
         }
             : require('../../../../assets/user_avatar.png')
     //const avatar = require('../../../../assets/user_avatar.png')
@@ -37,7 +37,7 @@ const MessagesItem = ({ navigation, message }) => {
 
     return (
         <TouchableOpacity
-            onPress={() => navigation.navigate('MessagesChatScreen', { message: message })}
+            onPress={() => navigation.navigate('MessagesChatScreen', { message: message.node })}
         >
             <View style={dark ? styles.cardDark : styles.card}>
                 <Image
@@ -60,14 +60,14 @@ const MessagesItem = ({ navigation, message }) => {
                     >
                         <View style={styles.messageTitle}>
                             <Typography medium style={{ color: colors.ON_SURFACE }}>
-                                {message.usuario.firstName ? (
-                                    message.usuario.firstName + " " + message.usuario.lastName
+                                {message.node.conversationUser.firstName ? (
+                                    message.node.conversationUser.firstName + " " + message.node.conversationUser.lastName
                                 ) : (
-                                    message.usuario.userName
+                                    message.node.conversationUser.userName
                                 )}
                             </Typography>
                             <Typography small>
-                                {copiaWat(message.mensajes[0].createdAt)}
+                                {copiaWat(message.node.messages[0].createdAt)}
                             </Typography>
                         </View>
 
@@ -76,9 +76,9 @@ const MessagesItem = ({ navigation, message }) => {
                             //bold={!message.mensajes[0].leido}
                             style={{ color: colors.ON_SURFACE_VARIANT, marginTop: 3 }}
                         >
-                            {message.mensajes[0].content.length > 43
-                                ? message.mensajes[0].content.substring(0, 43) + '...'
-                                : message.mensajes[0].content}
+                            {message.node.messages[0].content.length > 43
+                                ? message.node.messages[0].content.substring(0, 43) + '...'
+                                : message.node.messages[0].content}
                         </Typography>
                     </View>
                 </View>

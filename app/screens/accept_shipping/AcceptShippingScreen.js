@@ -98,13 +98,13 @@ const AcceptShippingScreen = ({ route, navigation }) => {
 		return (
 			<FontAwesome
 				name={name}
-				size={20}
+				size={22}
 				color={colors.SURFACE}
 			/>
 		)
 	}
 
-    const actionsTrash = [
+    const actionsRefresh = [
 		{
 			text: "Actualizar",
 			icon: actionIcon('refresh'),
@@ -142,9 +142,8 @@ const AcceptShippingScreen = ({ route, navigation }) => {
                         />
                         <FloatingAction
                             color={Colors.COLORS.PRIMARY}
-                            floatingIcon={actionIcon('trash')}
                             overrideWithAction={true}
-                            actions={actionsTrash}
+                            actions={actionsRefresh}
                             onPressItem={name => {
                                 doAction(name)
                             }}

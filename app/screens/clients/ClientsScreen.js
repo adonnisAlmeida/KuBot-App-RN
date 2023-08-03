@@ -1,9 +1,9 @@
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import ClientsList from './components/ClientsList'
 import { useLazyQuery } from '@apollo/client'
-import { ORDERS_LIST_CLIENTS } from '../../graphql/clients'
+import { MY_CLIENTS, ORDERS_LIST_CLIENTS } from '../../graphql/clients'
 import { Loading, NetworkError } from '../../components'
 import { getClientsByUser, setClientsByUser } from '../../redux/clients/clientsSlice'
 
@@ -15,60 +15,72 @@ const ClientsScreen = ({ navigation }) => {
     const clientsStore = useSelector(state => state.clients)
     const userStore = useSelector(state => state.userlogin)
     const carrierID = userStore.carrierInfo.serverId;
+    const [loadingScroll, setLoadingScroll] = useState(false)
+    const [hasNextPage, setHasNextPage] = useState(false)
+    const [endCursor, setEndCursor] = useState("")
 
-    const [getClients, { loading, error, data }] = useLazyQuery(ORDERS_LIST_CLIENTS, {
-        onCompleted: (data) => {
-            const ordenes = data.orders.edges
-            let temp = []
-            ordenes.forEach(el => {
-                if (el.node.user != null && el.node.user) {
-                    if (temp.filter(e => e.user.id === el.node.user.id).length > 0) {
-                        return
-                    } else {
-                        temp.push(el.node)
-                    }
-                }
-            })
-
-            dispatch(setClientsByUser(temp))
-            setMyClients(temp)
-
+    const [getMyClients, { loadingMyClients, errorMyClients, dataMyClients }] = useLazyQuery(MY_CLIENTS, {
+        onCompleted: (dataMyClients) => {
+            if (dataMyClients.myClients.pageInfo.hasNextPage) {
+                setHasNextPage(dataMyClients.myClients.pageInfo.hasNextPage)
+                setEndCursor(dataMyClients.myClients.pageInfo.endCursor)
+            } else {
+                setHasNextPage(false)
+            }
+            if (loadingApp || refreshing) {
+                let elementos = []
+                dataMyClients.myClients.edges.map((edges) => elementos.push(edges.node))
+                setMyClients(elementos)
+                dispatch(setClientsByUser(elementos))
+            } else {
+                let elementos = []
+                dataMyClients.myClients.edges.map((edges) => elementos.push(edges.node))
+                setMyClients([...myClients, ...elementos])
+                dispatch(setClientsByUser([...myClients, ...elementos]))
+            }
             setLoadingApp(false)
             setRefreshing(false)
+            setLoadingScroll(false)
         },
-        onError: () => {
+        onError: (errorMyClients) => {
             setLoadingApp(false)
             setRefreshing(false)
-            console.log('Error cargando lista de clientes ', error)
+            console.log('Error cargando lista de clientes ', errorMyClients)
         },
         fetchPolicy: "no-cache"
     })
 
     useEffect(() => {
         setLoadingApp(true)
-        getClients({ variables: { carrier: carrierID } })
-        dispatch(getClientsByUser())
+        getMyClients({ variables: { after: '', before: '' } })
     }, [])
 
-    useEffect(() => {
-        setMyClients(clientsStore.clients)
-    }, [clientsStore.clients])
+    const renderLoader = () => {
+        return loadingScroll ? <Loading /> : null
+    }
+
+    const loadMore = () => {
+        if (hasNextPage) {
+            setLoadingScroll(true)
+            getMyClients({ variables: { after: endCursor, before: '' } })
+        }
+    }
 
     const reloadApp = () => {
         setLoadingApp(true)
-        getClients({ variables: { carrier: carrierID } })
+        getMyClients({ variables: { after: '', before: '' } })
     }
 
     const doRefresh = () => {
         setRefreshing(true)
-        getClients({ variables: { carrier: carrierID } })
+        getMyClients({ variables: { after: '', before: '' } })
     }
 
     if (loadingApp) return <Loading />
 
     return (
         <View style={{ flex: 1 }}>
-            {error ?
+            {errorMyClients ?
                 (
                     <NetworkError accion={reloadApp} />
                 ) : (
@@ -76,10 +88,11 @@ const ClientsScreen = ({ navigation }) => {
                         navigation={navigation}
                         clients_list={myClients}
                         doRefresh={doRefresh}
+                        loadMore={loadMore}
+                        renderLoader={renderLoader}
                         refreshing={refreshing}
                     />
                 )}
-
         </View>
     )
 }

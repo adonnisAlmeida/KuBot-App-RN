@@ -10,7 +10,7 @@ import { useTheme } from '@react-navigation/native'
 import ClientItem from './ClientItem'
 import Colors from '../../../constants/Colors'
 
-const ClientsList = ({ navigation, clients_list, doRefresh, refreshing }) => {
+const ClientsList = ({ navigation, clients_list, doRefresh, loadMore, renderLoader, refreshing }) => {
     const { colors } = useTheme()
 
     const onRefresh = () => {
@@ -37,6 +37,9 @@ const ClientsList = ({ navigation, clients_list, doRefresh, refreshing }) => {
                             style={styles.constains}
                             showsVerticalScrollIndicator={false}
                             data={clients_list}
+                            ListFooterComponent={renderLoader}
+                            onEndReached={loadMore}
+                            onEndReachedThreshold={0.5}
                             refreshControl={
                                 <RefreshControl
                                     colors={[Colors.COLORS.PRIMARY]}
@@ -44,12 +47,11 @@ const ClientsList = ({ navigation, clients_list, doRefresh, refreshing }) => {
                                     onRefresh={onRefresh}
                                 />
                             }
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item, index, separators }) => (
+                            renderItem={({ item }) => (
                                 <ClientItem
                                     client={item}
                                     navigation={navigation}
-                                    key={index}
+                                    key={item.id}
                                 />
                             )}
                         />

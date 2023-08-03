@@ -1,10 +1,10 @@
-import { View, Text } from 'react-native'
+import { View, Text, FlatList } from 'react-native'
 import { useEffect, useState } from 'react'
 import { useTheme } from '@react-navigation/native'
 import { useLazyQuery } from '@apollo/client'
 import { Loading, NetworkError, Typography } from '../../components'
 import MessagesList from './components/MessagesList'
-import { RECEIVED_MESSAGES, SENT_MESSAGES } from '../../graphql/messages'
+import { MY_CONVERSATIONS, RECEIVED_MESSAGES, SENT_MESSAGES } from '../../graphql/messages'
 import { useDispatch, useSelector } from 'react-redux'
 import { conversations, receivedMessages, sentMessages, setConversations, setReceivedMessagesByUser, setSentMessagesByUser } from '../../redux/messages/messagesSlice'
 import { user, carrierInfo } from '../../redux/userlogin/userLoginSlice'
@@ -80,6 +80,40 @@ const MessagesScreen = ({ navigation }) => {
             setRefreshing(false)
             setLoadingScroll(false)
             console.log('Error Cargando getReceivedMessages >> ', errorReceived)
+        },
+        fetchPolicy: "no-cache"
+    })
+
+    const [getConversations, { loadingConversations, errorConversations, dataConversations }] = useLazyQuery(MY_CONVERSATIONS, {
+        onCompleted: (dataConversations) => {
+            console.log("TERMINO CONVERSATIONS >> ", dataConversations.myConversations.edges.length)
+            setTempConversation(dataConversations.myConversations.edges)
+            dispatch(setConversations(dataConversations.myConversations.edges))
+            setLoadingApp(false)
+            setRefreshing(false)
+            setLoadingScroll(false)
+            /* if (dataReceived.messages.pageInfo.hasNextPage) {
+                setHasNextPage(dataReceived.messages.pageInfo.hasNextPage)
+                setEndCursor(dataReceived.messages.pageInfo.endCursor)
+                makeConversationsReceived(dataReceived.messages.edges)
+                getReceivedMessages({ variables: { after: dataReceived.messages.pageInfo.endCursor, before: '', recipients: user_state.serverId }, })
+            } else {
+                setHasNextPage(false)
+                makeConversationsReceived(dataReceived.messages.edges)
+                getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, })
+            } */
+            //dispatch(setReceivedMessagesByUser(dataReceived.messages.edges))
+            /* setLoadingApp(false)
+            setRefreshing(false)
+            setLoadingScroll(false) */
+            /* makeConversationsReceived(dataReceived.messages.edges)
+            getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, }) */
+        },
+        onError: (errorConversations) => {
+            setLoadingApp(false)
+            setRefreshing(false)
+            setLoadingScroll(false)
+            console.log('Error Cargando Conversaciones >> ', errorConversations)
         },
         fetchPolicy: "no-cache"
     })
@@ -184,13 +218,18 @@ const MessagesScreen = ({ navigation }) => {
     useEffect(() => {
         setLoadingApp(true)
         //getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, })
-        getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
+
+
+        //getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
+        getConversations()
+
+
         // makeConversations()
     }, [])
 
-    useEffect(() => {
+    /* useEffect(() => {
         setTempConversation(conversation_reducer)
-    }, [conversation_reducer])
+    }, [conversation_reducer]) */
 
     const renderLoader = () => {
         return loadingScroll ? <Loading /> : null
@@ -207,14 +246,16 @@ const MessagesScreen = ({ navigation }) => {
 
     const reloadApp = () => {
         setLoadingApp(true)
-        getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
+        getConversations()
+        //getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
         //getMessages({ variables: { after: '', before: '' } })
     }
 
     const doRefresh = () => {
         setFirstTime(true)
         setRefreshing(true)
-        getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
+        getConversations()
+        //getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
         //getMessages({ variables: { after: '', before: '' } })
     }
 
@@ -276,7 +317,7 @@ const MessagesScreen = ({ navigation }) => {
                 ) :
                 (
                     <>
-                        <View style={{flex: 1}}>
+                        <View style={{ flex: 1 }}>
                             {tempConversation.length == 0 ? (
                                 <>
                                     <View style={{
@@ -284,7 +325,7 @@ const MessagesScreen = ({ navigation }) => {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}>
-                                        <Typography style={{marginBottom: 10}} h2>Usted no tiene mensajes aún. </Typography>
+                                        <Typography style={{ marginBottom: 10 }} h2>Usted no tiene mensajes aún. </Typography>
                                         <Typography >Puede comenzar a comunicarse con sus compañeros. Recuerde, una buena comunicación es la clave del éxito. </Typography>
                                     </View>
                                 </>

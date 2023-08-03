@@ -224,3 +224,56 @@ export const ORDERS_LIST_CONTACTS = gql`
 		}
 	}
 `
+export const MY_CONVERSATIONS = gql`
+	query{
+		myConversations(first: 100){
+			edges{
+				node{
+					messages{
+						serverId
+						createdAt
+						title
+						content
+						id
+						thread{
+							createdAt
+							updatedAt
+						}
+						recipients{
+							serverId
+							id
+							userName
+							firstName
+							lastName
+							avatar{
+								url
+								alt
+							}
+						}
+						author{
+							serverId
+							id
+							userName
+							firstName
+							lastName
+							avatar{
+								url
+								alt
+							}
+						}
+					}
+					conversationUser{
+						serverId
+						userName
+						firstName
+         				lastName
+						avatar{
+							url
+							alt
+						}
+					}
+				}
+			}
+		}  
+	}
+`

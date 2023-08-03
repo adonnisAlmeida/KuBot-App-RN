@@ -292,6 +292,7 @@ export const ACCEPT_ORDERS_LIST = gql`
 				node {
 					id
 					number
+					paymentStatus
 					shippingPrice{
 						currency
 						gross{
@@ -335,6 +336,7 @@ export const ACCEPT_ORDER_ID = gql`
 			id
 			number
 			created
+			paymentStatus
 			shippingPrice{
 				currency
 				gross{
@@ -377,6 +379,7 @@ export const ORDER_ID = gql`
 			status
 			created
 			shippingStatus
+			paymentStatus
 			allDimensions
 			events{
 				date

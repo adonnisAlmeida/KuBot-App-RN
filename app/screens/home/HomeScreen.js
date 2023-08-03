@@ -27,7 +27,7 @@ import { PRODUCT_TYPES } from '../../graphql/product'
 import { setCarrierInfo, user, carrierInfo, setUser } from '../../redux/userlogin/userLoginSlice'
 import { URL } from '../../constants/Other'
 //import Pushy from 'pushy-react-native';
-import { GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY, USER_INFO } from '../../graphql/login'
+import { CARRIER_INFO, GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY, USER_INFO } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 
 const { width } = Dimensions.get('window')
@@ -51,19 +51,16 @@ export default function HomeScreen({ navigation }) {
 	//console.log("localCarreirInfo >> ", localCarreirInfo)
 	//console.log("user_state >> ", user_state)
 
-	const [getCarrierByUserEmail, { loading, error, data }] = useLazyQuery(GET_CARRIER_BY_USER_EMAIL, {
+	const [getCarrierInfo, { loading, error, data }] = useLazyQuery(CARRIER_INFO, {
 		onCompleted: (data) => {
-			if (data.carriers.edges.length >= 1) {
-				dispatch(setCarrierInfo(data.carriers.edges[0].node))
-			} else {
-				dispatch(setCarrierInfo({}))
-			}
+			dispatch(setCarrierInfo(data.myCarrierInfo))
 			setInitCarrierLoading(false)
 			setReloadInfo(false)
 		},
 		onError: (error) => {
 			setInitCarrierLoading(false)
 			setReloadInfo(false)
+			dispatch(setCarrierInfo({}))
 			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', JSON.stringify(error, null, 2))
 		},
 		fetchPolicy: "no-cache",
@@ -76,11 +73,10 @@ export default function HomeScreen({ navigation }) {
 
 	const [getLogedUserInfo, { loadingUserInfo, errorUserInfo, dataUserInfo }] = useLazyQuery(USER_INFO, {
 		onCompleted: (dataUserInfo) => {
-			//console.log("Info del usuario logueado >> ", dataUserInfo.me)
 			if (dataUserInfo.me) {
 				dispatch(setUser(dataUserInfo.me))
 			}
-			getCarrierByUserEmail({ variables: { userEmail: user_state.email } })
+			getCarrierInfo()
 			setInitUserLoading(false)
 			setReloadInfo(false)
 		},
@@ -100,8 +96,6 @@ export default function HomeScreen({ navigation }) {
 	useEffect(() => {
 		setInitUserLoading(true)
 		setInitCarrierLoading(true)
-		//tokenVerify({ variables: { token: user_state.token } })
-		//getCarrierByUserEmail({ variables: { userEmail: user_state.email } })
 		getLogedUserInfo()
 
 

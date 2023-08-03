@@ -10,6 +10,9 @@ import { removeAcceptShipping } from '../../redux/accept_shipping/accept_shippin
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { MONTH_NAMES, DAY_NAMES } from '../../constants/Other'
 import { getCurrencySimbol, printCreated } from '../../utils/CommonFunctions'
+import { FloatingAction } from 'react-native-floating-action'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import Colors from '../../constants/Colors'
 
 
 moment.locale('es')
@@ -96,7 +99,33 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
     if (loadingOrder || errorOrder) return <Loading />
     if (orderDetails == undefined || orderDetails == null) return <Loading />
 
-    //console.log("orderDetails >> ", orderDetails)
+    const actionIcon = (name) => {
+		return (
+			<FontAwesome
+				name={name}
+				size={22}
+				color={colors.SURFACE}
+			/>
+		)
+	}
+
+    const actionsAccept = [
+		{
+			text: "Aceptar",
+			icon: actionIcon('check-square-o'),
+			name: "bt_accept",
+			position: 1,
+			color: Colors.COLORS.PRIMARY
+		}
+	];
+
+    const doAction = (action) => {
+		switch (action) {
+			case 'bt_accept':
+				setShowAlert(true)
+				break;
+		}
+	}
 
     return (
         <>
@@ -112,6 +141,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                 >
                                     Orden # {orderDetails.order.number}
                                 </Typography>
+                                <Typography>Estado del pago {orderDetails.order.paymentStatus}</Typography>
                                 <Typography bold h3 style={{ marginVertical: 10 }}>
                                     Dirección de Envío
                                 </Typography>
@@ -150,7 +180,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                             </View>
                         </View>
                         <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
-                            <Typography h3 style={{ marginVertical: 6 }}>
+                            <Typography bold h3 style={{ marginVertical: 6 }}>
                                 Creada el:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
@@ -201,11 +231,19 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                     <ActivityIndicator size={50} color={colors.PRIMARY} />
                 </View>
             ) : (null)}
-            <FloatingActionButton
+            <FloatingAction
+                color={Colors.COLORS.PRIMARY}
+                overrideWithAction={true}
+                actions={actionsAccept}
+                onPressItem={name => {
+                    doAction(name)
+                }}
+            />
+            {/* <FloatingActionButton
                 color={colors.primary}
                 icon={'check-square-o'}
                 onPress={() => setShowAlert(true)}
-            />
+            /> */}
             <AwesomeAlert
                 show={showAlertAw}
                 title="Aceptar Envío"
@@ -216,7 +254,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                 showConfirmButton={true}
                 cancelText="Cancelar"
                 confirmText="Aceptar"
-                confirmButtonColor="#2DCE89"
+                confirmButtonColor={Colors.COLORS.PRIMARY}
                 onCancelPressed={() => {
                     setShowAlert(false)
                 }}

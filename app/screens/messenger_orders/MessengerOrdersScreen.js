@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Colors from '../../constants/Colors';
 import { useTheme } from '@react-navigation/native';
 import { setMessengerOrders } from '../../redux/messenger_orders/messenger_ordersSlice';
+import { useRef } from 'react';
 
 export default function MessengerOrdersScreen({ navigation }) {
 	const { dark, colors } = useTheme()
@@ -89,10 +90,7 @@ export default function MessengerOrdersScreen({ navigation }) {
 	const loadMore = () => {
 		if (hasNextPage) {
 			setLoadingScroll(true)
-			console.log(`CARGA MAS DATOSSS con endCursor > ${endCursor}`)
 			getOrdersList({ variables: { carrier: carrierID, after: endCursor, before: '' } })
-		} else {
-			console.log(`No hay datos para cargar`)
 		}
 	}
 
