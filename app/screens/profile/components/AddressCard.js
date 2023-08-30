@@ -22,8 +22,6 @@ const AddressCard = ({
     const { colors } = useTheme()
     const dispatch = useDispatch()
 
-    console.log(addressCount)
-
     const [addressDelete, { loadingAddressDelete, errorAddressDelete, dataAddressDelete }] = useMutation(ADDRESS_DELETE, {
         onCompleted: (dataAddressDelete) => {
             console.log("Eliminando la direccion >> ", dataAddressDelete.accountAddressDelete.user)

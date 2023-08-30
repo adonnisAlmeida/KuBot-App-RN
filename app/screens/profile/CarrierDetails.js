@@ -91,7 +91,6 @@ const CarrierDetails = () => {
 
     const [piPhotoFrontalUpdate, { data, error, loading }] = useMutation(PI_PHOTO_FRONTAL_UPDATE, {
         onCompleted: (data) => {
-            console.log('LO ACTUALIZOO >> ', data)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoFrontal: vistaPrevia,
@@ -127,7 +126,6 @@ const CarrierDetails = () => {
 
     const [piPhotoBackUpdate, { dataBack, errorBack, loadingBack }] = useMutation(PI_PHOTO_BACK_UPDATE, {
         onCompleted: (dataBust) => {
-            console.log('LO ACTUALIZOO >> ', dataBust)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoBack: vistaPrevia,
@@ -164,7 +162,6 @@ const CarrierDetails = () => {
 
     const [bustPhotoUpdate, { dataBust, errorBust, loadingBust }] = useMutation(BUST_PHOTO_UPDATE, {
         onCompleted: (dataBust) => {
-            console.log('LO ACTUALIZOO >> ', dataBust)
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 bustPhoto: vistaPrevia,
@@ -213,7 +210,6 @@ const CarrierDetails = () => {
     }
 
     const abortUploadFrontal = () => {
-        console.log("ABORTAR")
         aborterRefFrontal.abort();
         setAbortRefFrontal(new AbortController());
         setConfirmModal(false)
@@ -264,7 +260,6 @@ const CarrierDetails = () => {
     const updatePiPhotoFrontal = () => {
         setUploadFrontal(true)
         setPiPhotoFrontal(vistaPrevia)
-        console.log("vistaPrevia >> ", vistaPrevia)
         piPhotoFrontalUpdate({
             variables: { id: carrier_info.id, image: photoFile }
         })

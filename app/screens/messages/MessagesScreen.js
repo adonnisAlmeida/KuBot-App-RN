@@ -227,9 +227,9 @@ const MessagesScreen = ({ navigation }) => {
         // makeConversations()
     }, [])
 
-    /* useEffect(() => {
+    useEffect(() => {
         setTempConversation(conversation_reducer)
-    }, [conversation_reducer]) */
+    }, [conversation_reducer])
 
     const renderLoader = () => {
         return loadingScroll ? <Loading /> : null

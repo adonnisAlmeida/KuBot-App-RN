@@ -55,8 +55,8 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
             console.log('LO ENVIO >> ', data.messageCreate.message.recipients)
             data.messageCreate.message.recipients.forEach(item => {
                 let newM = {
-                    usuario: item,
-                    mensaje: data.messageCreate.message
+                    conversationUser: item,
+                    message: data.messageCreate.message
                 }
                 dispatch(addMessageToConversation(newM))
             })

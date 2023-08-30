@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux'
 import { removeAcceptShipping } from '../../redux/accept_shipping/accept_shippingSlice'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { MONTH_NAMES, DAY_NAMES } from '../../constants/Other'
-import { getCurrencySimbol, printCreated } from '../../utils/CommonFunctions'
+import { getCurrencySimbol, pagoAmigable, printCreated } from '../../utils/CommonFunctions'
 import { FloatingAction } from 'react-native-floating-action'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Colors from '../../constants/Colors'
@@ -141,7 +141,7 @@ const AcceptShippingDetails = ({ route, navigation, ...props }) => {
                                 >
                                     Orden # {orderDetails.order.number}
                                 </Typography>
-                                <Typography>Estado del pago {orderDetails.order.paymentStatus}</Typography>
+                                <Typography>Estado del pago {pagoAmigable(orderDetails.order.paymentStatus)}</Typography>
                                 <Typography bold h3 style={{ marginVertical: 10 }}>
                                     Dirección de Envío
                                 </Typography>

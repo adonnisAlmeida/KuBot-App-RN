@@ -78,7 +78,6 @@ export default function HomeScreen({ navigation }) {
 			}
 			getCarrierInfo()
 			setInitUserLoading(false)
-			setReloadInfo(false)
 		},
 		onError: (errorUserInfo) => {
 			console.log("Error Info User >> ", errorUserInfo)
@@ -183,7 +182,7 @@ export default function HomeScreen({ navigation }) {
 	const carrierApplication = () => {
 		//console.log("carrierApplication >>", localCarreirInfo.kyc)
 		if (initCarrierLoading || initUserLoading) {
-			return null
+			return (null)
 		} else {
 			if (Object.keys(localCarreirInfo).length == 0) {// elcarrier no ha terminado el registro
 				return (
@@ -232,10 +231,11 @@ export default function HomeScreen({ navigation }) {
 						) : (null)}
 						<TouchableOpacity
 							onPress={() => reloadCarrier()}
+							disabled={reloadInfo}
 						>
 							<View>
 								<Typography h3 bold color="#ffffff">
-									Su solicitud de cuenta de mensajero está siendo procesada.
+									Su cuenta de mensajero está siendo procesada.
 								</Typography>
 							</View>
 						</TouchableOpacity>
@@ -266,6 +266,7 @@ export default function HomeScreen({ navigation }) {
 
 						<TouchableOpacity
 							onPress={() => reloadCarrier()}
+							disabled={reloadInfo}
 						>
 							<View>
 								<Typography h3 bold color="#ffffff">

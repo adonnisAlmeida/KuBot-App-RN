@@ -83,7 +83,9 @@ const PackageInfo = ({ pickedDate }) => {
     return (
         <View style={{
             padding: 10,
-            backgroundColor: Colors.COLORS.INFO
+            backgroundColor: Colors.COLORS.INFO,
+            borderBottomWidth: 1,
+            borderBottomColor: 'rgb(90,90,90)'
         }}>
             <Typography size={16} >No debe tener más de 48 horas el paquete en su poder.</Typography>
             <View style={{

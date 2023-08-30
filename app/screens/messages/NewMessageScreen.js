@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { Button, Input, Loading, Select, Typography } from '../../components'
 import MultiSelect from 'react-native-multiple-select';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { ALL_USERS, ORDERS_LIST_CONTACTS, SEND_MESSAGE } from '../../graphql/messages';
+import { ALL_USERS, CONTACTS_LIST, ORDERS_LIST_CONTACTS, SEND_MESSAGE } from '../../graphql/messages';
 import Colors from '../../constants/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { carrierInfo, user } from '../../redux/userlogin/userLoginSlice';
@@ -36,23 +36,20 @@ const NewMessageScreen = ({ navigation }) => {
 
     //console.log(carrier_info)
 
-    const [getAllContacts, { loadingContacts, errorContacts, dataContacts }] = useLazyQuery(ORDERS_LIST_CONTACTS, {
+    const [getAllContacts, { loadingContacts, errorContacts, dataContacts }] = useLazyQuery(CONTACTS_LIST, {
         onCompleted: (dataContacts) => {
-            console.log("Termino de cargar las ordenes", dataContacts.orders.edges.length)
-            if (dataContacts.orders.pageInfo.hasNextPage) {
-                actualizarUsuarios(dataContacts.orders.edges)
-                getAllContacts({ variables: { carrier: carrier_info.serverId, after: dataContacts.orders.pageInfo.endCursor, before: '' } })
+            console.log("Termino de cargar las ordenes", dataContacts.myContacts.edges)
+            setAllUsers(previousState => {
+                return previousState.concat(dataContacts.myContacts.edges)
+            })
+            setAllUsersShow(previousState => {
+                return previousState.concat(dataContacts.myContacts.edges)
+            })
+            if (dataContacts.myContacts.pageInfo.hasNextPage) {
+                getAllContacts({ variables: { carrier: carrier_info.serverId, after: dataContacts.myContacts.pageInfo.endCursor, before: '' } })
             } else {
-                actualizarUsuarios(dataContacts.orders.edges)
                 setLoadingUsers(false)
             }
-            /* if (dataContacts.users.pageInfo.hasNextPage) {
-                actualizarUsuarios(data.users.edges)
-                getAllUsers({ variables: { after: data.users.pageInfo.endCursor, before: '' } })
-            } else {
-                actualizarUsuarios(data.users.edges)
-                setLoadingUsers(false)
-            } */
         },
         onError: (errorContacts) => {
             console.log('Error Cargando todos los contactos >> ', errorContacts)
@@ -61,28 +58,7 @@ const NewMessageScreen = ({ navigation }) => {
         fetchPolicy: "no-cache"
     })
 
-    const [getAllUsers, { loading, error, data }] = useLazyQuery(ALL_USERS, {
-        onCompleted: (data) => {
-            if (data.users.pageInfo.hasNextPage) {
-                actualizarUsuarios(data.users.edges)
-                getAllUsers({ variables: { after: data.users.pageInfo.endCursor, before: '' } })
-            } else {
-                actualizarUsuarios(data.users.edges)
-                setLoadingUsers(false)
-            }
-            /* setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false) */
-            //actualizarUsuarios(data.users.edges)
-            //setLoadingUsers(false)
-            //setAllUsers(data.users.edges)
-        },
-        onError: (error) => {
-            console.log('Error Cargando todos los usuarios >> ', error)
-            console.log('Error Cargando todos los usuarios DATA >> ', data)
-        },
-        fetchPolicy: "no-cache"
-    })
+    
 
     const navigateConversation = () => {
         console.log('Entrooo navigateConversation')
@@ -93,10 +69,10 @@ const NewMessageScreen = ({ navigation }) => {
             console.log('Entrooo mySelectedItemsObject.length > 1 else')
             let flag = false
             conversation_reducer.forEach(conv => {
-                if (conv.usuario.serverId == mySelectedItemsObject[0].serverId) {
+                if (conv.node.conversationUser.serverId == mySelectedItemsObject[0].serverId) {
                     flag = true
                     console.log('Entrooo conv.usuario.serverId == mySelectedItemsObject[0].serverId')
-                    navigation.navigate('MessagesChatScreen', { message: conv })
+                    navigation.navigate('MessagesChatScreen', { message: conv.node })
                 }
             })
             if (!flag) {
@@ -155,47 +131,6 @@ const NewMessageScreen = ({ navigation }) => {
         ),
     })
 
-    const actualizarUsuarios = (orders) => {
-        console.log("entro a actualizar")
-        let temp = []
-        allUsers.forEach(element => {
-            temp.push(element)
-        });
-
-        orders.forEach(el => {
-            if (el.node.user != null && el.node.user) {
-                if (temp.filter(e => e.id === el.node.user.id).length > 0) {
-                    return
-                } else {
-                    temp.push(el.node.user)
-                }
-            }
-            el.node.sellers.forEach(use => {
-                if (temp.filter(e => e.id === use.user.id).length > 0) {
-                    return
-                } else {
-                    temp.push(use.user)
-                }
-            })
-        })
-        /* orders.forEach(el => {
-            
-        }) */
-
-        console.log("Termnio actualizar >> ", temp)
-
-        /* usuarios.forEach(element => {
-            element.node.user.id = element.node.user.serverId
-            temp.push(element.node.user)
-        }); */
-        setAllUsers(previousState => {
-            return previousState.concat(temp)
-        })
-        setAllUsersShow(previousState => {
-            return previousState.concat(temp)
-        })
-    }
-
     useEffect(() => {
         //getAllUsers({ variables: { after: '', before: '' }, })
         getAllContacts({ variables: { carrier: carrier_info.serverId, after: '', before: '' }, })
@@ -207,11 +142,11 @@ const NewMessageScreen = ({ navigation }) => {
             if (search.length > 0) {
                 setShowSearchClose(true)
                 let temporal = allUsers.filter((u) => {
-                    if (u.firstName && u.firstName.toUpperCase().includes(search.toUpperCase()))
+                    if (u.node.firstName && u.node.firstName.toUpperCase().includes(search.toUpperCase()))
                         return u
-                    if (u.lastName && u.lastName.toUpperCase().includes(search.toUpperCase()))
+                    if (u.node.lastName && u.node.lastName.toUpperCase().includes(search.toUpperCase()))
                         return u
-                    if (u.userName && u.userName.toUpperCase().includes(search.toUpperCase()))
+                    if (u.node.userName && u.node.userName.toUpperCase().includes(search.toUpperCase()))
                         return u
                 })
                 setAllUsersShow(temporal)
@@ -296,17 +231,15 @@ const NewMessageScreen = ({ navigation }) => {
                 ) : (null)}
             </View>
             <FlatList
-                //style={{ padding: 16 }}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 data={allUsersShow}
-                //data={allUsersShow}
-                keyExtractor={item => item.serverId}
+                keyExtractor={item => item.node.serverId}
                 renderItem={({ item, index }) => (
                     <UserItem
-                        user={item}
+                        user={item.node}
                         mySelectedItems={mySelectedItems}
                         toggleSelected={toggleSelected}
-                        key={index}
+                        key={item.node.serverId}
                     />
                 )}
             />

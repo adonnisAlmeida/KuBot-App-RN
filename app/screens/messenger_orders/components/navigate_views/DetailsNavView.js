@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Typography } from '../../../../components'
 import { useTheme } from '@react-navigation/native'
 import moment from 'moment'
-import { orderShippingStatusDisplay, orderStatusDisplay } from '../../../../utils/CommonFunctions'
+import { orderShippingStatusDisplay, orderStatusDisplay, pagoAmigable } from '../../../../utils/CommonFunctions'
 import Colors from '../../../../constants/Colors'
 import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
@@ -17,6 +17,7 @@ import ModalRejected from './components/ModalRejected'
 import ModalDelivered from './components/ModalDelivered'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import PackageInfo from './components/PackageInfo'
+import PaymentInfo from './components/PaymentInfo'
 
 moment.locale('es')
 
@@ -116,7 +117,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 case 'ACCEPTED_CARRIER':
                     setGifSource(require('../../../../../assets/product.gif'))
                     setActionsButton([
-                        
+
                     ])
                     break;
                 case 'PICKED_UP_CARRIER':
@@ -210,7 +211,7 @@ const DetailsNavView = ({ navigation, route }) => {
             case 'ACCEPTED_CARRIER':
                 setGifSource(require('../../../../../assets/product.gif'))
                 setActionsButton([
-                    
+
                 ])
                 break;
             case 'PICKED_UP_CARRIER':
@@ -347,6 +348,14 @@ const DetailsNavView = ({ navigation, route }) => {
                 setShippingStatus={setShippingStatus}
             />
             {
+                (data.order.paymentStatus == 'NOT_CHARGED'
+                    && data.order.shippingStatus != 'LOST'
+                    && data.order.shippingStatus != 'REJECTED'
+                    && data.order.shippingStatus != 'DELIVERED') ? (
+                    <PaymentInfo />
+                ) : (null)
+            }
+            {
                 ((data.order.shippingStatus == 'PICKED_UP_CARRIER'
                     || data.order.shippingStatus == 'IN_TRANSIT')
                     && pickedDate != '') ? (
@@ -383,6 +392,22 @@ const DetailsNavView = ({ navigation, route }) => {
                         <View>
                             <Image backgroundColor='white' source={gifSource} style={{ height: 30, width: 30, position: 'relative', marginTop: 10 }} />
                         </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
+                        <View>
+                            <Typography h3 style={{ marginVertical: 10 }}>
+                                Estado del pago
+                            </Typography>
+                            <Typography color={Colors.COLORS.INFO}>
+                                {pagoAmigable(data.order.paymentStatus)}
+                            </Typography>
+                        </View>
+                        {data.order.paymentStatus == 'NOT_CHARGED' ? (
+                            <View>
+                                <Image backgroundColor='white' source={require('../../../../../assets/outline-error-solid.gif')} style={{ height: 40, width: 40, position: 'relative', marginTop: 10 }} />
+                            </View>
+                        ) : null}
+
                     </View>
                 </View>
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>

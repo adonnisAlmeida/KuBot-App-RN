@@ -53,11 +53,11 @@ const FirstComponent = ({
         }
     }, [direccion1])
 
-    useEffect(() => {
+    /* useEffect(() => {
         if (direccion2.length > 0) {
             setErrors(pre => pre.filter((key) => key != 'direccion2'))
         }
-    }, [direccion2])
+    }, [direccion2]) */
 
     useEffect(() => {
         if (containsOnlyNumbers(telefono) && telefono.length == 8) {

@@ -163,6 +163,41 @@ export const ALL_USERS = gql`
 	}
 `
 
+export const CONTACTS_LIST = gql`
+	query myContacts{
+		myContacts(first: 10){
+			edges{
+				node{
+					id
+					serverId
+					userName
+					avatar{
+						url
+						alt
+					}
+					firstName
+					lastName
+					dateJoined
+					addresses {
+						id
+						country {
+							country
+						}
+						streetAddress1
+						city
+						postalCode
+					}
+				}
+			}
+			pageInfo{
+				hasNextPage
+				hasPreviousPage
+				startCursor
+				endCursor
+			}
+		}
+	}
+`
 export const ORDERS_LIST_CONTACTS = gql`
 	query Orders($carrier: Int, $after: String, $before: String) {
 		orders(first: 100, carrier: $carrier, after: $after, before: $before) {
