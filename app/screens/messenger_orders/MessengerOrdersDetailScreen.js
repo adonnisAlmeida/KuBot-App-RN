@@ -4,7 +4,7 @@ import { useTheme } from '@react-navigation/native'
 import { useLazyQuery, NetworkStatus } from '@apollo/client'
 import moment from 'moment'
 
-import { ORDER_ID } from '../../graphql/orders'
+import { ORDER_ID, ORDER_SERVER_ID } from '../../graphql/orders'
 import { Loading, Typography } from '../../components'
 import { NetworkError } from '../../components'
 import MessengerOrdersDetailNav from './components/MessengerOrdersDetailNav'
@@ -22,13 +22,13 @@ export default function MessengerOrdersDetailScreen({ route, navigation, ...prop
 
 	let messenger_orders_id = route.params?.messenger_orders_id
 
-	const [getOrderDetail, { loading, error, data, networkStatus }] = useLazyQuery(ORDER_ID, {
+	const [getOrderDetail, { loading, error, data, networkStatus }] = useLazyQuery(ORDER_SERVER_ID, {
 		onCompleted: (data) => {
 			setOrderDetails(data)
 			dispatch(setSelectedOrder(data))
-			//console.log('On complete >> ', data)
+			console.log('On complete >> ', data)
 		},
-		onError: () => {
+		onError: (error, data, networkStatus) => {
 			console.log('ERROR cargando Envío >> ', error.errors)
 			console.log('ERROR cargando Envío data var >> ', data)
 			console.log('ERROR cargando Envío networkStatus >> ', networkStatus)
@@ -57,7 +57,7 @@ export default function MessengerOrdersDetailScreen({ route, navigation, ...prop
 	if (Object.keys(orderDetails).length == 0) return <Loading />
 
 	navigation.setOptions({
-		title: `Envío #` + orderDetails.order.number,
+		title: `Envío # ` + orderDetails.orderById?.number,
 	})
 	/* console.log("a mostar >> ", orderDetails.order.number)
 	console.log("a mostar estado >> ", messengerOrdersRedux.selectedOrder.order.number) */

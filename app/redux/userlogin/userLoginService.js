@@ -11,6 +11,18 @@ export default {
 	setToken,
 	getToken,
 	setUserAddresses,
+	setDeviceToken,
+	deleteDeviceToken,
+}
+
+function setDeviceToken(token) {
+	AsyncStorage.setItem('@deviceToken', JSON.stringify(token))
+	return token
+}
+
+function deleteDeviceToken() {
+	AsyncStorage.removeItem('@deviceToken')
+	return {}
 }
 
 function login(user) {

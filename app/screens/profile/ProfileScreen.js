@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { StyleSheet, ScrollView, View, Image } from 'react-native'
+import { StyleSheet, ScrollView, View, Image, Platform, ToastAndroid } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { useQuery, useMutation } from '@apollo/client'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Typography } from '../../components'
 import useAlert from '../../hooks/useAlert'
-import { logout } from '../../redux/userlogin/userLoginSlice'
+import { deviceToken, logout } from '../../redux/userlogin/userLoginSlice'
 import { user, carrierInfo } from '../../redux/userlogin/userLoginSlice'
 import { USER_ID } from '../../graphql/user'
 import { CUSTOMER_DELETE } from '../../graphql/customers'
@@ -15,6 +15,7 @@ import Colors from '../../constants/Colors'
 import ContactDetails from './ContactDetails'
 import CarrierDetails from './CarrierDetails'
 import AwesomeAlert from 'react-native-awesome-alerts'
+import { PN_DELETE } from '../../graphql/pushNotifications'
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -22,9 +23,31 @@ export default function ProfileScreen({ navigation }) {
 	const dispatch = useDispatch()
 	const [showAlertAw, setShowAlert] = useState(false)
 	const carrier_state = useSelector(carrierInfo)
+	const device_token = useSelector(deviceToken)
+
+	const [pushNotificationDelete, { loadingPNDelete, errorPNDelete, dataPNDelete }] = useMutation(PN_DELETE, {
+		onCompleted: (dataPNDelete) => {
+			if (Platform.OS === 'android') {
+				ToastAndroid.show(`Token de dispositivo eliminado >> ${dataPNDelete.pushNotificationsDelete.device.token}`, ToastAndroid.LONG)
+			}
+			dispatch(logout())
+		},
+		onError: (errorPNDelete) => {
+			/* if (Platform.OS === 'android') {
+				ToastAndroid.show(`Error eliminando token del dispositivo`, ToastAndroid.LONG)
+			} */
+			dispatch(logout())
+			console.log("Error dataPNDelete >> ", errorPNDelete)
+		},
+		fetchPolicy: "no-cache",
+	})
 
 	const handleCerrarSesion = () => {
-		dispatch(logout())
+		if (device_token != "") {
+			pushNotificationDelete({
+				variables: { deviceToken: device_token }
+			})
+		}
 	}
 
 	//if (loading || error) return <Loading />

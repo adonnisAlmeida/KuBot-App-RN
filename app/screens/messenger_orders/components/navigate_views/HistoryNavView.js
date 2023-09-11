@@ -12,7 +12,7 @@ const HistoryNavView = ({ navigation, route }) => {
   let data = route.params?.data
   useEffect(() => {
     let tempEvents = []
-    data.order.events.map((event, index) => {
+    data.orderById.events.map((event, index) => {
       tempEvents.push(event)
     })
     setEvents(tempEvents.reverse())

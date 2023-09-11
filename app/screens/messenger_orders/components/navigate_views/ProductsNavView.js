@@ -9,7 +9,7 @@ moment.locale('es')
 
 const ProductsNavView = ({ navigation, route }) => {
     let data = route.params?.data
-    const d = new Date(data.order.created);
+    const d = new Date(data.orderById.created);
     const { colors } = useTheme()
 
     const calculateTotal = (amount, quantity) => {
@@ -18,7 +18,7 @@ const ProductsNavView = ({ navigation, route }) => {
 
     return (
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-            {data.order.lines.map((producto, index) => {
+            {data.orderById.lines.map((producto, index) => {
                 return (
                     <View key={index} style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                         <Typography color={colors.ON_SURFACE}>

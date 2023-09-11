@@ -6,28 +6,19 @@ import {
 	StyleSheet,
 	View,
 	Dimensions,
-	Linking,
-	Text,
 	TouchableOpacity,
-	Modal,
-	TouchableWithoutFeedback,
-	Platform,
-	ToastAndroid,
 	//Image,
 } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
-//import { LinearGradient } from 'expo-linear-gradient'
 import LinearGradient from 'react-native-linear-gradient';
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client'
 
 import Theme from '../../constants/Theme'
 import { Typography, FloatingActionButton } from '../../components'
 import { PRODUCT_TYPES } from '../../graphql/product'
 import { setCarrierInfo, user, carrierInfo, setUser } from '../../redux/userlogin/userLoginSlice'
-import { URL } from '../../constants/Other'
-//import Pushy from 'pushy-react-native';
-import { CARRIER_INFO, GET_CARRIER_BY_USER_EMAIL, TOKEN_VERIFY, USER_INFO } from '../../graphql/login'
+import { CARRIER_INFO, USER_INFO } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 
 const { width } = Dimensions.get('window')
@@ -43,7 +34,6 @@ export default function HomeScreen({ navigation }) {
 	const [reloadInfo, setReloadInfo] = useState(false)
 	const [aborterRefCarrierInfo, setAborterRefCarrierInfo] = useState(new AbortController());
 	const [aborterRefUserInfo, setAborterRefUserInfo] = useState(new AbortController());
-	const [pushyToken, setPushyToken] = useState(null)
 
 	/* console.log("countryArea >>>>", user_state.addresses[0].countryArea)
 	console.log("cityArea >>>>", user_state.addresses[0].cityArea) */
@@ -95,24 +85,7 @@ export default function HomeScreen({ navigation }) {
 	useEffect(() => {
 		setInitUserLoading(true)
 		setInitCarrierLoading(true)
-		getLogedUserInfo()
-
-
-
-		// Register the user for push notifications
-		/* Pushy.register().then(async (deviceToken) => {
-			// Display an alert with device token
-			setPushyToken(deviceToken)
-			//console.log('Pushy device token: ' + deviceToken);
-
-			// Send the token to your backend server via an HTTP GET request
-			//await fetch('https://your.api.hostname/register/device?token=' + deviceToken);
-
-			// Succeeded, optionally do something to alert the user
-		}).catch((err) => {
-			// Handle registration errors
-			console.error('Error en tomando pushy.me Token', err);
-		}); */
+		getLogedUserInfo()		
 	}, [])
 
 	useEffect(() => {
@@ -158,6 +131,67 @@ export default function HomeScreen({ navigation }) {
 			? user_state.firstName + ' ' + user_state.lastName
 			: user_state.email
 
+		const crearNotificacion = () => {
+			navigation.navigate("PruebasScreen")
+			/* console.log("A CREAR")
+			
+
+			PushNotification.getChannels(function (channel_ids) {
+				console.log(channel_ids); // ['channel_id_1']
+				channel_ids.forEach(chan => {
+					if (chan == "channel-id-1" || chan == "channel-id-2")
+						PushNotification.deleteChannel(chan);
+				})
+			});
+
+			PushNotification.localNotification({
+				channelId: "KuBotApp-Channel",
+				title: "Titulo",
+				ticker: "My Notification Ticker", // (optional)
+				showWhen: false, // (optional) default: true
+				//largeIcon: "ic_launcher", // (optional) default: "ic_launcher". Use "" for no large icon.
+				//largeIconUrl: "https://www.blogdelfotografo.com/wp-content/uploads/2022/01/girasol-foto-perfil.webp", // (optional) default: "ic_launcher". Use "" for no large icon.
+				autoCancel: true, // (optional) default: true
+				smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher". Use "" for default small icon.
+
+				bigText: "My big text that will be shown when notification is expanded. Styling can be done using HTML tags(see android docs for details)", // (optional) default: "message" prop
+				subText: "This is a subText", // (optional) default: none
+				//bigPictureUrl: "https://d500.epimg.net/cincodias/imagenes/2019/06/04/lifestyle/1559679036_977776_1559679371_noticia_normal.jpg", // (optional) default: undefined
+				//bigLargeIcon: "ic_launcher", // (optional) default: undefined
+				//bigLargeIconUrl: "https://i.blogs.es/09b647/googlefotos/1366_2000.jpg", // (optional) default: undefined
+				//color: Colors.COLORS.PRIMARY,
+				message: "Mensaje",
+				bigText: "El mensaje largo va aqui",
+
+				visibility: "public",
+				onlyAlertOnce: true,
+
+				actions: ["ReplyInput"],
+				reply_placeholder_text: "Write your response...", // (required)
+				reply_button_text: "Reply" // (required)
+			}); */
+
+			/* PushNotification.localNotification({
+				//Android Only Properties 
+				channelId: "KuBotApp-Channel", // (required) channelId, if the channel doesn't exist, notification will not trigger.
+				ticker: "My Notification Ticker", // (optional)
+				showWhen: true, // (optional) default: true
+				autoCancel: true, // (optional) default: true
+				//largeIcon: "ic_launcher", // (optional) default: "ic_launcher". Use "" for no large icon.
+				//largeIconUrl: "https://media.istockphoto.com/id/1408387701/photo/social-media-marketing-digitally-generated-image-engagement.webp?s=1024x1024&w=is&k=20&c=Bck-z2Z287uKcEDpoLS7F1VA9NzdBbF7gY0ZTyYPoTs=", // (optional) default: undefined
+				smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher". Use "" for default small icon.
+				bigText: "My big text that will be shown when notification is expanded. Styling can be done using HTML tags(see android docs for details)", // (optional) default: "message" prop
+				subText: "This is a subText", // (optional) default: none
+				//bigPictureUrl: "https://plus.unsplash.com/premium_photo-1682124850312-7a1955d99732?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXJsfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60", // (optional) default: undefined
+				//bigLargeIcon: "ic_launcher", // (optional) default: undefined
+				//bigLargeIconUrl: "https://media.istockphoto.com/id/1434947710/photo/businessman-headphones-and-laptop-webinar-in-office-with-coffee-on-table-video-call-or.webp?s=1024x1024&w=is&k=20&c=NvC5p29pg1jBXw-IEzCTYg3Mv1A11k8BGVFqRw-DCDk=", // (optional) default: undefined
+				color: "green", // (optional) default: system default
+				vibrate: true, // (optional) default: true
+				vibration: 1100, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
+		
+			}); */
+		}
+
 		return (
 			<View style={{ marginBottom: 16 }}>
 				<Typography h1 color={colors.ON_BACKGROUND}>
@@ -166,6 +200,13 @@ export default function HomeScreen({ navigation }) {
 				<Typography h1 bold color={colors.ON_BACKGROUND}>
 					{name}
 				</Typography>
+				<TouchableOpacity
+					onPress={() => crearNotificacion()}
+				>
+					<Typography>
+						Crear notificacion
+					</Typography>
+				</TouchableOpacity>
 			</View>
 		)
 	}

@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { StyleSheet, TouchableOpacity, View, Text } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { StyleSheet, TouchableOpacity, View, Text, Platform, ToastAndroid } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { useTheme } from '@react-navigation/native'
 
-import { logout } from '../redux/userlogin/userLoginSlice'
+import { deviceToken, logout } from '../redux/userlogin/userLoginSlice'
 import Theme from '../constants/Theme'
 import Colors from '../constants/Colors'
 import AwesomeAlert from 'react-native-awesome-alerts'
+import { useMutation } from '@apollo/client'
+import { PN_DELETE } from '../graphql/pushNotifications'
 
 export function DrawerItem(props) {
 	const { title, icon, navigate, focused, navigation } = props
@@ -69,8 +71,34 @@ export function DrawerItemLogout(props) {
 	const { dark } = useTheme()
 	const dispatch = useDispatch()
 	const [showAlertAw, setShowAlert] = useState(false)
+	const device_token = useSelector(deviceToken)
 
 	const containerStyles = [styles.defaultStyle]
+
+	const [pushNotificationDelete, { loadingPNDelete, errorPNDelete, dataPNDelete }] = useMutation(PN_DELETE, {
+		onCompleted: (dataPNDelete) => {
+			if (Platform.OS === 'android') {
+				ToastAndroid.show(`Token de dispositivo eliminado >> ${dataPNDelete.pushNotificationsDelete.device.token}`, ToastAndroid.LONG)
+			}
+			dispatch(logout())
+		},
+		onError: (errorPNDelete) => {
+			/* if (Platform.OS === 'android') {
+				ToastAndroid.show(`Error eliminando token del dispositivo`, ToastAndroid.LONG)
+			} */
+			dispatch(logout())
+			console.log("Error dataPNDelete >> ", errorPNDelete)
+		},
+		fetchPolicy: "no-cache",
+	})
+
+	const handleCerrarSesion = () => {
+		if (device_token != "") {
+			pushNotificationDelete({
+				variables: { deviceToken: device_token }
+			})
+		}
+	}
 
 	return (
 		<>
@@ -116,7 +144,7 @@ export function DrawerItemLogout(props) {
 				onDismiss={() => {
 					setShowAlert(false)
 				}}
-				onConfirmPressed={() => dispatch(logout())}
+				onConfirmPressed={() => handleCerrarSesion()}
 			/>
 		</>
 

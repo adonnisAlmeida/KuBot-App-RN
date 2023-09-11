@@ -8,6 +8,7 @@ export const userLoginSlice = createSlice({
 		user: {},
 		userToken: "",
 		isLogin: false,
+		deviceToken: "",
 		/* isCarrier: false,
 		isStaff: false,
 		isSeller: false */
@@ -51,6 +52,12 @@ export const userLoginSlice = createSlice({
 			.addCase(setUserAddresses.fulfilled, (state, action) => {
 				state.user.addresses = action.payload
 			})
+			.addCase(setDeviceToken.fulfilled, (state, action) => {
+				state.deviceToken = action.payload
+			})
+			.addCase(deleteDeviceToken.fulfilled, (state, action) => {
+				state.deviceToken = ""
+			})
 	},
 })
 
@@ -59,6 +66,7 @@ export const userToken = (state) => state.userlogin.userToken
 export const carrierInfo = (state) => state.userlogin.carrierInfo
 export const isLogin = (state) => state.userlogin.isLogin
 export const isCarrier = (state) => state.userlogin.isCarrier
+export const deviceToken = (state) => state.userlogin.deviceToken
 
 export const login = createAsyncThunk('userlogin/login', service.login)
 export const logout = createAsyncThunk('userlogin/logout', service.logout)
@@ -67,6 +75,10 @@ export const setUser = createAsyncThunk('userlogin/setUser', service.setUser)
 
 export const setToken = createAsyncThunk('userlogin/setToken', service.setToken)
 export const getToken = createAsyncThunk('userlogin/getToken', service.getToken)
+
+export const setDeviceToken = createAsyncThunk('userlogin/setDeviceToken', service.setDeviceToken)
+export const getDeviceToken = createAsyncThunk('userlogin/getDeviceToken', service.getDeviceToken)
+export const deleteDeviceToken = createAsyncThunk('userlogin/deleteDeviceToken', service.deleteDeviceToken)
 
 export const setCarrierInfo = createAsyncThunk('userlogin/setCarrierInfo', service.setCarrierInfo)
 export const setCarrierInfoOtro = createAsyncThunk('userlogin/setCarrierInfoOtro', service.setCarrierInfoOtro)

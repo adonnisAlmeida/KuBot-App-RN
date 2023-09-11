@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { useSelector, useDispatch } from 'react-redux'
-import { StatusBar, Text, View } from 'react-native'
+import { StatusBar } from 'react-native'
 
 import Theme from '../constants/Theme'
 import { isLogin, getUser, getCarrierInfo, user, getToken } from '../redux/userlogin/userLoginSlice'
@@ -13,6 +13,7 @@ import Screens from '../screens/index'
 import Header from './Header'
 import CustomDrawerContent from './CustomDrawerContent'
 import Colors from '../constants/Colors'
+import MyPushNotification from './MyPushNotification'
 
 const Stack = createStackNavigator()
 const Drawer = createDrawerNavigator()
@@ -74,7 +75,7 @@ export default function Navigation(props) {
 	const darkmode = useSelector(isDarkMode)
 	const isLoginActive = useSelector(isLogin)
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!isLoginActive) {
 			dispatch(getUser())
 			dispatch(getToken())
@@ -107,6 +108,7 @@ function AppNavigation(props) {
 
 	return (
 		<NavigationContainer theme={darkmode ? Theme.ThemeDark : Theme.ThemeLight}>
+			<MyPushNotification/>
 			<Stack.Navigator
 				initialRouteName="DrawerNavigator"
 				screenOptions={{

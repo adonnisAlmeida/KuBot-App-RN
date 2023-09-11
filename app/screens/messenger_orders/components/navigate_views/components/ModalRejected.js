@@ -32,8 +32,8 @@ const ModalRejected = ({
     const [uploadingImage, setUploadingImage] = useState(false)
     const [actualizando, setActualizando] = useState(false)
     const [renderiza, setRenderiza] = useState(false)
-    const [signatureImages, setSignatureImages] = useState(envio.order.rejectedOrder?.signImg)
-    const [evidenceImages, setEvidenceImages] = useState(envio.order.rejectedOrder?.shipImg)
+    const [signatureImages, setSignatureImages] = useState(envio.orderById.rejectedOrder?.signImg)
+    const [evidenceImages, setEvidenceImages] = useState(envio.orderById.rejectedOrder?.shipImg)
     const [aborterRefSignature, setAborterRefSignature] = useState(new AbortController());
     const [aborterRefEvidence, setAborterRefEvidence] = useState(new AbortController());
 
@@ -42,7 +42,7 @@ const ModalRejected = ({
     const [signatureRejectionImages, { loadingSignature, errorSignature, dataSignature }] = useMutation(SIGNATURE_REJECTED_IMAGES, {
         onCompleted: (dataSignature) => {
             console.log("CREOO LA IMAGEN >> ", dataSignature)
-            envio.order.rejectedOrder = dataSignature.signatureImagesRejection.order.rejectedOrder
+            envio.orderById.rejectedOrder = dataSignature.signatureImagesRejection.order.rejectedOrder
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
             }
@@ -74,7 +74,7 @@ const ModalRejected = ({
     const [evidenceRejectionImages, { loadingEvidence, errorEvidence, dataEvidence }] = useMutation(EVIDENCE_REJECTED_IMAGES, {
         onCompleted: (dataEvidence) => {
             console.log("CREOO LA IMAGEN Evidence >> ", dataEvidence)
-            envio.order.rejectedOrder = dataEvidence.evidenceImagesRejection.order.rejectedOrder
+            envio.orderById.rejectedOrder = dataEvidence.evidenceImagesRejection.order.rejectedOrder
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de evidencia correctamente.', ToastAndroid.LONG)
             }
@@ -111,10 +111,10 @@ const ModalRejected = ({
                 } else {
                     if (dataRejected.orderRejected.order) {
                         if (dataRejected.orderRejected.order.shippingStatus == 'REJECTED') {
-                            envio.order.shippingStatus = 'REJECTED'
+                            envio.orderById.shippingStatus = 'REJECTED'
                             setShippingStatus('REJECTED')
                             const parametros = {
-                                "id": envio.order.id,
+                                "id": envio.orderById.id,
                                 "status": 'REJECTED'
                             }
                             dispatch(setOrderShippingStatus(parametros))
@@ -185,14 +185,14 @@ const ModalRejected = ({
         setUploadingImage(true)
         switch (modalTarget) {
             case 'SIGNATURE':
-                console.log("a envir la imagen", imageURI, envio.order.id)
+                console.log("a envir la imagen", imageURI, envio.orderById.id)
                 signatureRejectionImages({
-                    variables: { id: envio.order.id, images: imageURI }
+                    variables: { id: envio.orderById.id, images: imageURI }
                 })
                 break;
             case 'EVIDENCE':
                 evidenceRejectionImages({
-                    variables: { id: envio.order.id, images: imageURI }
+                    variables: { id: envio.orderById.id, images: imageURI }
                 })
                 break;
 
@@ -207,15 +207,15 @@ const ModalRejected = ({
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Debe completar la Justificación.', ToastAndroid.LONG)
             }
-        } else if (envio.order.rejectedOrder != null) {
-            if (envio.order.rejectedOrder.signImg.length == 0 || envio.order.rejectedOrder.shipImg.length == 0) {
+        } else if (envio.orderById.rejectedOrder != null) {
+            if (envio.orderById.rejectedOrder.signImg.length == 0 || envio.orderById.rejectedOrder.shipImg.length == 0) {
                 if (Platform.OS === 'android') {
                     ToastAndroid.show('Las imágenes de la orden rechazada no han sido completadas.', ToastAndroid.LONG)
                 }
             } else {
                 setActualizando(true)
                 console.log("Cambiar estado")
-                orderRejected({ variables: { id: envio.order.id, input: { reason: justify } } })
+                orderRejected({ variables: { id: envio.orderById.id, input: { reason: justify } } })
             }
         } else {
             if (Platform.OS === 'android') {
@@ -358,8 +358,8 @@ const ModalRejected = ({
                     <TouchableWithoutFeedback /* style={styles.modalContent} */>
                         <View keyboardShouldPersistTaps={'handled'} style={styles.modalContent}>
                             <ScrollView style={styles.scrollContent}>
-                                <Typography h2>Envío #{envio.order.number}</Typography>
-                                <Typography style={{ marginTop: 5 }} color={'#9e9e9e'} small>{printCreated2(envio.order.created)}</Typography>
+                                <Typography h2>Envío #{envio.orderById.number}</Typography>
+                                <Typography style={{ marginTop: 5 }} color={'#9e9e9e'} small>{printCreated2(envio.orderById.created)}</Typography>
                                 <Typography style={{ marginTop: 10 }}>Justificación del rechazo:</Typography>
                                 <TextInput
                                     selectTextOnFocus
@@ -388,7 +388,7 @@ const ModalRejected = ({
                                         horizontal={true}
                                     >
                                         <View style={{ flexDirection: "row", marginTop: 5 }}>
-                                            {envio.order.rejectedOrder ? (
+                                            {envio.orderById.rejectedOrder ? (
                                                 signatureImages?.length > 0 ? (
                                                     signatureImages.map((photo, index) => (
                                                         <ImageCard
@@ -430,7 +430,7 @@ const ModalRejected = ({
                                         horizontal={true}
                                     >
                                         <View style={{ flexDirection: "row", marginTop: 5 }}>
-                                            {envio.order.rejectedOrder ? (
+                                            {envio.orderById.rejectedOrder ? (
                                                 evidenceImages?.length > 0 ? (
                                                     evidenceImages.map((photo, index) => (
                                                         <ImageCard

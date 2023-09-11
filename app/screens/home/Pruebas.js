@@ -1,11 +1,10 @@
-import { View, Text, StyleSheet, StatusBar } from 'react-native'
+import { View, Text, StyleSheet, StatusBar, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
-//import { Typography } from '../../components'
-//import { TimePickerInputLineal, DatePickerInputLineal } from '../../components/DatePickerInput'
-import MySelect from '../../components/MySelect'
 import { useEffect } from 'react'
-import Colors from '../../constants/Colors'
-import { printCreated, stringToColour } from '../../utils/CommonFunctions'
+import { Typography } from '../../components'
+import PushNotification, { Importance } from "react-native-push-notification";
+import Pushy from 'pushy-react-native';
+import Colors from '../../constants/Colors';
 
 const localRules = [
     {
@@ -60,135 +59,213 @@ const localRules = [
     },
 ]
 
-const Pruebas = () => {
-    const [selectedRule, setSelectedRule] = useState(5)
-    const [item, setItem] = useState({
-        "id": "UnVsZrg0",
-        "name": "Never",
-        "nameSpanish": "Única vez",
-        "label": "Única vez",
-        "description": "Repeat never",
-        "frequency": "NEVER",
-        "serverId": 5,
-        "value": 5
-    })
-    const [finFull, setFinFull] = useState(null)
-    const [fin, setFin] = useState('')
-    const [inicioFull, setInicioFull] = useState(null)
-    const [inicio, setInicio] = useState('')
-    const [fechaFin, setFechaFin] = useState('')
-    const [barStyle, setBarStyle] = useState('light-content')
+const Pruebas = ({ navigation }) => {
+    const [canales, setCanales] = useState([])
 
     useEffect(() => {
-        switch (item.serverId) {
-            case 1:
-                setBarStyle('dark-content')
-                break;
-            case 2:
-                setBarStyle('light-content')
-                break;
-            case 3:
-                setBarStyle('light-content')
-                break;
-            case 4:
-                setBarStyle('dark-content')
-                break;
-            case 5:
-                setBarStyle('dark-content')
-                break;
-        }
-    }, [item])
+        PushNotification.getChannels(function (channel_ids) {
+            setCanales(channel_ids)
+        });
+    }, [])
+
+    const actualizar_canales = () => {
+        PushNotification.getChannels(function (channel_ids) {
+            setCanales(channel_ids)
+        });
+    }
+
+    const crear_canal = () => {
+        PushNotification.createChannel(
+            {
+                channelId: "prueba-1", // (required)
+                channelName: "prueba-1", // (required)
+                soundName: "sample.mp3", // (optional) See `soundName` parameter of `localNotification` function
+                importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
+                vibrate: true,
+            },
+            (created) => console.log(`prueba-1 '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+        );
+        /* PushNotification.createChannel(
+            {
+                channelId: "default-channel-id", // (required)
+                channelName: `Default channel`, // (required)
+                channelDescription: "A default channel", // (optional) default: undefined.
+                soundName: "default", // (optional) See `soundName` parameter of `localNotification` function
+                importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
+                vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
+            },
+            (created) => console.log(`createChannel 'default-channel-id' returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+        );
+        PushNotification.createChannel(
+            {
+                channelId: "sound-channel-id", // (required)
+                channelName: `Sound channel`, // (required)
+                channelDescription: "A sound channel", // (optional) default: undefined.
+                soundName: "sample.mp3", // (optional) See `soundName` parameter of `localNotification` function
+                importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
+                vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
+            },
+            (created) => console.log(`createChannel 'sound-channel-id' returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+        ); */
+        actualizar_canales()
+    }
+
+    const eliminar_canal = () => {
+        PushNotification.getChannels(function (channel_ids) {
+            channel_ids.forEach(chan => {
+                PushNotification.deleteChannel(chan);
+            })
+        });
+        actualizar_canales()
+    }
+
+    const notificacion1 = (notificacion) => {
+        PushNotification.localNotification({
+            channelId: 'KuBotApp-Channel',
+            subText: notificacion.subText? notificacion.subText : "",
+            title: notificacion.title,
+            message: notificacion.message,
+            color: Colors.COLORS.PRIMARY, // (optional) default: system default
+            smallIcon: "ic_notification",
+            data: notificacion
+        });
+    }
+
+    const notificacion2 = (notificacion) => {
+        PushNotification.localNotification({
+            channelId: 'KuBotApp-Channel',
+            subText: notificacion.subText? notificacion.subText : "",
+            title: notificacion.title,
+            message: notificacion.message,
+            color: Colors.COLORS.PRIMARY, // (optional) default: system default
+            smallIcon: "ic_notification",
+            data: notificacion
+        });
+    }
+    const notificacion3 = (notificacion) => {
+        PushNotification.localNotification({
+            channelId: 'KuBotApp-Channel',
+            subText: notificacion.subText? notificacion.subText : "",
+            title: notificacion.title,
+            message: notificacion.message,
+            color: Colors.COLORS.PRIMARY, // (optional) default: system default
+            smallIcon: "ic_notification",
+            data: notificacion
+        });
+    }
+    
+    const notificacion4 = (notificacion) => {
+        PushNotification.localNotification({
+            channelId: 'KuBotApp-Channel',
+            subText: notificacion.subText? notificacion.subText : "",
+            title: notificacion.title,
+            message: notificacion.message,
+            color: Colors.COLORS.PRIMARY, // (optional) default: system default
+            smallIcon: "ic_notification",
+            data: notificacion
+        });
+    }
 
     return (
-        <>
-            {/* <StatusBar
-                backgroundColor={
-                    stringToColour(item.name) + '99'
+        <View>
+            <View>
+                {
+                    canales.map(can => {
+                        return (
+                            <View style={{ marginVertical: 20 }}>
+                                <Typography>
+                                    {can}
+                                </Typography>
+                            </View>
+                        )
+                    })
                 }
-                barStyle={barStyle}
-            /> */}
-            <View style={{ flex: 1 }}>
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    backgroundColor: '#fff',
-                    paddingHorizontal: 16,
-                    paddingVertical: 20,
-                }}>
-                    <Text>
-                        Desde
-                    </Text>
-                    <Text>
-                        {printCreated('2023-04-03')}
-                    </Text>
-                </View>
-                <View style={{
-                    backgroundColor: '#fff',
-                    marginTop: 15,
-                    paddingHorizontal: 16,
-                }}>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: 10,
-                    }}>
-                        <TimePickerInputLineal
-                            label="Hora de Inicio"
-                            date={inicioFull}
-                            value={inicio}
-                            setValue={setInicio}
-                        />
-                    </View>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: 10,
-                        borderTopColor: '#8E8E8E',
-                        borderTopWidth: StyleSheet.hairlineWidth,
-                    }}>
-                        <TimePickerInputLineal
-                            date={finFull}
-                            label="Hora de Fin"
-                            value={fin}
-                            setValue={setFin}
-                        />
-                    </View>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: 10,
-                        borderTopColor: '#8E8E8E',
-                        borderTopWidth: StyleSheet.hairlineWidth,
-                    }}>
-                        <MySelect
-                            label="Repetir"
-                            items={localRules}
-                            value={selectedRule}
-                            setValue={setSelectedRule}
-                            setItem={setItem}
-                        />
-                    </View>
-                    {selectedRule != 5 ? (
-                        <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            paddingVertical: 10,
-                            borderTopColor: '#8E8E8E',
-                            borderTopWidth: StyleSheet.hairlineWidth,
-                        }}>
-                            <DatePickerInputLineal
-                                label="Fecha de Finalización"
-                                value={fechaFin}
-                                setValue={setFechaFin}
-                                type='date'
-                                date={fechaFin}
-                            />
-                        </View>
-                    ) : null}
-                </View>
             </View>
-        </>
 
+            <TouchableOpacity
+                style={{
+                    padding: 5,
+                    backgroundColor: 'orange',
+                    marginTop: 5
+                }}
+                onPress={() => crear_canal()}
+            >
+                <Typography>Crear Canal</Typography>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{
+                    padding: 5,
+                    backgroundColor: 'orange',
+                    marginTop: 5
+                }}
+                onPress={() => eliminar_canal()}
+            >
+                <Typography>Eliminar Canal</Typography>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{
+                    padding: 5,
+                    backgroundColor: 'orange',
+                    marginTop: 5
+                }}
+                onPress={() => notificacion1({
+                    'title': 'Manolo Pascual',
+                    'subText': 'Nuevo Mensaje',
+                    'message': 'Hola manolito, como esta todo, ya el pedido #123 esta listo para enviar ',
+                    'messageTitle': 'Contenido del mensaje',
+                    'navigate': true, 
+                    'navigateTo': 'messages', 
+                    'authorId': 4,
+                    'category': 'new_message',
+                })}
+            >
+                <Typography>Notificacion de mensajes</Typography>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{
+                    padding: 5,
+                    backgroundColor: 'orange',
+                    marginTop: 5
+                }}
+                onPress={() => notificacion2({
+                    'title': 'Orden Completada',
+                    'message': 'El pedido # 48 está listo para que un mensajero lo tome',
+                    'category': 'order_completed',
+                })}
+            >
+                <Typography>Posible orden</Typography>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{
+                    padding: 5,
+                    backgroundColor: 'orange',
+                    marginTop: 5
+                }}
+                onPress={() => notificacion3({
+                    'subText': 'Cambio de estado',
+                    'title': 'Cambio de estado de envio de la orden # 48',
+                    'message': 'El estado de envio de la # 48 ha cambiado a Recogido por el Mensajero',
+                    'category': 'cambio_estado',
+                    'order_id': 'T3JkZXI6NDg='
+                })}
+            >
+                <Typography>Cambio de estado de la orden</Typography>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{
+                    padding: 5,
+                    backgroundColor: 'orange',
+                    marginTop: 5
+                }}
+                onPress={() => notificacion4({
+                    'title': 'Cuenta de Mensajero Activada',
+                    'message': 'Su solicitud de cuenta de mensajero ha sido aprobada',
+                    'category': 'account_active',
+                })}
+            >
+                <Typography>Cuenta de Mensajero aceptada</Typography>
+            </TouchableOpacity>
+        </View>
     )
 }
 

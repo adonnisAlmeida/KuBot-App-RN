@@ -4,7 +4,7 @@ import { useTheme } from '@react-navigation/native'
 import { useState } from 'react'
 import SenderMessage from './components/SenderMessage'
 import ReceiverMessage from './components/ReceiverMessage'
-import { Typography, Button } from '../../components'
+import { Typography, Button, Loading } from '../../components'
 import Colors from '../../constants/Colors'
 import { useDispatch, useSelector } from 'react-redux'
 import { user } from '../../redux/userlogin/userLoginSlice'
@@ -15,8 +15,8 @@ import Feather from 'react-native-vector-icons/Feather'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { SEND_MESSAGE } from '../../graphql/messages'
-import { useMutation } from '@apollo/client'
+import { CONVERSATION, SEND_MESSAGE } from '../../graphql/messages'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import moment from 'moment';
 import { addMessage, addMessageToConversation, conversations, receivedMessages } from '../../redux/messages/messagesSlice'
 import { useEffect } from 'react'
@@ -24,14 +24,16 @@ import { width } from 'deprecated-react-native-prop-types/DeprecatedImagePropTyp
 
 const MessagesChatScreen = ({ route, navigation, ...props }) => {
     const { colors } = useTheme()
-    let messages = route.params?.message
+    //let messages = route.params?.message
     const [otroLoading, setOtroLoading] = useState(false)
     const [titleVisible, setTitleVisible] = useState(false)
     const [sendVisible, setSendVisible] = useState(false)
     const [title, setTitle] = useState('')
-    const [allMessages, setAllMessages] = useState(messages.messages)
+    const [allMessages, setAllMessages] = useState({})
+    const [conversationUser, setConversationUser] = useState({})
     const [content, setContent] = useState('')
     const [messageModal, setMessageModal] = useState(false)
+    const [loadingApp, setLoadingApp] = useState(false)
     const user_state = useSelector(user)
     const dispatch = useDispatch()
     const received_messages_state = useSelector(receivedMessages)
@@ -39,30 +41,12 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
 
     //console.log("conversation_reducer >> ", conversation_reducer)
 
-    useEffect(() => {
-        console.log("SE ACTUALIZARON LAS CONVERSAXIONES")
-    }, [received_messages_state.conversations])
-    useEffect(() => {
-        console.log("SE ACTUALIZARON conversation_reducer")
-    }, [conversation_reducer])
-    /* useEffect(() => {
-        dispatch(addMessage({lolo: 'lolo'}))
-    }, []) */
-
-    useEffect(() => {
-        if (content.length != 0) {
-            setSendVisible(true)
-        } else {
-            setSendVisible(false)
-        }
-    }, [content])
-
     const [sendMessageMutation, { loading, error, data }] = useMutation(SEND_MESSAGE, {
         onCompleted: (data) => {
             setMessageModal(false)
             console.log('LO ENVIO >> ', data.messageCreate)
             let newM = {
-                conversationUser: messages.conversationUser,
+                conversationUser: conversationUser,
                 message: data.messageCreate.message
             }
             setTitle('')
@@ -85,6 +69,42 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
         },
     })
 
+    const [getConversation, { loadingConversation, errorConversation, dataConversation }] = useLazyQuery(CONVERSATION, {
+        onCompleted: (dataConversation) => {
+            console.log("TERMINO CONVERSATIONS >> ", dataConversation)
+            setConversationUser(dataConversation.conversation.conversationUser)
+            setAllMessages(dataConversation.conversation.messages)
+            setLoadingApp(false)
+        },
+        onError: (errorConversation) => {
+            setLoadingApp(false)
+            console.log('Error Cargando Conversaciones >> ', errorConversation)
+        },
+        fetchPolicy: "no-cache"
+    })
+
+    useEffect(() => {
+        if (route.params?.conversation_id) {
+            setLoadingApp(true)
+            getConversation({ variables: { userId: route.params?.conversation_id } })
+        } else {
+            if (route.params?.message) {
+                setConversationUser(route.params.message.conversationUser)
+                setAllMessages(route.params.message.messages)
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        if (content.length != 0) {
+            setSendVisible(true)
+        } else {
+            setSendVisible(false)
+        }
+    }, [content])
+
+
+
     const sendMessage = () => {
         //dispatch(addMessageToConversation({lolo: 'lolo'}))
         if (content.length != 0) {
@@ -94,7 +114,7 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                         "title": title,
                         "content": content,
                         "author": user_state.serverId,
-                        "recipients": [messages.conversationUser.serverId]
+                        "recipients": [conversation.conversationUser.serverId]
                     }
                 }
             })
@@ -107,12 +127,12 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
         }, 2000); */
     }
 
-    const avatar = messages.conversationUser.avatar ? {
-        uri: messages.conversationUser.avatar.url,
+    const avatar = conversationUser.avatar ? {
+        uri: conversationUser.avatar.url,
     } : require('../../../assets/user_avatar.png')
 
     navigation.setOptions({
-        title: `${messages.conversationUser.firstName ? (messages.conversationUser.firstName) : (messages.conversationUser.userName)}`,
+        title: `${conversationUser.firstName ? (conversationUser.firstName) : (conversationUser.userName)}`,
         /*  headerRight: () => (
              <View style={{ flexDirection: 'row' }}>
                  <TouchableOpacity onPress={() => setMessageModal(true)} style={styles.headerRight}>
@@ -133,39 +153,17 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                         color='#fff'
                         style={{ marginTop: 4 }}
                     />
-                    <Image source={avatar} style={styles.image} />
+                    {loadingApp ? (
+                        <View style={{ padding: 8 }}>
+                            <ActivityIndicator color={'#fff'} />
+                        </View>
+                    ) : (
+                        <Image source={avatar} style={styles.image} />
+                    )}
                 </TouchableOpacity>
             </View>
         ),
     })
-
-    const actionIcon = (name) => {
-        return (
-            <MaterialCommunityIcons
-                name={name}
-                size={24}
-                color={colors.SURFACE}
-            />
-        )
-    }
-
-    const actionNewMessage = [
-        {
-            text: "Nuevo Mensaje",
-            icon: actionIcon('email-send'),
-            name: "bt_new_message",
-            position: 2,
-            color: Colors.COLORS.PRIMARY
-        }
-    ];
-
-    const doAction = (action) => {
-        switch (action) {
-            case 'bt_new_message':
-                setMessageModal(true)
-                break;
-        }
-    }
 
     const chatBackground = require('../../../assets/chatBackground4.jpg')
     //const chatBackground = require('../../../assets/chat_background5.png')
@@ -182,6 +180,8 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
 
         return printCreated(date)
     }
+
+    if (loadingApp) return <Loading />
 
     return (
         <View style={{ flex: 1 }}>

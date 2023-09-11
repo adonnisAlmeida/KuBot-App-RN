@@ -261,6 +261,7 @@ export const ORDERS_LIST = gql`
 			edges {
 				node {
 					id
+					serverId
 					number
 					shippingStatus
 					created
@@ -375,6 +376,150 @@ export const ACCEPT_ORDER_ID = gql`
 export const ORDER_ID = gql`
 	query Product($id: ID!) {
 		order(id: $id) {
+			id
+			status
+			created
+			shippingStatus
+			paymentStatus
+			allDimensions
+			events{
+				date
+				message
+				type
+				user{
+				  firstName
+				}
+			  }
+			  signatureImagesDelivery {
+				id
+				image {
+				  url
+				}
+			  }
+			  packageImagesDelivery {
+				id
+				image {
+				  url
+				}
+			  }
+			  rejectedOrder{
+				id
+				reason
+				shipImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+				signImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+			  }
+			  defaultPickupAddress{
+				phone
+				id
+				streetAddress1
+				streetAddress2
+				city
+				cityArea
+				countryArea
+				firstName
+				lastName
+				companyName
+				postalCode
+				country{
+				  country
+				  code
+				}
+			  }
+			shippingAddress{
+				phone
+				id
+				streetAddress1
+				streetAddress2
+				countryArea
+				city
+				cityArea
+				firstName
+				lastName
+				companyName
+				postalCode
+				country{
+				  country
+				  code
+				}
+			}
+			lines {
+				variant{
+					name
+				}
+				quantity
+				productName
+				productSku
+			}
+			number
+			sellers{
+				user{
+					serverId
+					userName
+					avatar{
+						url
+						alt
+					}
+					firstName
+					lastName
+					dateJoined
+					addresses{
+						id
+					  country {
+							country
+						}
+						streetAddress1
+						city
+						postalCode
+					}
+				}
+			} 
+			customerNote
+			weight{
+				unit
+				value
+			}
+			created
+			status
+			user {
+				serverId
+				userName
+				avatar{
+					url
+					alt
+				}
+				firstName
+				lastName
+				dateJoined
+				addresses {
+					id
+					country {
+						country
+					}
+					streetAddress1
+					city
+					postalCode
+				}
+			}
+		}
+	}
+`
+export const ORDER_SERVER_ID = gql`
+	query Product($id: ID!) {
+		orderById(id: $id) {
 			id
 			status
 			created

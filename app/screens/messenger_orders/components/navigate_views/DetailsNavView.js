@@ -26,7 +26,7 @@ const DetailsNavView = ({ navigation, route }) => {
     const [sellers, setSellers] = useState([])
     const [actionsButton, setActionsButton] = useState([])
     const [displayLoading, setDisplayLoading] = useState(false)
-    const [shippingStatus, setShippingStatus] = useState(data.order.shippingStatus)
+    const [shippingStatus, setShippingStatus] = useState(data.orderById.shippingStatus)
     const [gifSource, setGifSource] = useState(null)
     const [showModalRejected, setShowModalRejected] = useState(false)
     const [showModalDelivered, setShowModalDelivered] = useState(false)
@@ -46,14 +46,14 @@ const DetailsNavView = ({ navigation, route }) => {
                 } else {
                     if (dataTransit.orderInTransit.order) {
                         if (dataTransit.orderInTransit.order.shippingStatus == 'IN_TRANSIT') {
-                            data.order.shippingStatus = 'IN_TRANSIT'
+                            data.orderById.shippingStatus = 'IN_TRANSIT'
                             setShippingStatus('IN_TRANSIT')
                             setDisplayLoading(false)
                             if (Platform.OS === 'android') {
                                 ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             const parametros = {
-                                "id": data.order.id,
+                                "id": data.orderById.id,
                                 "status": 'IN_TRANSIT'
                             }
                             dispatch(setOrderShippingStatus(parametros))
@@ -79,14 +79,14 @@ const DetailsNavView = ({ navigation, route }) => {
                 } else {
                     if (dataLost.orderLost.order) {
                         if (dataLost.orderLost.order.shippingStatus == 'LOST') {
-                            data.order.shippingStatus = 'LOST'
+                            data.orderById.shippingStatus = 'LOST'
                             setShippingStatus('LOST')
                             setDisplayLoading(false)
                             if (Platform.OS === 'android') {
                                 ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             const parametros = {
-                                "id": data.order.id,
+                                "id": data.orderById.id,
                                 "status": 'LOST'
                             }
                             dispatch(setOrderShippingStatus(parametros))
@@ -107,13 +107,13 @@ const DetailsNavView = ({ navigation, route }) => {
     useEffect(() => {
         if (data) {
             let temp = []
-            data.order.sellers.map((seller) => {
+            data.orderById.sellers.map((seller) => {
                 if (!temp.includes(seller)) {
                     temp.push(seller)
                 }
             })
             setSellers(temp)
-            switch (data.order.shippingStatus) {
+            switch (data.orderById.shippingStatus) {
                 case 'ACCEPTED_CARRIER':
                     setGifSource(require('../../../../../assets/product.gif'))
                     setActionsButton([
@@ -121,7 +121,7 @@ const DetailsNavView = ({ navigation, route }) => {
                     ])
                     break;
                 case 'PICKED_UP_CARRIER':
-                    data.order.events.map((event) => {
+                    data.orderById.events.map((event) => {
                         if (event.type == 'PICKED_UP_CARRIER')
                             setPickedDate(event.date)
                     })
@@ -144,7 +144,7 @@ const DetailsNavView = ({ navigation, route }) => {
                     ])
                     break;
                 case 'IN_TRANSIT':
-                    data.order.events.map((event) => {
+                    data.orderById.events.map((event) => {
                         if (event.type == 'PICKED_UP_CARRIER')
                             setPickedDate(event.date)
                     })
@@ -306,7 +306,7 @@ const DetailsNavView = ({ navigation, route }) => {
             case 'in_transit':
                 setDisplayLoading(true)
                 console.log('Cambiar estado a TRANSPORTANDOCE')
-                orderTransit({ variables: { id: data.order.id } })
+                orderTransit({ variables: { id: data.orderById.id } })
                 break;
             case 'rejected':
                 setShowModalRejected(true)
@@ -315,7 +315,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 setShowAlert(true)
                 /* console.log('Cambiar estado a PERDIDA')
                 setDisplayLoading(true)
-                orderLost({ variables: { id: data.order.id } }) */
+                orderLost({ variables: { id: data.orderById.id } }) */
                 break;
             case 'delivered':
                 setShowModalDelivered(true)
@@ -326,7 +326,7 @@ const DetailsNavView = ({ navigation, route }) => {
     const statusToLost = () => {
         setDisplayLoading(true)
         setShowAlert(false)
-        orderLost({ variables: { id: data.order.id } })
+        orderLost({ variables: { id: data.orderById.id } })
     }
 
     const llamar = (phoneNumber) => {
@@ -348,16 +348,16 @@ const DetailsNavView = ({ navigation, route }) => {
                 setShippingStatus={setShippingStatus}
             />
             {
-                (data.order.paymentStatus == 'NOT_CHARGED'
-                    && data.order.shippingStatus != 'LOST'
-                    && data.order.shippingStatus != 'REJECTED'
-                    && data.order.shippingStatus != 'DELIVERED') ? (
+                (data.orderById.paymentStatus == 'NOT_CHARGED'
+                    && data.orderById.shippingStatus != 'LOST'
+                    && data.orderById.shippingStatus != 'REJECTED'
+                    && data.orderById.shippingStatus != 'DELIVERED') ? (
                     <PaymentInfo />
                 ) : (null)
             }
             {
-                ((data.order.shippingStatus == 'PICKED_UP_CARRIER'
-                    || data.order.shippingStatus == 'IN_TRANSIT')
+                ((data.orderById.shippingStatus == 'PICKED_UP_CARRIER'
+                    || data.orderById.shippingStatus == 'IN_TRANSIT')
                     && pickedDate != '') ? (
                     <PackageInfo pickedDate={pickedDate} />
                 ) : (null)
@@ -366,10 +366,10 @@ const DetailsNavView = ({ navigation, route }) => {
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Typography h3 style={{ marginBottom: 10 }}>
-                            Envío #{data.order.number}
+                            Envío #{data.orderById.number}
                         </Typography>
                         <Typography color={Colors.COLORS.INFO} style={{ marginBottom: 10 }}>
-                            {orderStatusDisplay(data.order.status).toUpperCase()}
+                            {orderStatusDisplay(data.orderById.status).toUpperCase()}
                         </Typography>
                     </View>
                     {/* <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
@@ -377,7 +377,7 @@ const DetailsNavView = ({ navigation, route }) => {
                             Creada el:
                         </Typography>
                         <Typography color={colors.ON_SURFACE}>
-                            {printCreated(data.order.created)}
+                            {printCreated(data.orderById.created)}
                         </Typography>
                     </View> */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
@@ -399,10 +399,10 @@ const DetailsNavView = ({ navigation, route }) => {
                                 Estado del pago
                             </Typography>
                             <Typography color={Colors.COLORS.INFO}>
-                                {pagoAmigable(data.order.paymentStatus)}
+                                {pagoAmigable(data.orderById.paymentStatus)}
                             </Typography>
                         </View>
-                        {data.order.paymentStatus == 'NOT_CHARGED' ? (
+                        {data.orderById.paymentStatus == 'NOT_CHARGED' ? (
                             <View>
                                 <Image backgroundColor='white' source={require('../../../../../assets/outline-error-solid.gif')} style={{ height: 40, width: 40, position: 'relative', marginTop: 10 }} />
                             </View>
@@ -414,15 +414,15 @@ const DetailsNavView = ({ navigation, route }) => {
                     <Typography h3 style={{ marginBottom: 10 }}>
                         Cliente
                     </Typography>
-                    {data.order.user ? (
+                    {data.orderById.user ? (
                         <TouchableOpacity
-                            onPress={() => navigation.navigate('ClientDetails', { client: data.order.user })}
+                            onPress={() => navigation.navigate('ClientDetails', { client: data.orderById.user })}
                         >
                             <Typography color={colors.primary}>
-                                {data.order.user.firstName ? (
-                                    data.order.user.firstName + ' ' + data.order.user.lastName
+                                {data.orderById.user.firstName ? (
+                                    data.orderById.user.firstName + ' ' + data.orderById.user.lastName
                                 ) : (
-                                    data.order.user.userName
+                                    data.orderById.user.userName
                                 )}
                             </Typography>
                         </TouchableOpacity>
@@ -431,23 +431,23 @@ const DetailsNavView = ({ navigation, route }) => {
                             Invitado
                         </Typography>
                     )}
-                    {data.order.defaultPickupAddress ? (
+                    {data.orderById.defaultPickupAddress ? (
                         <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
                             <Typography h3 style={{ marginVertical: 10 }}>
                                 Dirección de Recogida
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.defaultPickupAddress.firstName} {data.order.defaultPickupAddress.lastName}
+                                {data.orderById.defaultPickupAddress.firstName} {data.orderById.defaultPickupAddress.lastName}
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.defaultPickupAddress.streetAddress1}
+                                {data.orderById.defaultPickupAddress.streetAddress1}
                             </Typography>
                             <View style={{ flexDirection: 'row' }}>
                                 <Typography bold style={{ marginRight: 5 }} color={colors.ON_SURFACE}>
                                     Ciudad:
                                 </Typography>
                                 <Typography color={colors.ON_SURFACE}>
-                                    {data.order.defaultPickupAddress.city}
+                                    {data.orderById.defaultPickupAddress.city}
                                 </Typography>
                             </View>
                             <View style={{ flexDirection: 'row' }}>
@@ -455,7 +455,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                     Provincia:
                                 </Typography>
                                 <Typography color={colors.ON_SURFACE}>
-                                    {data.order.defaultPickupAddress.countryArea}
+                                    {data.orderById.defaultPickupAddress.countryArea}
                                 </Typography>
                             </View>
                             <View style={{ flexDirection: 'row' }}>
@@ -463,7 +463,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                     País:
                                 </Typography>
                                 <Typography color={colors.ON_SURFACE}>
-                                    {data.order.defaultPickupAddress.country.country}
+                                    {data.orderById.defaultPickupAddress.country.country}
                                 </Typography>
                             </View>
                             <View style={{ flexDirection: 'row' }}>
@@ -471,7 +471,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                     Código postal:
                                 </Typography>
                                 <Typography color={colors.ON_SURFACE}>
-                                    {data.order.defaultPickupAddress.postalCode}
+                                    {data.orderById.defaultPickupAddress.postalCode}
                                 </Typography>
                             </View>
                         </View>
@@ -490,10 +490,10 @@ const DetailsNavView = ({ navigation, route }) => {
                             Dirección de Entrega
                         </Typography>
                         <Typography color={colors.ON_SURFACE}>
-                            {data.order.shippingAddress.firstName} {data.order.shippingAddress.lastName}
+                            {data.orderById.shippingAddress.firstName} {data.orderById.shippingAddress.lastName}
                         </Typography>
                         <Typography color={colors.ON_SURFACE}>
-                            {data.order.shippingAddress.streetAddress1}
+                            {data.orderById.shippingAddress.streetAddress1}
                         </Typography>
 
                         <View style={{ flexDirection: 'row' }}>
@@ -501,7 +501,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                 Ciudad:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.shippingAddress.city}
+                                {data.orderById.shippingAddress.city}
                             </Typography>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
@@ -509,7 +509,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                 Provincia:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.shippingAddress.countryArea}
+                                {data.orderById.shippingAddress.countryArea}
                             </Typography>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
@@ -517,7 +517,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                 País:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.shippingAddress.country.country}
+                                {data.orderById.shippingAddress.country.country}
                             </Typography>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
@@ -525,7 +525,7 @@ const DetailsNavView = ({ navigation, route }) => {
                                 Código postal:
                             </Typography>
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.shippingAddress.postalCode}
+                                {data.orderById.shippingAddress.postalCode}
                             </Typography>
                         </View>
                     </View>
@@ -534,10 +534,10 @@ const DetailsNavView = ({ navigation, route }) => {
                             Teléfono
                         </Typography>
                         {
-                            data.order.shippingAddress.phone ?
+                            data.orderById.shippingAddress.phone ?
                                 (
-                                    <Typography color={Colors.COLORS.INFO} onPress={() => llamar(data.order.shippingAddress.phone)}>
-                                        {data.order.shippingAddress.phone}  <Feather
+                                    <Typography color={Colors.COLORS.INFO} onPress={() => llamar(data.orderById.shippingAddress.phone)}>
+                                        {data.orderById.shippingAddress.phone}  <Feather
                                             name="phone-call"
                                             color={Colors.COLORS.INFO}
                                             size={15}
@@ -571,7 +571,7 @@ const DetailsNavView = ({ navigation, route }) => {
                         Peso Total
                     </Typography>
                     <Typography color={colors.ON_SURFACE}>
-                        {parseFloat(data.order.weight.value).toFixed(2)} {data.order.weight.unit}
+                        {parseFloat(data.orderById.weight.value).toFixed(2)} {data.orderById.weight.unit}
                     </Typography>
                 </View>
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
@@ -582,17 +582,17 @@ const DetailsNavView = ({ navigation, route }) => {
                         Largo x Ancho x Alto
                     </Typography>
                     <Typography color={colors.ON_SURFACE}>
-                        {data.order.allDimensions}
+                        {data.orderById.allDimensions}
                     </Typography>
                 </View>
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                     <Typography h3 style={{ marginBottom: 10 }}>
                         Nota del Cliente
                     </Typography>
-                    {data.order.customerNote ?
+                    {data.orderById.customerNote ?
                         (
                             <Typography color={colors.ON_SURFACE}>
-                                {data.order.customerNote}
+                                {data.orderById.customerNote}
                             </Typography>
                         ) :
                         (
@@ -605,7 +605,7 @@ const DetailsNavView = ({ navigation, route }) => {
                     <Typography h3 style={{ marginBottom: 10 }}>
                         Nota del Pedido
                     </Typography>
-                    {data.order.events.map((event, index) => {
+                    {data.orderById.events.map((event, index) => {
                         if (event.type == 'NOTE_ADDED') {
                             hasNote = true
                             return (
@@ -633,7 +633,7 @@ const DetailsNavView = ({ navigation, route }) => {
             </ScrollView >
 
             {
-                (data.order.shippingStatus === 'LOST' || data.order.shippingStatus === 'NO_STATUS' ||
+                (data.orderById.shippingStatus === 'LOST' || data.orderById.shippingStatus === 'NO_STATUS' ||
                     shippingStatus === 'LOST' || shippingStatus === 'NO_STATUS' ||
                     shippingStatus === 'REJECTED' || shippingStatus === 'ACCEPTED_CARRIER') ? null :
                     (

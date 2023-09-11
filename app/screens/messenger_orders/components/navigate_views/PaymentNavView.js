@@ -11,9 +11,9 @@ const PaymentNavView = ({ navigation, route }) => {
   let data = route.params?.data
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-      {data.order.payments.length > 0 && (<View>
+      {data.orderById.payments.length > 0 && (<View>
         <View style={{ paddingBottom: 32 }}>
-          {data.order.payments.map((payment, index) => {
+          {data.orderById.payments.map((payment, index) => {
             return (
               <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                 <Typography color={colors.ON_SURFACE}>

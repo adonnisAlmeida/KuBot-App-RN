@@ -32,8 +32,8 @@ const ModalDelivered = ({
     const [actualizando, setActualizando] = useState(false)
     const [aborterRefSignature, setAborterRefSignature] = useState(new AbortController());
     const [aborterRefPackage, setAborterRefPackage] = useState(new AbortController());
-    const [signatureImages, setSignatureImages] = useState(envio.order.signatureImagesDelivery)
-    const [packageImages, setPackageImages] = useState(envio.order.packageImagesDelivery)
+    const [signatureImages, setSignatureImages] = useState(envio.orderById.signatureImagesDelivery)
+    const [packageImages, setPackageImages] = useState(envio.orderById.packageImagesDelivery)
 
     const dispatch = useDispatch()
 
@@ -45,13 +45,13 @@ const ModalDelivered = ({
                 } else {
                     if (dataDelivered.orderDelivered.order) {
                         if (dataDelivered.orderDelivered.order.shippingStatus == 'DELIVERED') {
-                            envio.order.shippingStatus = 'DELIVERED'
+                            envio.orderById.shippingStatus = 'DELIVERED'
                             setShippingStatus('DELIVERED')
                             if (Platform.OS === 'android') {
                                 ToastAndroid.show('Estado del Envío actualizado correctamente.', ToastAndroid.LONG)
                             }
                             const parametros = {
-                                "id": envio.order.id,
+                                "id": envio.orderById.id,
                                 "status": 'DELIVERED'
                             }
                             dispatch(setOrderShippingStatus(parametros))
@@ -73,7 +73,7 @@ const ModalDelivered = ({
     const [signatureDeliveredImages, { loadingSignature, errorSignature, dataSignature }] = useMutation(SIGNATURE_IMAGES, {
         onCompleted: (dataSignature) => {
             //console.log("CREOO LA IMAGEN >> ", dataSignature)
-            envio.order.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
+            envio.orderById.signatureImagesDelivery = dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery
             setSignatureImages(dataSignature.shipmentDeliveredSignatureImage.order.signatureImagesDelivery)
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
@@ -105,7 +105,7 @@ const ModalDelivered = ({
     const [packageDeliveredImages, { loadingPackage, errorPackage, dataPackage }] = useMutation(PACKAGE_IMAGES, {
         onCompleted: (dataPackage) => {
             //console.log("CREOO LA IMAGEN >> ", dataPackage)
-            envio.order.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
+            envio.orderById.packageImagesDelivery = dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery
             setPackageImages(dataPackage.shipmentDeliveredPackageImage.order.packageImagesDelivery)
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de paquete correctamente.', ToastAndroid.LONG)
@@ -202,12 +202,12 @@ const ModalDelivered = ({
         switch (modalTarget) {
             case 'SIGNATURE':
                 signatureDeliveredImages({
-                    variables: { id: envio.order.id, images: imageURI }
+                    variables: { id: envio.orderById.id, images: imageURI }
                 })
                 break;
             case 'PACKAGE':
                 packageDeliveredImages({
-                    variables: { id: envio.order.id, images: imageURI }
+                    variables: { id: envio.orderById.id, images: imageURI }
                 })
                 break;
 
@@ -217,17 +217,17 @@ const ModalDelivered = ({
     }
 
     const makeDelivered = () => {
-        if (envio.order.signatureImagesDelivery && envio.order.signatureImagesDelivery.length == 0) {
+        if (envio.orderById.signatureImagesDelivery && envio.orderById.signatureImagesDelivery.length == 0) {
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Las imágenes de la firma no se han completado', ToastAndroid.LONG)
             }
-        } else if (envio.order.packageImagesDelivery && envio.order.packageImagesDelivery.length == 0) {
+        } else if (envio.orderById.packageImagesDelivery && envio.orderById.packageImagesDelivery.length == 0) {
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Las imágenes del paquete no se han completado', ToastAndroid.LONG)
             }
         } else {
             setActualizando(true)
-            orderDelivered({ variables: { id: envio.order.id } })
+            orderDelivered({ variables: { id: envio.orderById.id } })
         }
     }
 
@@ -345,8 +345,8 @@ const ModalDelivered = ({
                 >
                     <TouchableWithoutFeedback /* style={styles.modalContent} */>
                         <View keyboardShouldPersistTaps={'handled'} style={styles.modalContent}>
-                            <Typography h2>Envío #{envio.order.number}</Typography>
-                            <Typography style={{ marginTop: 5 }} color={'#9e9e9e'} small>{printCreated2(envio.order.created)}</Typography>
+                            <Typography h2>Envío #{envio.orderById.number}</Typography>
+                            <Typography style={{ marginTop: 5 }} color={'#9e9e9e'} small>{printCreated2(envio.orderById.created)}</Typography>
 
                             <View style={styles.imagesContent}>
                                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -366,7 +366,7 @@ const ModalDelivered = ({
                                     horizontal={true}
                                 >
                                     <View style={{ flexDirection: "row", marginTop: 5 }}>
-                                        {envio.order.signatureImagesDelivery ? (
+                                        {envio.orderById.signatureImagesDelivery ? (
                                             signatureImages?.length > 0 ? (
                                                 signatureImages.map((photo, index) => (
                                                     <ImageCard
@@ -407,7 +407,7 @@ const ModalDelivered = ({
                                     horizontal={true}
                                 >
                                     <View style={{ flexDirection: "row", marginTop: 5 }}>
-                                        {envio.order.packageImagesDelivery ? (
+                                        {envio.orderById.packageImagesDelivery ? (
                                             packageImages.length > 0 ? (
                                                 packageImages.map((photo, index) => (
                                                     <ImageCard
