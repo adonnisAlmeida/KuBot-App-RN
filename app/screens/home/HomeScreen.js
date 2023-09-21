@@ -200,13 +200,13 @@ export default function HomeScreen({ navigation }) {
 				<Typography h1 bold color={colors.ON_BACKGROUND}>
 					{name}
 				</Typography>
-				<TouchableOpacity
+				{/* <TouchableOpacity
 					onPress={() => crearNotificacion()}
 				>
 					<Typography>
 						Crear notificacion
 					</Typography>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 			</View>
 		)
 	}

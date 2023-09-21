@@ -27,9 +27,9 @@ export default function ProfileScreen({ navigation }) {
 
 	const [pushNotificationDelete, { loadingPNDelete, errorPNDelete, dataPNDelete }] = useMutation(PN_DELETE, {
 		onCompleted: (dataPNDelete) => {
-			if (Platform.OS === 'android') {
+			/* if (Platform.OS === 'android') {
 				ToastAndroid.show(`Token de dispositivo eliminado >> ${dataPNDelete.pushNotificationsDelete.device.token}`, ToastAndroid.LONG)
-			}
+			} */
 			dispatch(logout())
 		},
 		onError: (errorPNDelete) => {
@@ -47,6 +47,8 @@ export default function ProfileScreen({ navigation }) {
 			pushNotificationDelete({
 				variables: { deviceToken: device_token }
 			})
+		}else{
+			dispatch(logout())
 		}
 	}
 

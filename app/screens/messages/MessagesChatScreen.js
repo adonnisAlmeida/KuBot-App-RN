@@ -64,8 +64,8 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
         onError: (error, data) => {
             if (Platform.OS === 'android')
                 ToastAndroid.show('Error enviando mensaje.', ToastAndroid.LONG)
-            console.log('Error enviando mensaje >> ', error)
-            console.log('Error enviando mensaje data >> ', data)
+            console.log('Error enviando mensaje >> ', JSON.stringify(error, null, 2))
+            console.log('Error enviando mensaje data >> ', JSON.stringify(data, null, 2))
         },
     })
 
@@ -77,8 +77,9 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
             setLoadingApp(false)
         },
         onError: (errorConversation) => {
+            navigation.navigate('MessagesScreen')
             setLoadingApp(false)
-            console.log('Error Cargando Conversaciones >> ', errorConversation)
+            console.log('Error Cargando Conversaciones >> ', JSON.stringify(errorConversation, null, 2))
         },
         fetchPolicy: "no-cache"
     })
@@ -114,7 +115,7 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                         "title": title,
                         "content": content,
                         "author": user_state.serverId,
-                        "recipients": [conversation.conversationUser.serverId]
+                        "recipients": [conversationUser.serverId]
                     }
                 }
             })

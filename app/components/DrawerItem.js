@@ -77,9 +77,9 @@ export function DrawerItemLogout(props) {
 
 	const [pushNotificationDelete, { loadingPNDelete, errorPNDelete, dataPNDelete }] = useMutation(PN_DELETE, {
 		onCompleted: (dataPNDelete) => {
-			if (Platform.OS === 'android') {
+			/* if (Platform.OS === 'android') {
 				ToastAndroid.show(`Token de dispositivo eliminado >> ${dataPNDelete.pushNotificationsDelete.device.token}`, ToastAndroid.LONG)
-			}
+			} */
 			dispatch(logout())
 		},
 		onError: (errorPNDelete) => {
@@ -97,6 +97,8 @@ export function DrawerItemLogout(props) {
 			pushNotificationDelete({
 				variables: { deviceToken: device_token }
 			})
+		}else{
+			dispatch(logout())
 		}
 	}
 
