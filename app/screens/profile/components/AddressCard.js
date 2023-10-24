@@ -197,7 +197,7 @@ const AddressCard = ({
                                 fontWeight: 'bold',
                                 marginRight: 5,
                             }}>
-                                Calle:
+                                Dirección:
                             </Typography>
                             <Typography style={{ color: colors.ON_SURFACE }}>
                                 {address.streetAddress1}

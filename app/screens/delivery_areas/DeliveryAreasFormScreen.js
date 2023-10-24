@@ -89,6 +89,7 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 						var father = {
 							'id': prov.node.parent.id,
 							'name': prov.node.parent.name,
+							'serverId': prov.node.parent.serverId,
 							'municipios': [prov]
 						}
 						groupedProvinces.push(father)

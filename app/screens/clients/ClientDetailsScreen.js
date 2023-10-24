@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity, Image as RNImage } from 'react-native'
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image as RNImage, Modal, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { Typography } from '../../components'
 import Theme from '../../constants/Theme'
@@ -9,16 +9,20 @@ import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import Colors from '../../constants/Colors'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import { useSelector } from 'react-redux'
-import { conversations } from '../../redux/messages/messagesSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { conversations, setConversations } from '../../redux/messages/messagesSlice'
 import { useRef } from 'react'
 import { useEffect } from 'react'
+import { useLazyQuery } from '@apollo/client'
+import { MY_CONVERSATIONS } from '../../graphql/messages'
 moment.locale('es')
 
 const ClientDetailsScreen = ({ navigation, route }) => {
     const [client, setClient] = useState(route.params?.client)
+    const [loading, setLoading] = useState(false)
     const { dark, colors } = useTheme()
     const conversation_reducer = useSelector(conversations)
+    const dispatch = useDispatch()
 
     const avatar =
         client.avatar !== null
@@ -44,74 +48,116 @@ const ClientDetailsScreen = ({ navigation, route }) => {
         ),
     })
 
+    const [getConversations, { loadingConversations, errorConversations, dataConversations }] = useLazyQuery(MY_CONVERSATIONS, {
+        onCompleted: (dataConversations) => {
+            dispatch(setConversations(dataConversations.myConversations.edges))
+            setLoading(false)
+            dataConversations.myConversations.edges.forEach(conv => {
+                if (conv.node.conversationUser.serverId == client.serverId) {
+                    flag = true
+                    navigation.navigate('MessagesChatScreen', { message: conv.node })
+                }
+            })
+            if (!flag) {
+                navigation.navigate('WriteMessageScreen', { selecteds: [client] })
+            }
+        },
+        onError: (errorConversations) => {
+            setLoading(false)
+            console.log('Error Cargando Conversaciones >> ', errorConversations)
+        },
+        fetchPolicy: "no-cache"
+    })
+
     const contactMessage = () => {
         let flag = false
-        conversation_reducer.forEach(conv => {
-            if (conv.node.conversationUser.serverId == client.user.serverId) {
-                flag = true
-                navigation.navigate('MessagesChatScreen', { message: conv.node })
+        if (conversation_reducer.length > 0) {
+            conversation_reducer.forEach(conv => {
+                if (conv.node.conversationUser.serverId == client.serverId) {
+                    flag = true
+                    navigation.navigate('MessagesChatScreen', { message: conv.node })
+                }
+            })
+            if (!flag) {
+                navigation.navigate('WriteMessageScreen', { selecteds: [client] })
             }
-        })
-        if (!flag) {
-            navigation.navigate('WriteMessageScreen', { selecteds: [client] })
+        } else {
+            setLoading(true)
+            getConversations()
         }
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <View
-                style={[dark ? styles.cardDark : styles.card]}
+        <>
+            <Modal
+                visible={loading}
+                transparent={true}
+                animationType="fade"
+            //onRequestClose={() => setLoading(false)}
             >
-                <View style={styles.header}>
-                    <Image
-                        backgroundColor='white'
-                        source={avatar}
-                        indicator={Progress.Pie}
-                        indicatorProps={{
-                            color: Colors.COLORS.PRIMARY,
-                            borderWidth: 0,
-                        }}
-                        imageStyle={styles.avatar}
-                    />
-                    <View style={styles.headetText}>
-                        <Typography style={{ color: 'white', shadowOpacity: 0.8, shadowColor: 'red', }} bold title >
-                            {client.firstName ? (
-                                client.firstName + " " + client.lastName
-                            ) : (
-                                client.userName
-                            )}
-                        </Typography>
-                        <TouchableOpacity onPress={() => contactMessage()}>
-                            <Typography bold color={Colors.COLORS.WEB_LINK}>
-                                CONTACTAR
+                <View style={styles.modalStyle}>
+                    <ActivityIndicator size='large' color={Colors.COLORS.PRIMARY} />
+                </View>
+            </Modal>
+            <ScrollView style={styles.container}>
+                <View
+                    style={[dark ? styles.cardDark : styles.card]}
+                >
+                    <View style={styles.header}>
+                        <Image
+                            backgroundColor='white'
+                            source={avatar}
+                            indicator={Progress.Pie}
+                            indicatorProps={{
+                                color: Colors.COLORS.PRIMARY,
+                                borderWidth: 0,
+                            }}
+                            imageStyle={styles.avatar}
+                        />
+                        <View style={styles.headetText}>
+                            <Typography style={{ color: 'white', shadowOpacity: 0.8, shadowColor: 'red', }} bold title >
+                                {client.firstName ? (
+                                    client.firstName + " " + client.lastName
+                                ) : (
+                                    client.userName
+                                )}
                             </Typography>
-                        </TouchableOpacity>
+                            <TouchableOpacity onPress={() => contactMessage()}>
+                                <Typography bold color={Colors.COLORS.WEB_LINK}>
+                                    CONTACTAR
+                                </Typography>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View>
+                        <Typography style={styles.textHeader} h3 bold>
+                            Dirección:
+                        </Typography>
+                        <Typography >
+                            {client.addresses[0].streetAddress1}, {client.addresses[0].city}, {client.addresses[0].country.country}
+                        </Typography>
+                        <Typography style={styles.textHeader} h3 bold>
+                            Fecha de Ingreso:
+                        </Typography>
+                        <Typography>
+                            {printCreated(client.dateJoined)}
+                        </Typography>
                     </View>
                 </View>
-                <View>
-                    <Typography style={styles.textHeader} h3 bold>
-                        Dirección:
-                    </Typography>
-                    <Typography >
-                        {client.addresses[0].streetAddress1}, {client.addresses[0].city}, {client.addresses[0].country.country}
-                    </Typography>
-                    <Typography style={styles.textHeader} h3 bold>
-                        Fecha de Ingreso:
-                    </Typography>
-                    <Typography>
-                        {printCreated(client.dateJoined)}
-                    </Typography>
-                </View>
-            </View>
-
-
-        </ScrollView>
+            </ScrollView>
+        </>
     )
 }
 
 export default ClientDetailsScreen
 
 const styles = StyleSheet.create({
+    modalStyle: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    },
     image: {
         height: 35,
         width: 35,

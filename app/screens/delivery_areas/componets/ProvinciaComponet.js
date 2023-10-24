@@ -5,6 +5,7 @@ import { count_elementos_str } from '../../../utils/CommonFunctions'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { useState } from 'react'
 import MunicipioComponet from './MunicipioComponet'
+import ProvinciaElement from './ProvinciaElement'
 
 const ProvinciaComponet = ({ provincia, selectedMun, setSelectedMun }) => {
     const [openDrop, setOpenDrop] = useState(false)
@@ -53,6 +54,14 @@ const ProvinciaComponet = ({ provincia, selectedMun, setSelectedMun }) => {
                         selectedMun={selectedMun}
                         setSelectedMun={setSelectedMun}
                     /> */}
+                    <ProvinciaElement
+                        key={provincia.id}
+                        provinciaId={provincia.id}
+                        name={provincia.name}
+                        serverId={provincia.serverId}
+                        selectedMun={selectedMun}
+                        setSelectedMun={setSelectedMun}
+                    />
                     {provincia.municipios.map((municipio, index) => {
                         return (
                             <MunicipioComponet

@@ -12,6 +12,7 @@ import { useLazyQuery } from '@apollo/client'
 import Colors from '../../constants/Colors'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import DeliveryAreaItem from './componets/DeliveryAreaItem'
 
 export default function DeliveryAreasScreen({ navigation }) {
 	const [myDeliveryAreas, setMyDeliveryAreas] = useState([])
@@ -152,26 +153,33 @@ export default function DeliveryAreasScreen({ navigation }) {
 											onRefresh={onRefresh}
 										/>
 									}
-									keyExtractor={(item, index) => index.toString()}
+									keyExtractor={(item, index) => item.node.id}
 									renderItem={({ item, index, separators }) => (
-										<View style={[dark ? styles.cardDark : styles.card]}>
-											<View style={styles.card_details}>
-												<View
-													style={{
-														flex: 1,
-														flexDirection: 'column',
-														justifyContent: 'center',
-													}}
-												>
-													<Typography bold color={colors.ON_SURFACE}>
-														{item.node.parent && item.node.parent.name}
-													</Typography>
-													<Typography color={colors.ON_SURFACE}>
-														{item.node.name}
-													</Typography>
+										<>
+											<DeliveryAreaItem
+												key={item.node.id}
+												deliveryArea={item}
+											/>
+
+											{/* <View style={[dark ? styles.cardDark : styles.card]}>
+												<View style={styles.card_details}>
+													<View
+														style={{
+															flex: 1,
+															flexDirection: 'column',
+															justifyContent: 'center',
+														}}
+													>
+														<Typography bold color={colors.ON_SURFACE}>
+															{item.node.parent && item.node.parent.name}
+														</Typography>
+														<Typography color={colors.ON_SURFACE}>
+															{item.node.name}
+														</Typography>
+													</View>
 												</View>
-											</View>
-										</View>
+											</View> */}
+										</>
 									)}
 								/>
 							</View>

@@ -11,6 +11,7 @@ export const DELIVERY_ZONES = gql`
                     parent{
                         name
                         id
+                        serverId
                     }
                 }
             }

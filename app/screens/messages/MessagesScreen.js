@@ -92,22 +92,6 @@ const MessagesScreen = ({ navigation }) => {
             setLoadingApp(false)
             setRefreshing(false)
             setLoadingScroll(false)
-            /* if (dataReceived.messages.pageInfo.hasNextPage) {
-                setHasNextPage(dataReceived.messages.pageInfo.hasNextPage)
-                setEndCursor(dataReceived.messages.pageInfo.endCursor)
-                makeConversationsReceived(dataReceived.messages.edges)
-                getReceivedMessages({ variables: { after: dataReceived.messages.pageInfo.endCursor, before: '', recipients: user_state.serverId }, })
-            } else {
-                setHasNextPage(false)
-                makeConversationsReceived(dataReceived.messages.edges)
-                getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, })
-            } */
-            //dispatch(setReceivedMessagesByUser(dataReceived.messages.edges))
-            /* setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false) */
-            /* makeConversationsReceived(dataReceived.messages.edges)
-            getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, }) */
         },
         onError: (errorConversations) => {
             setLoadingApp(false)

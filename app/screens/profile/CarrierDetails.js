@@ -125,12 +125,12 @@ const CarrierDetails = () => {
     })
 
     const [piPhotoBackUpdate, { dataBack, errorBack, loadingBack }] = useMutation(PI_PHOTO_BACK_UPDATE, {
-        onCompleted: (dataBust) => {
+        onCompleted: (dataBack) => {
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 piPhotoBack: vistaPrevia,
-                kyc: data.carrierPiPhotoFrontalUpdate.carrier.kyc,
-                isActive: data.carrierPiPhotoFrontalUpdate.carrier.isActive,
+                kyc: dataBack.carrierPiPhotoBackUpdate.carrier.kyc,
+                isActive: dataBack.carrierPiPhotoBackUpdate.carrier.isActive,
             }))
             setUploadBack(false)
             if (Platform.OS === 'android')
@@ -165,8 +165,8 @@ const CarrierDetails = () => {
             dispatch(setCarrierInfoOtro({
                 ...carrier_info,
                 bustPhoto: vistaPrevia,
-                kyc: data.carrierPiPhotoFrontalUpdate.carrier.kyc,
-                isActive: data.carrierPiPhotoFrontalUpdate.carrier.isActive,
+                kyc: dataBust.carrierBustPhotoUpdate.carrier.kyc,
+                isActive: dataBust.carrierBustPhotoUpdate.carrier.isActive,
             }))
             setUploadBust(false)
             if (Platform.OS === 'android')
