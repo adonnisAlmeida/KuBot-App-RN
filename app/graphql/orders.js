@@ -62,11 +62,13 @@ mutation shipmentDeliveredSignatureImage($id: ID!, $images: [Upload!]) {
 	  order {
 		id
 		signatureImagesDelivery {
+			id
 		  image {
 			url
 		  }
 		}
 		packageImagesDelivery {
+			id
 		  image {
 			url
 		  }
@@ -238,11 +240,13 @@ mutation shipmentDeliveredPackageImage($id: ID!, $images: [Upload!]) {
 	  order {
 		id
 		signatureImagesDelivery {
+			id
 		  image {
 			url
 		  }
 		}
 		packageImagesDelivery {
+			id
 		  image {
 			url
 		  }
@@ -256,8 +260,8 @@ mutation shipmentDeliveredPackageImage($id: ID!, $images: [Upload!]) {
 `
 
 export const ORDERS_LIST = gql`
-	query Orders($carrier: Int, $after: String!, $before: String!, $freeOrder: Boolean) {
-		orders(first: 100, carrier: $carrier, after: $after, before: $before, freeOrder: $freeOrder) {
+	query Orders($carrier: Int, $after: String!, $before: String!, $freeOrder: Boolean, $filter: OrderFilterInput) {
+		orders(first: 100, carrier: $carrier, after: $after, before: $before, freeOrder: $freeOrder, filter:$filter) {
 			edges {
 				node {
 					id

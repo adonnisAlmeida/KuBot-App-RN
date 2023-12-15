@@ -36,6 +36,16 @@ export const ADD_DELIVERY_ZONES = gql`
                 }) {
             carrier{
                 serverId
+                deliveryZones{
+                    id
+                    name
+                    serverId
+                    parent{
+                      name
+                      id
+                      serverId
+                    }
+                  }
             }
             errors{
                 field

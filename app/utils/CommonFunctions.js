@@ -169,6 +169,11 @@ export function historialAmigable(eventType) {
                 'ES': 'Se agregó una nota al pedido.',
                 'EN': 'A note was added to the order'
             }
+        case 'NOTE_UPDATED':
+            return {
+                'ES': 'Se actualizó una nota del pedido.',
+                'EN': 'A note was updated'
+            }
             break;
         case 'OTHER':
             return {
@@ -284,8 +289,16 @@ export function orderShippingStatusDisplay(status) {
             return "Rechazado"
         case 'LOST':
             return "Perdido"
+        case 'ACCEPTED':
+            return "Aceptado"
+        case 'RETURN_APPROVED':
+            return "Rechazo aceptado"
+        case 'RETURN_REQUEST':
+            return "Solicitud de rechaza"
+        case 'RETURN_DISAPPROVED':
+            return "Rechazo desaprobado"
         default:
-            return "Sin estado"
+            return ""
     }
 }
 

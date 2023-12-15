@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import { Loading, NetworkError } from '../../components'
+import { Loading, NetworkError, Typography } from '../../components'
 import AcceptShippingList from './components/AcceptShippingList'
 import { useState } from 'react'
 import { useLazyQuery } from '@apollo/client'
@@ -52,8 +52,8 @@ const AcceptShippingScreen = ({ route, navigation }) => {
             setLoadingScroll(false)
 
         },
-        onError: () => {
-            console.log('ERROR cargando ordenes >> ', error)
+        onError: (error, data) => {
+            console.log('ERROR cargando ordenes >> ', JSON.stringify(error, null, 2))
             console.log('ERROR cargando ordenes data var >> ', data)
             setLoadingApp(false)
             setRefreshing(false)
@@ -69,6 +69,7 @@ const AcceptShippingScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         setOrders(acceptShippingStore.listado)
+        console.log('CAMBIOOOO')
     }, [acceptShippingStore.listado])
 
     const renderLoader = () => {
@@ -95,32 +96,32 @@ const AcceptShippingScreen = ({ route, navigation }) => {
     }
 
     const actionIcon = (name) => {
-		return (
-			<FontAwesome
-				name={name}
-				size={22}
-				color={colors.SURFACE}
-			/>
-		)
-	}
+        return (
+            <FontAwesome
+                name={name}
+                size={25}
+                color={colors.SURFACE}
+            />
+        )
+    }
 
     const actionsRefresh = [
-		{
-			text: "Actualizar",
-			icon: actionIcon('refresh'),
-			name: "bt_update",
-			position: 1,
-			color: Colors.COLORS.PRIMARY
-		}
-	];
+        {
+            text: "Actualizar",
+            icon: actionIcon('refresh'),
+            name: "bt_update",
+            position: 1,
+            color: Colors.COLORS.PRIMARY
+        }
+    ];
 
     const doAction = (action) => {
-		switch (action) {
-			case 'bt_update':
-				doRefresh()
-				break;
-		}
-	}
+        switch (action) {
+            case 'bt_update':
+                doRefresh()
+                break;
+        }
+    }
 
     if (loadingApp) return <Loading />
 
@@ -128,7 +129,29 @@ const AcceptShippingScreen = ({ route, navigation }) => {
         <View style={{ flex: 1 }}>
             {error ?
                 (
-                    <NetworkError accion={reloadApp} />
+                    error.message == "on_vacation" ?
+                        (
+                            <View
+                                style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 15, }}
+                            >
+                                <Typography bold h3 color={colors.ON_BACKGROUND}>
+                                    No puede aceptar envíos.
+                                </Typography>
+                                <Typography color={colors.ON_BACKGROUND}>
+                                    Usted está de vacaciones o las planificó a partir de mañana.
+                                </Typography>
+                                <FloatingAction
+                                    color={Colors.COLORS.PRIMARY}
+                                    overrideWithAction={true}
+                                    actions={actionsRefresh}
+                                    onPressItem={name => {
+                                        doAction(name)
+                                    }}
+                                />
+                            </View>
+                        ) : (
+                            <NetworkError accion={reloadApp} />
+                        )
                 ) :
                 (
                     <>

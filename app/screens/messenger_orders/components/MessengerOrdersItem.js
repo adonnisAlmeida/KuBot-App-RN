@@ -14,11 +14,9 @@ moment.locale('es')
 export default function MessengerOrdersItem({
 	navigation,
 	messenger_orders,
-	select,
 	...props
 }) {
 	const { dark, colors } = useTheme()
-	const styles_select = dark ? styles.selectDark : styles.select
 
 	const colorBonito = (estado) => {
 		switch (estado) {
@@ -44,7 +42,7 @@ export default function MessengerOrdersItem({
 
 	return (
 		<TouchableOpacity {...props}>
-			<View style={[dark ? styles.cardDark : styles.card, select && styles_select]}>
+			<View style={[dark ? styles.cardDark : styles.card]}>
 				<View style={styles.allInfo}>
 					<View style={styles.card_details}>
 						<View
@@ -156,9 +154,6 @@ const styles = StyleSheet.create({
 		flex: 2,
 		flexDirection: 'column',
 		justifyContent: 'space-around',
-	},
-	select: {
-		backgroundColor: '#cccccc',
 	},
 	selectDark: {
 		backgroundColor: '#535353',

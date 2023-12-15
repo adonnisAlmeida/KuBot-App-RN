@@ -1,77 +1,52 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
 	StyleSheet,
-	ScrollView,
 	FlatList,
-	TouchableWithoutFeedback,
 	View,
 	RefreshControl,
 } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 
 import MessengerOrdersItem from './MessengerOrdersItem'
-import { FloatingActionButton, Typography } from '../../../components'
+import { Typography } from '../../../components'
 import Colors from '../../../constants/Colors'
 
 export default function MessengerOrdersList({
 	navigation,
 	messenger_orders_list,
-	delete_messenger_orders,
 	doRefresh,
 	loadMore,
 	renderLoader,
-	refreshing
+	refreshing,
+	activeFilters
 }) {
-	const [selected, setSelected] = useState([])
 	const { colors } = useTheme()
 
-	navigation.setOptions({
-		title:
-			selected.length > 0
-				? `${selected.length} elemento${selected.length == 1 ? '' : 's'}`
-				: 'Mis pedidos',
-	})
-
-	const onLongPressMessengerOrders = (messenger_orders) => {
-		if (selected.includes(messenger_orders.id)) {
-			const selected_filter = selected.filter(
-				(selected_messenger_orders) =>
-					selected_messenger_orders != messenger_orders.id
-			)
-			setSelected(selected_filter)
-		} else setSelected([...selected, messenger_orders.id])
-	}
-
 	const onPressMessengerOrders = (messenger_orders) => {
-		if (selected.length > 0) onLongPressMessengerOrders(messenger_orders)
-		else {
-			console.log("ID DE LA ORDEN >> ", messenger_orders.serverId)
-			navigation.navigate('MessengerOrdersDetail', {
-				messenger_orders_id: messenger_orders.serverId,
-			})
-		}
-	}
-
-	const onDeleteMessengerOrders = () => {
-		delete_messenger_orders(selected)
-		setSelected([])
-	}
-
-	const onOutPress = () => {
-		setSelected([])
+		navigation.navigate('MessengerOrdersDetail', {
+			messenger_orders_id: messenger_orders.serverId,
+		})
 	}
 
 	const onRefresh = () => {
 		doRefresh()
 	}
 
-	const isSelection = (messenger_orders) =>
-		selected.includes(messenger_orders.id)
-
 	return (
-		<TouchableWithoutFeedback onPress={() => onOutPress()}>
-			<View style={{ flex: 1 }}>
-				{messenger_orders_list.length === 0 ? (
+		<View style={{ flex: 1 }}>
+			{messenger_orders_list.length === 0 && activeFilters ? (
+				<View
+					style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+				>
+					<Typography bold h3 color={colors.ON_BACKGROUND}>
+						No se encontraron pedidos.
+					</Typography>
+					<Typography color={colors.ON_BACKGROUND}>
+						No se han encontrado pedidos para los filtros aplicados.
+					</Typography>
+				</View>
+			) : (
+				messenger_orders_list.length === 0 ? (
 					<View
 						style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
 					>
@@ -105,21 +80,13 @@ export default function MessengerOrdersList({
 									messenger_orders={item}
 									navigation={navigation}
 									key={index}
-									select={isSelection(item)}
 								/>
 							)}
 						/>
 					</View>
-				)}
-				{selected.length > 0 && (
-					<FloatingActionButton
-						color={selected.length > 0 ? colors.ERROR : colors.primary}
-						icon={selected.length > 0 ? 'trash' : 'plane'}
-						onPress={() => onDeleteMessengerOrders()}
-					/>
-				)}
-			</View>
-		</TouchableWithoutFeedback>
+				)
+			)}
+		</View>
 	)
 }
 

@@ -35,7 +35,7 @@ const HistoryNavView = ({ navigation, route }) => {
                     {moment(event.date).format('YYYY-MM-DD HH:mm')}
                   </Typography>
                   <Typography color={colors.ON_SURFACE}>
-                    {historialAmigable(event.type).ES}
+                    {historialAmigable(event.type)?.ES}
                   </Typography>
                 </View>
               </View>

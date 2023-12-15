@@ -31,6 +31,7 @@ export const sellersSlice = createSlice({
 })
 
 export const hoylyDays = (state) => state.sellers.hoylyDays
+export const sellers = (state) => state.sellers.sellers
 
 export const getSellersByUser = createAsyncThunk(
 	'sellers/getSellersByUser',

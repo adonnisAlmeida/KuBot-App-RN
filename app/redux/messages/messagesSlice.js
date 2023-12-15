@@ -13,11 +13,18 @@ export const messagesSlice = createSlice({
 		setMessagesLoading: (state, action) => {
 			state.isLoading = true
 		},
+		setMessageRead: (state, action) => {
+			state.conversations.forEach(conver => {
+				if (conver.node.conversationUser.serverId == action.payload.conversationUser.serverId) {
+					conver.node.messages[0].isRead = true
+				}
+			});
+		},
 		addMessageToConversation: (state, action) => {
 			let flag = true
 			state.conversations.forEach(conver => {
 				if (conver.node.conversationUser.serverId == action.payload.conversationUser.serverId) {
-					conver.node.messages.unshift(action.payload.message)
+					conver.node.messages.unshift({message: action.payload.message})
 					flag = false
 				}
 			});
@@ -25,12 +32,12 @@ export const messagesSlice = createSlice({
 				let newConve = {
 					node: {
 						conversationUser: action.payload.conversationUser,
-						messages: [action.payload.message]
+						messages: [{message: action.payload.message}]
 					}
 				}
 				state.conversations.unshift(newConve)
 			}
-			state.conversations = state.conversations.sort((a, b) => new Date(a.node.messages[0].createdAt) - new Date(b.node.messages[0].createdAt)).reverse()
+			state.conversations = state.conversations.sort((a, b) => new Date(a.node.messages[0].message.createdAt) - new Date(b.node.messages[0].message.createdAt)).reverse()
 		},
 	},
 	extraReducers(builder) {
@@ -128,6 +135,6 @@ export const addMessage = createAsyncThunk(
 	}
 )
 
-export const { setMessagesLoading, addMessageToConversation } = messagesSlice.actions
+export const { setMessagesLoading, addMessageToConversation, setMessageRead } = messagesSlice.actions
 
 export default messagesSlice.reducer

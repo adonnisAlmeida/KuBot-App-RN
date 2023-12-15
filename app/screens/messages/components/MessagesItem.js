@@ -1,14 +1,15 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTheme } from '@react-navigation/native'
 import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
 import { Typography } from '../../../components';
 import Theme from '../../../constants/Theme';
 import moment from 'moment';
+import Colors from '../../../constants/Colors';
 
 const MessagesItem = ({ navigation, message }) => {
-    //console.log("FROM ITEM message ",message )
+    //console.log("FROM ITEM message ", message.node.messages[0].serverId)
     const { dark, colors } = useTheme()
 
     const avatar =
@@ -16,8 +17,7 @@ const MessagesItem = ({ navigation, message }) => {
             uri: message.node.conversationUser.avatar.url,
         }
             : require('../../../../assets/user_avatar.png')
-    //const avatar = require('../../../../assets/user_avatar.png')
-    //console.log(`message.usuario.avatar >> ${message.usuario.userName} >>`, message.usuario.avatar)
+
 
     const copiaWat = (para) => {
         const fecha = new Date(para).setHours(0, 0, 0, 0)
@@ -26,11 +26,11 @@ const MessagesItem = ({ navigation, message }) => {
         let moment2 = moment(hoy).format('DD/MM/YY')
         let yy = moment(para).format('DD/MM/YY')
         let horas = moment(para).format('h:mm a')
-        if(fecha === hoy) {
+        if (fecha === hoy) {
             return horas
-        }if (moment2 === moment1){
+        } if (moment2 === moment1) {
             return "Ayer"
-        }else{
+        } else {
             return yy
         }
     }
@@ -39,7 +39,7 @@ const MessagesItem = ({ navigation, message }) => {
         <TouchableOpacity
             onPress={() => navigation.navigate('MessagesChatScreen', { message: message.node })}
         >
-            <View style={dark ? styles.cardDark : styles.card}>
+            <View style={[dark ? styles.cardDark : styles.card, { backgroundColor: (message.node.messages[0].serverId && !message.node.messages[0].isRead) ? Colors.COLORS.SWITCH_OFF : '#fff' }]}>
                 <Image
                     style={styles.avatar}
                     imageStyle={styles.avatar}
@@ -66,19 +66,21 @@ const MessagesItem = ({ navigation, message }) => {
                                     message.node.conversationUser.userName
                                 )}
                             </Typography>
-                            <Typography small>
-                                {copiaWat(message.node.messages[0].createdAt)}
+                            <Typography
+                                bold={(message.node.messages[0].serverId && !message.node.messages[0].isRead) ? true : false}
+                                small>
+                                {copiaWat(message.node.messages[0].message.createdAt)}
                             </Typography>
                         </View>
 
                         <Typography
                             small
-                            //bold={!message.mensajes[0].leido}
+                            bold={(message.node.messages[0].serverId && !message.node.messages[0].isRead) ? true : false}
                             style={{ color: colors.ON_SURFACE_VARIANT, marginTop: 3 }}
                         >
-                            {message.node.messages[0].content.length > 43
-                                ? message.node.messages[0].content.substring(0, 43) + '...'
-                                : message.node.messages[0].content}
+                            {message.node.messages[0].message.content.length > 43
+                                ? message.node.messages[0].message.content.substring(0, 43) + '...'
+                                : message.node.messages[0].message.content}
                         </Typography>
                     </View>
                 </View>

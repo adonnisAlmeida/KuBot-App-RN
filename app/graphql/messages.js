@@ -111,6 +111,7 @@ export const SEND_MESSAGE = gql`
 					thread{
 						createdAt
 						updatedAt
+						serverId
 					}
 					recipients{
 						serverId
@@ -134,6 +135,19 @@ export const SEND_MESSAGE = gql`
 							alt
 						}
 					}
+			}
+		}
+	}
+`
+export const UPDATE_MESSAGE_METADATA = gql`
+	mutation messageMetadataUpdate($id: Int!, $input: MessageMetadataInput!,) {
+		messageMetadataUpdate(id: $id, input: $input) {
+			errors{
+				field
+				message
+			}
+			messageMetadata{
+				isRead
 			}
 		}
 	}
@@ -164,8 +178,8 @@ export const ALL_USERS = gql`
 `
 
 export const CONTACTS_LIST = gql`
-	query myContacts{
-		myContacts(first: 10){
+	query myContacts($after: String, $before: String){
+		myContacts(first: 100, after: $after, before: $before){
 			edges{
 				node{
 					id
@@ -265,37 +279,45 @@ export const MY_CONVERSATIONS = gql`
 			edges{
 				node{
 					messages{
+						isDeleted
+						asSender
 						serverId
-						createdAt
-						title
-						content
-						id
-						thread{
+						isRead
+						message{
+							serverId
 							createdAt
-							updatedAt
-						}
-						recipients{
-							serverId
+							title
+							content
 							id
-							userName
-							firstName
-							lastName
-							avatar{
-								url
-								alt
+							thread{
+								createdAt
+								updatedAt
+								serverId
+							}
+							recipients{
+								serverId
+								id
+								userName
+								firstName
+								lastName
+								avatar{
+									url
+									alt
+								}
+							}
+							author{
+								serverId
+								id
+								userName
+								firstName
+								lastName
+								avatar{
+									url
+									alt
+								}
 							}
 						}
-						author{
-							serverId
-							id
-							userName
-							firstName
-							lastName
-							avatar{
-								url
-								alt
-							}
-						}
+						
 					}
 					conversationUser{
 						serverId

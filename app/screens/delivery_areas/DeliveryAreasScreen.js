@@ -137,12 +137,12 @@ export default function DeliveryAreasScreen({ navigation }) {
 								<Typography bold h3 color={colors.ON_BACKGROUND}>
 									No se encontraron zonas de entrega.
 								</Typography>
-								{/* <Typography color={colors.ON_BACKGROUND}>
+								<Typography color={colors.ON_BACKGROUND}>
 									Las zonas de entrega se utilizan para mostrar pedidos correspondientes con las zonas.
-								</Typography> */}
+								</Typography>
 							</View>
 						) : (
-							<View style={styles.constains}>
+							<View>
 								<FlatList
 									showsVerticalScrollIndicator={false}
 									data={myDeliveryAreas}
@@ -153,35 +153,32 @@ export default function DeliveryAreasScreen({ navigation }) {
 											onRefresh={onRefresh}
 										/>
 									}
-									keyExtractor={(item, index) => item.node.id}
-									renderItem={({ item, index, separators }) => (
-										<>
+									keyExtractor={(item) => item.node.id}
+									renderItem={({ item, index }) => (
+										(index == 0 || item.node.parent == null? (
 											<DeliveryAreaItem
 												key={item.node.id}
 												deliveryArea={item}
 											/>
+										) : (
+											myDeliveryAreas[index - 1].node.parent?.id == item.node.parent?.id ?
+												(
+													<DeliveryAreaItem
+														key={item.node.id}
+														deliveryArea={item}
+														no_title={true}
+													/>
+												) : (
+													<DeliveryAreaItem
+														key={item.node.id}
+														deliveryArea={item}
+													/>
+												)
+										))
 
-											{/* <View style={[dark ? styles.cardDark : styles.card]}>
-												<View style={styles.card_details}>
-													<View
-														style={{
-															flex: 1,
-															flexDirection: 'column',
-															justifyContent: 'center',
-														}}
-													>
-														<Typography bold color={colors.ON_SURFACE}>
-															{item.node.parent && item.node.parent.name}
-														</Typography>
-														<Typography color={colors.ON_SURFACE}>
-															{item.node.name}
-														</Typography>
-													</View>
-												</View>
-											</View> */}
-										</>
 									)}
 								/>
+								
 							</View>
 						)}
 					</View>

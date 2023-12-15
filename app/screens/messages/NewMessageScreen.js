@@ -7,7 +7,7 @@ import { ALL_USERS, CONTACTS_LIST, ORDERS_LIST_CONTACTS, SEND_MESSAGE } from '..
 import Colors from '../../constants/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { carrierInfo, user } from '../../redux/userlogin/userLoginSlice';
-import { addMessageToConversation, conversations } from '../../redux/messages/messagesSlice';
+import { conversations } from '../../redux/messages/messagesSlice';
 import UserItem from './components/UserItem';
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -38,7 +38,6 @@ const NewMessageScreen = ({ navigation }) => {
 
     const [getAllContacts, { loadingContacts, errorContacts, dataContacts }] = useLazyQuery(CONTACTS_LIST, {
         onCompleted: (dataContacts) => {
-            console.log("Termino de cargar las ordenes", dataContacts.myContacts.edges)
             setAllUsers(previousState => {
                 return previousState.concat(dataContacts.myContacts.edges)
             })
@@ -51,7 +50,7 @@ const NewMessageScreen = ({ navigation }) => {
                 setLoadingUsers(false)
             }
         },
-        onError: (errorContacts) => {
+        onError: (errorContacts, dataContacts) => {
             console.log('Error Cargando todos los contactos >> ', errorContacts)
             console.log('Error Cargando todos los usuarios DATA >> ', dataContacts)
         },

@@ -15,7 +15,9 @@ const ImageCard = ({ photo, setImages, mutation }) => {
     const [errorDeleting, setErrorDeleting] = useState(false)
 
 
-    //console.log(photo)
+    console.log('photo', photo)
+    console.log('setImages', setImages)
+    console.log('mutation', mutation)
 
     const [signatureRejectionImageDelete, { loadingSignature, errorSignature, dataSignature }] = useMutation(DELETE_SIGNATURE_IMAGE_REJECTION, {
         onCompleted: (dataSignature) => {

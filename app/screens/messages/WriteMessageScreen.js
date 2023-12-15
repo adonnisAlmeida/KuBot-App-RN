@@ -60,16 +60,14 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
                 }
                 dispatch(addMessageToConversation(newM))
             })
-            /* if (Platform.OS === 'android')
-                ToastAndroid.show('Mensaje Enviado correctamente.', ToastAndroid.LONG)
-            navigation.navigate('MessagesScreen') */
+            
             setTitle('')
             setContent('')
             setTitleVisible(false)
             setLocalMessages(previousState => {
                 //let newS = previousState.push(data.messageCreate.message)
                 //console.log('previousState ', previousState)
-                return [data.messageCreate.message, ...previousState]
+                return [{message: data.messageCreate.message}, ...previousState]
                 //return  previousState
             });
         },
@@ -182,10 +180,10 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
                                 style={{ paddingLeft: 14, paddingHorizontal: 10 }}
                                 contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end',}}
                                 inverted={-1}
-                                keyExtractor={item => item.id}
+                                keyExtractor={item => item.message.serverId}
                                 renderItem={({ item, index }) => {
                                     return (
-                                        <SenderMessage key={index} message={item} />
+                                        <SenderMessage key={item.message.serverId} message={item.message} />
                                     )
                                 }}
                             />

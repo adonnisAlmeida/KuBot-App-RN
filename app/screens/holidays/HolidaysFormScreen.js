@@ -6,8 +6,10 @@ import { Typography, Button, DatePickerInput, Input } from '../../components'
 import { holidays } from '../../constants/mock'
 import { addHolyDaysByUser } from '../../redux/holydays/holydaysSlice'
 import { CREATE_VACATION } from '../../graphql/holydays'
-import { useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import Colors from '../../constants/Colors'
+import { ACCEPT_ORDERS_LIST } from '../../graphql/orders'
+import { setAcceptShipping } from '../../redux/accept_shipping/accept_shippingSlice'
 
 export default function HolidaysFormScreen({ navigation }) {
 	const [description, setDescription] = React.useState('')
@@ -19,8 +21,32 @@ export default function HolidaysFormScreen({ navigation }) {
 	const userStore = useSelector(state => state.userlogin)
 	const carrierID = userStore.carrierInfo.serverId;
 
+	const [getOrdersList, { loadingOrders, errorOrders, dataOrders }] = useLazyQuery(ACCEPT_ORDERS_LIST, {
+		onCompleted: (dataOrders) => {
+			if (dataOrders.orders.pageInfo.hasNextPage) {
+				setHasNextPage(dataOrders.orders.pageInfo.hasNextPage)
+				setEndCursor(dataOrders.orders.pageInfo.endCursor)
+			} else {
+				setHasNextPage(false)
+			}
+			let elementos = []
+			dataOrders.orders.edges.map((edges) => elementos.push(edges.node))
+			console.log('DISPAROOO')
+			dispatch(setAcceptShipping(elementos))
+		},
+		onError: (errorOrders, dataOrders) => {
+			console.log('ERROR cargando ordenes >> ', JSON.stringify(errorOrders, null, 2))
+			console.log('ERROR cargando ordenes data var >> ', dataOrders)
+			setLoadingApp(false)
+			setRefreshing(false)
+			setLoadingScroll(false)
+		},
+		fetchPolicy: "no-cache"
+	})
+
 	const [createVacation, { loading, error, data }] = useMutation(CREATE_VACATION, {
 		onCompleted: (data) => {
+			getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
 			let newHolyDay = {
 				node: {
 					description: data.vacationCreate.vacation.description,

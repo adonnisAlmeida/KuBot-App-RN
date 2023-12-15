@@ -74,7 +74,7 @@ const SellersScreen = ({ navigation }) => {
         onError: (errorMySellers) => {
             setLoadingApp(false)
             setRefreshing(false)
-            console.log('Error cargando lista de clientes ', errorMySellers)
+            console.log('Error cargando lista de Vendedores ', errorMySellers)
         },
         fetchPolicy: "no-cache"
     })

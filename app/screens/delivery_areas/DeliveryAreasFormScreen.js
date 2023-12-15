@@ -53,7 +53,11 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 	const [addDeliveryZones, { loadingAdd, errorAdd, dataAdd }] = useMutation(ADD_DELIVERY_ZONES, {
 		onCompleted: (data) => {
 			//dispatch(setDeliveryAreasIds(selectedIds))
-			dispatch(setDeliveryAreas(selectedMun))
+			let newZones = []
+			data.addDeliveryZoneCarrier.carrier.deliveryZones.map(prov => {
+				newZones.push({ node: prov })
+			})
+			dispatch(setDeliveryAreas(newZones))
 			setShowAlert(false)
 			if (Platform.OS === 'android') {
 				ToastAndroid.show('Se actualizaron las zonas de entrega.', ToastAndroid.LONG)
@@ -145,7 +149,7 @@ export default function DeliveryAreasFormScreen({ navigation }) {
 
 
 	const guardar = () => { // OJO falta actualizarlo en back
-		console.log('a guardar con  >> ', selectedMun.length)
+		//console.log('a guardar con  >> ', selectedMun.length)
 
 		setAlertTitle("Actualizando Zonas de entrega")
 		setShowAlert(true)

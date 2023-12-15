@@ -564,11 +564,11 @@ export default function DeliverySchedulesFormScreen({ navigation, route }) {
 					carrier: carrierID,
 				}
 			})
-			/* console.log("A Crear con >> ", {
+			console.log("A Crear con >> ", {
 				start: inicioDate,
 				end: finDate,
 			})
-			setNewLoadingcreate(false) */
+			/* setNewLoadingcreate(false) */
 			/* let test = new Date()
 			console.log(`A crear con start: ${inicioDate},
 			end: ${finDate},

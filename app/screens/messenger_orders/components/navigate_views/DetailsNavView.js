@@ -157,13 +157,13 @@ const DetailsNavView = ({ navigation, route }) => {
                             position: 1,
                             color: Colors.COLORS.PRIMARY
                         },
-                        /* {
+                        {
                             text: "Rechazado",
                             icon: actionIcon('handshake-slash'),
                             name: "rejected",
                             position: 1,
                             color: Colors.COLORS.PRIMARY
-                        }, */
+                        },
                         /* {
                             text: "Perdido",
                             icon: actionIcon('question'),
@@ -176,13 +176,13 @@ const DetailsNavView = ({ navigation, route }) => {
                 case 'DELIVERED':
                     setGifSource(require('../../../../../assets/open-box.gif'))
                     setActionsButton([
-                        {
+                        /* {
                             text: "Rechazado",
                             icon: actionIcon('handshake-slash'),
                             name: "rejected",
                             position: 1,
                             color: Colors.COLORS.PRIMARY
-                        },
+                        }, */
                     ])
                     break;
                 case 'REJECTED':
@@ -243,13 +243,13 @@ const DetailsNavView = ({ navigation, route }) => {
                         position: 1,
                         color: Colors.COLORS.PRIMARY
                     },
-                    /* {
+                    {
                         text: "Rechazado",
                         icon: actionIcon('handshake-slash'),
                         name: "rejected",
                         position: 1,
                         color: Colors.COLORS.PRIMARY
-                    }, */
+                    },
                     /* {
                         text: "Perdido",
                         icon: actionIcon('question'),
@@ -262,13 +262,13 @@ const DetailsNavView = ({ navigation, route }) => {
             case 'DELIVERED':
                 setGifSource(require('../../../../../assets/open-box.gif'))
                 setActionsButton([
-                    {
+                    /* {
                         text: "Rechazado",
                         icon: actionIcon('handshake-slash'),
                         name: "rejected",
                         position: 1,
                         color: Colors.COLORS.PRIMARY
-                    },
+                    }, */
                 ])
                 break;
             case 'REJECTED':
@@ -304,18 +304,13 @@ const DetailsNavView = ({ navigation, route }) => {
     const doAction = (action) => {
         switch (action) {
             case 'in_transit':
-                setDisplayLoading(true)
-                console.log('Cambiar estado a TRANSPORTANDOCE')
-                orderTransit({ variables: { id: data.orderById.id } })
+                setShowAlert(true)
                 break;
             case 'rejected':
                 setShowModalRejected(true)
                 break;
             case 'lost':
                 setShowAlert(true)
-                /* console.log('Cambiar estado a PERDIDA')
-                setDisplayLoading(true)
-                orderLost({ variables: { id: data.orderById.id } }) */
                 break;
             case 'delivered':
                 setShowModalDelivered(true)
@@ -327,6 +322,12 @@ const DetailsNavView = ({ navigation, route }) => {
         setDisplayLoading(true)
         setShowAlert(false)
         orderLost({ variables: { id: data.orderById.id } })
+    }
+
+    const statusToInTransit = () => {
+        setDisplayLoading(true)
+        setShowAlert(false)
+        orderTransit({ variables: { id: data.orderById.id } })
     }
 
     const llamar = (phoneNumber) => {
@@ -368,18 +369,17 @@ const DetailsNavView = ({ navigation, route }) => {
                         <Typography h3 style={{ marginBottom: 10 }}>
                             Envío #{data.orderById.number}
                         </Typography>
-                        <Typography color={Colors.COLORS.INFO} style={{ marginBottom: 10 }}>
-                            {orderStatusDisplay(data.orderById.status).toUpperCase()}
-                        </Typography>
                     </View>
-                    {/* <View style={{ borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
-                        <Typography h3 style={{ marginVertical: 6 }}>
-                            Creada el:
-                        </Typography>
-                        <Typography color={colors.ON_SURFACE}>
-                            {printCreated(data.orderById.created)}
-                        </Typography>
-                    </View> */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
+                        <View>
+                            <Typography h3 style={{ marginVertical: 10 }}>
+                                Estado de procesamiento
+                            </Typography>
+                            <Typography color={Colors.COLORS.INFO}>
+                                {orderStatusDisplay(data.orderById.status).toUpperCase()}
+                            </Typography>
+                        </View>
+                    </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderColor: '#000', borderTopWidth: 1, marginTop: 10 }}>
                         <View>
                             <Typography h3 style={{ marginVertical: 10 }}>
@@ -635,7 +635,8 @@ const DetailsNavView = ({ navigation, route }) => {
             {
                 (data.orderById.shippingStatus === 'LOST' || data.orderById.shippingStatus === 'NO_STATUS' ||
                     shippingStatus === 'LOST' || shippingStatus === 'NO_STATUS' ||
-                    shippingStatus === 'REJECTED' || shippingStatus === 'ACCEPTED_CARRIER') ? null :
+                    shippingStatus === 'REJECTED' || shippingStatus === 'ACCEPTED_CARRIER' || 
+                    shippingStatus === 'DELIVERED') ? null :
                     (
                         <FloatingAction
                             color={Colors.COLORS.PRIMARY}
@@ -662,8 +663,8 @@ const DetailsNavView = ({ navigation, route }) => {
             }
             <AwesomeAlert
                 show={showAlertAw}
-                title="Estado de la orden"
-                message="¿Está seguro de cambiar el estado de la orden a 'Perdido'?"
+                title="Cambio de estado"
+                message="¿Está seguro de cambiar el estado de la orden a 'Transportándose'?"
                 closeOnTouchOutside={true}
                 closeOnHardwareBackPress={true}
                 showCancelButton={true}
@@ -677,7 +678,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 onDismiss={() => {
                     setShowAlert(false)
                 }}
-                onConfirmPressed={() => statusToLost()}
+                onConfirmPressed={() => statusToInTransit()}
             />
         </>
     )

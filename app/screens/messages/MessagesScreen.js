@@ -28,62 +28,7 @@ const MessagesScreen = ({ navigation }) => {
 
     const [tempConversation, setTempConversation] = useState([])
 
-    const [getSentMessages, { loadingSent, errorSent, dataSent }] = useLazyQuery(SENT_MESSAGES, {
-        onCompleted: (dataSent) => {
-            console.log("TERMINO SENT", dataSent.messages.pageInfo.hasNextPage)
-            if (dataSent.messages.pageInfo.hasNextPage) {
-                setHasNextPage(dataSent.messages.pageInfo.hasNextPage)
-                setEndCursor(dataSent.messages.pageInfo.endCursor)
-                makeConversationsSent(dataSent.messages.edges, false)
-                getSentMessages({ variables: { after: dataSent.messages.pageInfo.endCursor, before: '', author: user_state.serverId }, })
-            } else {
-                setHasNextPage(false)
-                makeConversationsSent(dataSent.messages.edges, true)
-            }
-            //dispatch(setSentMessagesByUser(dataSent.messages.edges))
-            /* setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false) */
-            //makeConversationsSent(dataSent.messages.edges)
-        },
-        onError: (errorSent) => {
-            setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false)
-            console.log('Error Cargando getSentMessages >> ', errorSent)
-        },
-        fetchPolicy: "no-cache"
-    })
-
-    const [getReceivedMessages, { loadingReceived, errorReceived, dataReceived }] = useLazyQuery(RECEIVED_MESSAGES, {
-        onCompleted: (dataReceived) => {
-            console.log("TERMINO RECEIVED >> ", dataReceived.messages.pageInfo.hasNextPage)
-            if (dataReceived.messages.pageInfo.hasNextPage) {
-                setHasNextPage(dataReceived.messages.pageInfo.hasNextPage)
-                setEndCursor(dataReceived.messages.pageInfo.endCursor)
-                makeConversationsReceived(dataReceived.messages.edges)
-                getReceivedMessages({ variables: { after: dataReceived.messages.pageInfo.endCursor, before: '', recipients: user_state.serverId }, })
-            } else {
-                setHasNextPage(false)
-                makeConversationsReceived(dataReceived.messages.edges)
-                getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, })
-            }
-            //dispatch(setReceivedMessagesByUser(dataReceived.messages.edges))
-            /* setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false) */
-            /* makeConversationsReceived(dataReceived.messages.edges)
-            getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, }) */
-        },
-        onError: (errorReceived) => {
-            setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false)
-            console.log('Error Cargando getReceivedMessages >> ', errorReceived)
-        },
-        fetchPolicy: "no-cache"
-    })
-
+  
     const [getConversations, { loadingConversations, errorConversations, dataConversations }] = useLazyQuery(MY_CONVERSATIONS, {
         onCompleted: (dataConversations) => {
             console.log("TERMINO CONVERSATIONS >> ", dataConversations.myConversations.edges.length)
@@ -102,113 +47,9 @@ const MessagesScreen = ({ navigation }) => {
         fetchPolicy: "no-cache"
     })
 
-    const makeConversationsSent = (sents, ultimo) => {
-        console.log("hacer converzacion con enviados >> ", sents.length)
-        let tem = []
-        let flag = false
-        //console.log("tempConversation> ", tempConversation)
-        tempConversation.forEach(item => tem.push(item))
-        sents.forEach(sent => {
-            //console.log(sent)
-            sent.node.recipients.forEach(re => {
-                //console.log("RECC> ", re)
-                //console.log("RECC> ", tempConversation)
-                tem.forEach(tempC => {
-                    /* console.log("RECC> ", re)
-                    console.log("tempC ", tempC) */
-                    if (re.serverId == tempC.usuario.serverId) {
-                        flag = true
-                        tempC.mensajes.push(sent.node)
-                    }
-                })
-                if (!flag) {
-                    let conv = {
-                        usuario: re,
-                        mensajes: [sent.node],
-                    }
-                    tem.push(conv)
-                }
-                flag = false
-            })
-        })
-        tem = sortMessages(tem)
-        if (ultimo) {
-            tem = sortConversation(tem)
-            dispatch(setConversations(tem))
-            //setTempConversation(tem)
-            setLoadingApp(false)
-            setRefreshing(false)
-            setLoadingScroll(false)
-        } else {
-            setTempConversation(tem)
-        }
-
-
-        //setConversations(tempConversation)
-        //console.log("tempConversation desde sent", tempConversation)
-
-    }
-
-    const sortMessages = (mess) => {
-        mess.forEach(m => {
-            m.mensajes = m.mensajes.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).reverse()
-        })
-        return mess
-    }
-
-    const sortConversation = (mess) => {
-        mess = mess.sort((a, b) => new Date(a.mensajes[0].createdAt) - new Date(b.mensajes[0].createdAt)).reverse()
-        return mess
-    }
-
-    const makeConversationsReceived = (received) => {
-        console.log("hacer converzacion con recividos >> ", received.length)
-        let tem = []
-        //console.log("tempConversation> ", tempConversation)
-        if (!refreshing && !firstTime) {//cunado esta refrescando y no es primera vez
-            tempConversation.forEach(item => tem.push(item))
-            console.log("Entro 1")
-        } else if (refreshing && firstTime) {
-            console.log("Entro 2")
-            setFirstTime(false)
-        } else if (refreshing && !firstTime) {
-            console.log("Entro 3")
-            tempConversation.forEach(item => tem.push(item))
-        }
-
-        received.forEach(newC => {
-            let flag = false
-            tem.forEach(oldC => {
-                if (oldC.usuario.serverId == newC.node.author.serverId) {
-                    flag = true
-                    oldC.mensajes.push(newC.node)
-                }
-            })
-            if (!flag) {
-                let conv = {
-                    usuario: newC.node.author,
-                    mensajes: [newC.node],
-                }
-                tem.push(conv)
-            }
-        })
-        //tem = sortMessages(tem)
-        setTempConversation(tem)
-        //setConversations(tem)
-        /* console.log("tempConversation desde recividos", tempConversation)
-        console.log("hacer converzacion con recividos >> ", received.length) */
-    }
-
     useEffect(() => {
         setLoadingApp(true)
-        //getSentMessages({ variables: { after: '', before: '', author: user_state.serverId }, })
-
-
-        //getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
         getConversations()
-
-
-        // makeConversations()
     }, [])
 
     useEffect(() => {
@@ -219,28 +60,16 @@ const MessagesScreen = ({ navigation }) => {
         return loadingScroll ? <Loading /> : null
     }
 
-    const loadMore = () => {
-        if (hasNextPage) {
-            setLoadingScroll(true)
-            console.log(`CARGA MAS DATOSSS con endCursor > ${endCursor}`)
-            getReceivedMessages({ variables: { after: endCursor, before: '', recipients: user_state.serverId }, })
-            //getMessages({ variables: { after: endCursor, before: '' } })
-        }
-    }
 
     const reloadApp = () => {
         setLoadingApp(true)
         getConversations()
-        //getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
-        //getMessages({ variables: { after: '', before: '' } })
     }
 
     const doRefresh = () => {
         setFirstTime(true)
         setRefreshing(true)
         getConversations()
-        //getReceivedMessages({ variables: { after: '', before: '', recipients: user_state.serverId }, })
-        //getMessages({ variables: { after: '', before: '' } })
     }
 
     const actionIcon = (name) => {
@@ -295,7 +124,7 @@ const MessagesScreen = ({ navigation }) => {
 
     return (
         <View style={{ flex: 1 }}>
-            {errorSent || errorReceived ?
+            {errorConversations ?
                 (
                     <NetworkError accion={() => reloadApp()} />
                 ) :

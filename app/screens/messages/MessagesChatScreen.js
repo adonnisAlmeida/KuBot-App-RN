@@ -15,10 +15,10 @@ import Feather from 'react-native-vector-icons/Feather'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { CONVERSATION, SEND_MESSAGE } from '../../graphql/messages'
+import { CONVERSATION, SEND_MESSAGE, UPDATE_MESSAGE_METADATA } from '../../graphql/messages'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import moment from 'moment';
-import { addMessage, addMessageToConversation, conversations, receivedMessages } from '../../redux/messages/messagesSlice'
+import { setMessageRead, addMessageToConversation, conversations, receivedMessages } from '../../redux/messages/messagesSlice'
 import { useEffect } from 'react'
 import { width } from 'deprecated-react-native-prop-types/DeprecatedImagePropType'
 
@@ -56,7 +56,7 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
             setAllMessages(previousState => {
                 //let newS = previousState.push(data.messageCreate.message)
                 //console.log('previousState ', previousState)
-                return [data.messageCreate.message, ...previousState]
+                return [{ message: data.messageCreate.message }, ...previousState]
                 //return  previousState
             });
             //console.log("allMessages >> ", allMessages)
@@ -69,11 +69,34 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
         },
     })
 
+    const [updateMessageMetadata, { loadingMetadata, errorMetadata, dataMetadata }] = useMutation(UPDATE_MESSAGE_METADATA, {
+        onCompleted: (dataMetadata) => {
+            dispatch(setMessageRead({
+                conversationUser: conversationUser
+            }))
+            console.log(">>>> ACTUALIZO META dataMetadata >> ", dataMetadata)
+        },
+        onError: (errorMetadata, dataMetadata) => {
+            console.log('Error ACTUALIZO META >> ', JSON.stringify(errorMetadata, null, 2))
+            console.log('Error ACTUALIZO META data >> ', JSON.stringify(dataMetadata, null, 2))
+        },
+    })
+
     const [getConversation, { loadingConversation, errorConversation, dataConversation }] = useLazyQuery(CONVERSATION, {
         onCompleted: (dataConversation) => {
             console.log("TERMINO CONVERSATIONS >> ", dataConversation)
             setConversationUser(dataConversation.conversation.conversationUser)
             setAllMessages(dataConversation.conversation.messages)
+            if (dataConversation.conversation.messages[0].isRead == false) {
+                updateMessageMetadata({
+                    variables: {
+                        id: route.params.message.messages[0].serverId,
+                        input: {
+                            isRead: true
+                        }
+                    }
+                })
+            }
             setLoadingApp(false)
         },
         onError: (errorConversation) => {
@@ -92,6 +115,16 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
             if (route.params?.message) {
                 setConversationUser(route.params.message.conversationUser)
                 setAllMessages(route.params.message.messages)
+                if (route.params.message.messages[0].isRead == false) {
+                    updateMessageMetadata({
+                        variables: {
+                            id: route.params.message.messages[0].serverId,
+                            input: {
+                                isRead: true
+                            }
+                        }
+                    })
+                }
             }
         }
     }, [])
@@ -107,7 +140,6 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
 
 
     const sendMessage = () => {
-        //dispatch(addMessageToConversation({lolo: 'lolo'}))
         if (content.length != 0) {
             sendMessageMutation({
                 variables: {
@@ -120,12 +152,6 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                 }
             })
         }
-        /* setOtroLoading(true)
-        setTimeout(() => {
-            setOtroLoading(false)
-            setTitle('')
-            setContent('')
-        }, 2000); */
     }
 
     const avatar = conversationUser.avatar ? {
@@ -203,17 +229,17 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                         inverted={-1}
                         //keyExtractor={item => item.id}
                         renderItem={({ item, index }) => {
-                            if (item.author.serverId == user_state.serverId) { // Mensajes enviados
-                                if (index > 0 && (new Date(allMessages[index - 1].createdAt).setHours(0, 0, 0, 0) != new Date(item.createdAt).setHours(0, 0, 0, 0))) {
+                            if (item.message.author.serverId == user_state.serverId) { // Mensajes enviados
+                                if (index > 0 && (new Date(allMessages[index - 1].message.createdAt).setHours(0, 0, 0, 0) != new Date(item.message.createdAt).setHours(0, 0, 0, 0))) {
                                     if (index == allMessages.length - 1) {
                                         return (
                                             <>
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].message.createdAt)}</Typography>
                                                 </View>
-                                                <SenderMessage key={index} message={item} />
+                                                <SenderMessage key={item.message.serverId} message={item.message} />
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.message.createdAt)}</Typography>
                                                 </View>
                                             </>
                                         )
@@ -221,9 +247,9 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                                         return (
                                             <>
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].message.createdAt)}</Typography>
                                                 </View>
-                                                <SenderMessage key={index} message={item} />
+                                                <SenderMessage key={item.message.serverId} message={item.message} />
                                             </>
                                         )
                                     }
@@ -231,27 +257,27 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                                     if (index == allMessages.length - 1) {
                                         return (
                                             <>
-                                                <SenderMessage key={index} message={item} />
+                                                <SenderMessage key={item.message.serverId} message={item.message} />
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.message.createdAt)}</Typography>
                                                 </View>
                                             </>
                                         )
                                     } else {
-                                        return (<SenderMessage key={index} message={item} />)
+                                        return (<SenderMessage key={item.message.serverId} message={item.message} />)
                                     }
                                 }
                             } else { // Mensajes recividos
-                                if (index > 0 && (new Date(allMessages[index - 1].createdAt).setHours(0, 0, 0, 0) != new Date(item.createdAt).setHours(0, 0, 0, 0))) {
+                                if (index > 0 && (new Date(allMessages[index - 1].message.createdAt).setHours(0, 0, 0, 0) != new Date(item.message.createdAt).setHours(0, 0, 0, 0))) {
                                     if (index == allMessages.length - 1) {
                                         return (
                                             <>
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].message.createdAt)}</Typography>
                                                 </View>
-                                                <ReceiverMessage key={index} message={item} />
+                                                <ReceiverMessage key={item.message.serverId} message={item.message} />
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.message.createdAt)}</Typography>
                                                 </View>
                                             </>
                                         )
@@ -259,9 +285,9 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                                         return (
                                             <>
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(allMessages[index - 1].message.createdAt)}</Typography>
                                                 </View>
-                                                <ReceiverMessage key={index} message={item} />
+                                                <ReceiverMessage key={item.message.serverId} message={item.message} />
                                             </>
                                         )
                                     }
@@ -269,14 +295,14 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
                                     if (index == allMessages.length - 1) {
                                         return (
                                             <>
-                                                <ReceiverMessage key={index} message={item} />
+                                                <ReceiverMessage key={item.message.serverId} message={item.message} />
                                                 <View style={styles.dateSeparator}>
-                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.createdAt)}</Typography>
+                                                    <Typography style={styles.dateSeparatorText}>{dateSeparator(item.message.createdAt)}</Typography>
                                                 </View>
                                             </>
                                         )
                                     } else {
-                                        return (<ReceiverMessage key={index} message={item} />)
+                                        return (<ReceiverMessage key={item.message.serverId} message={item.message} />)
                                     }
                                 }
                             }
