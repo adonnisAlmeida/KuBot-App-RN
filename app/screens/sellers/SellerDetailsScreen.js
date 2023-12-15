@@ -53,6 +53,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
         onCompleted: (dataConversations) => {
             dispatch(setConversations(dataConversations.myConversations.edges))
             setLoading(false)
+            let flag = false
             dataConversations.myConversations.edges.forEach(conv => {
                 if (conv.node.conversationUser.serverId == seller.user.serverId) {
                     flag = true
@@ -60,7 +61,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                 }
             })
             if (!flag) {
-                navigation.navigate('WriteMessageScreen', { selecteds: [seller.user] })
+                navigation.navigate('WriteMessageScreen', { selecteds: [seller.user], goBack: true })
             }
         },
         onError: (errorConversations) => {
@@ -80,7 +81,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                 }
             })
             if (!flag) {
-                navigation.navigate('WriteMessageScreen', { selecteds: [seller.user] })
+                navigation.navigate('WriteMessageScreen', { selecteds: [seller.user], goBack: true })
             }
         } else {
             setLoading(true)

@@ -160,20 +160,9 @@ const MessagesChatScreen = ({ route, navigation, ...props }) => {
 
     navigation.setOptions({
         title: `${conversationUser.firstName ? (conversationUser.firstName) : (conversationUser.userName)}`,
-        /*  headerRight: () => (
-             <View style={{ flexDirection: 'row' }}>
-                 <TouchableOpacity onPress={() => setMessageModal(true)} style={styles.headerRight}>
-                     <MaterialCommunityIcons
-                         name='chat-plus'
-                         size={30}
-                         color={colors.SURFACE}
-                     />
-                 </TouchableOpacity>
-             </View>
-         ), */
         headerLeft: () => (
             <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity onPress={() => navigation.navigate('MessagesScreen')} style={styles.headerLeft}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerLeft}>
                     <Ionicons
                         name='arrow-back'
                         size={24}

@@ -38,16 +38,21 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
             ids.push(element.serverId)
         });
         setSelectedItems(ids)
-        const backAction = () => {
-            navigation.navigate('MessagesScreen')
-            return true;
-        };
+        if (!route.params?.goBack) {
+            console.log('ENTROOO')
+            const backAction = () => {
+                navigation.navigate('MessagesScreen')
+                return true;
+            };
 
-        const backHandler = BackHandler.addEventListener(
-            'hardwareBackPress',
-            backAction,
-        );
-        return () => backHandler.remove();
+            const backHandler = BackHandler.addEventListener(
+                'hardwareBackPress',
+                backAction,
+            );
+            return () => backHandler.remove();
+        }else(
+            console.log("NO ENtro ASI QUE NO LO CREOOO")
+        )
     }, [])
 
     const [sendMessageMutation, { loading, error, data }] = useMutation(SEND_MESSAGE, {
@@ -60,14 +65,14 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
                 }
                 dispatch(addMessageToConversation(newM))
             })
-            
+
             setTitle('')
             setContent('')
             setTitleVisible(false)
             setLocalMessages(previousState => {
                 //let newS = previousState.push(data.messageCreate.message)
                 //console.log('previousState ', previousState)
-                return [{message: data.messageCreate.message}, ...previousState]
+                return [{ message: data.messageCreate.message }, ...previousState]
                 //return  previousState
             });
         },
@@ -122,13 +127,19 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
     navigation.setOptions({
         headerTitle: (props) => (
             <>
-                <Typography bold color='#fff' size={20}>{selecteds.length} {selecteds.length == 1? 'destinatario': 'destinatarios'}</Typography>
+                <Typography bold color='#fff' size={20}>{selecteds.length} {selecteds.length == 1 ? 'destinatario' : 'destinatarios'}</Typography>
                 <Typography color='#fff' size={13}>{listaNombres()}</Typography>
             </>
         ),
         headerLeft: () => (
             <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity onPress={() => navigation.navigate('MessagesScreen')} style={{
+                <TouchableOpacity onPress={
+                    route.params?.goBack ? (
+                        () => navigation.goBack()
+                    ): (
+                        () => navigation.navigate('MessagesScreen')
+                    )
+                } style={{
                     flexDirection: 'row',
                     marginLeft: 12,
                     padding: 5,
@@ -178,7 +189,7 @@ const WriteMessageScreen = ({ route, navigation, ...props }) => {
                             <FlatList
                                 data={localMessages}
                                 style={{ paddingLeft: 14, paddingHorizontal: 10 }}
-                                contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end',}}
+                                contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', }}
                                 inverted={-1}
                                 keyExtractor={item => item.message.serverId}
                                 renderItem={({ item, index }) => {

@@ -9,15 +9,17 @@ import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { FloatingAction } from 'react-native-floating-action'
-import { useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { ORDER_LOST, ORDER_TRANSIT } from '../../../../graphql/orders'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../redux/messenger_orders/messenger_ordersSlice'
 import ModalRejected from './components/ModalRejected'
 import ModalDelivered from './components/ModalDelivered'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import PackageInfo from './components/PackageInfo'
 import PaymentInfo from './components/PaymentInfo'
+import { MY_CONVERSATIONS } from '../../../../graphql/messages'
+import { conversations, setConversations } from '../../../../redux/messages/messagesSlice'
 
 moment.locale('es')
 
@@ -31,9 +33,12 @@ const DetailsNavView = ({ navigation, route }) => {
     const [showModalRejected, setShowModalRejected] = useState(false)
     const [showModalDelivered, setShowModalDelivered] = useState(false)
     const [showAlertAw, setShowAlert] = useState(false)
+    const [loading, setLoading] = useState(false)
     const [pickedDate, setPickedDate] = useState('')
+    const [sellerContact, setSellerContact] = useState('')
     let hasNote = false
     const { colors } = useTheme()
+    const conversation_reducer = useSelector(conversations)
 
 
     const dispatch = useDispatch()
@@ -103,6 +108,47 @@ const DetailsNavView = ({ navigation, route }) => {
             setDisplayLoading(false)
         }
     })
+
+    const [getConversations, { loadingConversations, errorConversations, dataConversations }] = useLazyQuery(MY_CONVERSATIONS, {
+        onCompleted: (dataConversations) => {
+            dispatch(setConversations(dataConversations.myConversations.edges))
+            setLoading(false)
+            let flag = false
+            dataConversations.myConversations.edges.forEach(conv => {
+                if (conv.node.conversationUser.serverId == sellerContact.user.serverId) {
+                    flag = true
+                    navigation.navigate('MessagesChatScreen', { message: conv.node })
+                }
+            })
+            if (!flag) {
+                navigation.navigate('WriteMessageScreen', { selecteds: [sellerContact.user], goBack: true })
+            }
+        },
+        onError: (errorConversations) => {
+            setLoading(false)
+            console.log('Error Cargando Conversaciones >> ', errorConversations)
+        },
+        fetchPolicy: "no-cache"
+    })
+
+    const contactMessage = (seller) => {
+        let flag = false
+        if (conversation_reducer.length > 0) {
+            conversation_reducer.forEach(conv => {
+                if (conv.node.conversationUser.serverId == seller.user.serverId) {
+                    flag = true
+                    navigation.navigate('MessagesChatScreen', { message: conv.node })
+                }
+            })
+            if (!flag) {
+                navigation.navigate('WriteMessageScreen', { selecteds: [seller.user], goBack: true })
+            }
+        } else {
+            setLoading(true)
+            setSellerContact(seller)
+            getConversations()
+        }
+    }
 
     useEffect(() => {
         if (data) {
@@ -556,14 +602,31 @@ const DetailsNavView = ({ navigation, route }) => {
                         Vendedor
                     </Typography>
                     {sellers.map((seller, index) => (
-                        <TouchableOpacity
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}
                             key={index}
-                            onPress={() => navigation.navigate('SellerDetails', { seller: seller })}
                         >
-                            <Typography color={colors.primary}>
-                                {seller.user.firstName + ' ' + seller.user.lastName}
-                            </Typography>
-                        </TouchableOpacity>
+                            <View>
+                                <TouchableOpacity
+                                    key={index}
+                                    onPress={() => navigation.navigate('SellerDetails', { seller: seller })}
+                                >
+                                    <Typography color={colors.primary}>
+                                        {seller.user.firstName + ' ' + seller.user.lastName}
+                                    </Typography>
+                                </TouchableOpacity>
+                                <Typography>
+                                    {seller.user.userName}
+                                </Typography>
+                            </View>
+                            <TouchableOpacity onPress={() => contactMessage(seller)}>
+                                <Typography color={colors.primary}>CONTACTAR</Typography>
+                            </TouchableOpacity>
+                        </View>
                     ))}
                 </View>
                 <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
@@ -635,7 +698,7 @@ const DetailsNavView = ({ navigation, route }) => {
             {
                 (data.orderById.shippingStatus === 'LOST' || data.orderById.shippingStatus === 'NO_STATUS' ||
                     shippingStatus === 'LOST' || shippingStatus === 'NO_STATUS' ||
-                    shippingStatus === 'REJECTED' || shippingStatus === 'ACCEPTED_CARRIER' || 
+                    shippingStatus === 'REJECTED' || shippingStatus === 'ACCEPTED_CARRIER' ||
                     shippingStatus === 'DELIVERED') ? null :
                     (
                         <FloatingAction
