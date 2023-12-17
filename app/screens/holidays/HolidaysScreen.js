@@ -10,6 +10,8 @@ import { DELETE_HOLIDAY, GET_HOLYDAYS_BY_CARRIER } from '../../graphql/holydays'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { useTheme } from '@react-navigation/native'
+import { CARRIER_INFO } from '../../graphql/login'
+import { setCarrierInfo } from '../../redux/userlogin/userLoginSlice'
 
 
 export default function HolidaysScreen({ navigation }) {
@@ -63,6 +65,18 @@ export default function HolidaysScreen({ navigation }) {
 		},
 		fetchPolicy: "no-cache"
 	})
+
+	const [getCarrierInfo, { loadingCI, errorCI, dataCI }] = useLazyQuery(CARRIER_INFO, {
+		onCompleted: (dataCI) => {
+			dispatch(setCarrierInfo(dataCI.myCarrierInfo))
+		},
+		onError: (errorCI) => {
+			dispatch(setCarrierInfo({}))
+			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', JSON.stringify(errorCI, null, 2))
+		},
+		fetchPolicy: "no-cache",
+	})
+
 	const [deleteHolyDays, { loadingDelete, errorDelete, dataDelete }] = useMutation(DELETE_HOLIDAY, {
 		onCompleted: (dataDelete) => {
 			/* let newElements = myHolyDays.filter((holy) => holy.node.serverId != dataDelete.vacationDelete.vacation.serverId)
@@ -92,17 +106,11 @@ export default function HolidaysScreen({ navigation }) {
 		dispatch(setHolyDaysByUser([]))
 		setLoadingApp(true)
 		getHolyDays({ variables: { carrierServerId: carrierID, after: '', before: '' } })
-		//dispatch(getHolyDaysByUser(carrierID))
 	}, [])
 
 	useEffect(() => {
 		setMyHolyDays(holyDaysStore.hoylyDays)
 		setLoadingApp(false)
-		/* console.log("Empieza")
-		holyDaysStore.hoylyDays.forEach(ele => {
-			console.log("holyDaysStore.hoylyDays >> ", ele.node.description)
-		})
-		console.log("Termina") */
 	}, [holyDaysStore.hoylyDays])
 
 	const delete_holidays = (ids) => {
@@ -121,6 +129,7 @@ export default function HolidaysScreen({ navigation }) {
 			temporal = temporal.filter(elem => elem !== id)
 			if (temporal.length == 0) {
 				console.log("termino completo")
+				getCarrierInfo()
 				setShowAlert(false)
 				setLoadingApp(false)
 				dispatch(removeHolyDaysByUser(deleteIds))
@@ -141,7 +150,7 @@ export default function HolidaysScreen({ navigation }) {
 			console.log(`CARGA MAS DATOSSS con endCursor > ${endCursor}`)
 			getHolyDays({ variables: { carrierServerId: carrierID, after: endCursor, before: '' } })
 		} else {
-			console.log(`No hay datos para cargar`)
+			console.log(`No hay datos para cargar HolidaysScreen`)
 		}
 	}
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { StyleSheet, View, ToastAndroid, Platform, ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -8,8 +8,8 @@ import { addHolyDaysByUser } from '../../redux/holydays/holydaysSlice'
 import { CREATE_VACATION } from '../../graphql/holydays'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import Colors from '../../constants/Colors'
-import { ACCEPT_ORDERS_LIST } from '../../graphql/orders'
-import { setAcceptShipping } from '../../redux/accept_shipping/accept_shippingSlice'
+import { CARRIER_INFO } from '../../graphql/login'
+import { setCarrierInfo } from '../../redux/userlogin/userLoginSlice'
 
 export default function HolidaysFormScreen({ navigation }) {
 	const [description, setDescription] = React.useState('')
@@ -21,32 +21,20 @@ export default function HolidaysFormScreen({ navigation }) {
 	const userStore = useSelector(state => state.userlogin)
 	const carrierID = userStore.carrierInfo.serverId;
 
-	const [getOrdersList, { loadingOrders, errorOrders, dataOrders }] = useLazyQuery(ACCEPT_ORDERS_LIST, {
-		onCompleted: (dataOrders) => {
-			if (dataOrders.orders.pageInfo.hasNextPage) {
-				setHasNextPage(dataOrders.orders.pageInfo.hasNextPage)
-				setEndCursor(dataOrders.orders.pageInfo.endCursor)
-			} else {
-				setHasNextPage(false)
-			}
-			let elementos = []
-			dataOrders.orders.edges.map((edges) => elementos.push(edges.node))
-			console.log('DISPAROOO')
-			dispatch(setAcceptShipping(elementos))
+	const [getCarrierInfo, { loadingCI, errorCI, dataCI }] = useLazyQuery(CARRIER_INFO, {
+		onCompleted: (dataCI) => {
+			dispatch(setCarrierInfo(dataCI.myCarrierInfo))
 		},
-		onError: (errorOrders, dataOrders) => {
-			console.log('ERROR cargando ordenes >> ', JSON.stringify(errorOrders, null, 2))
-			console.log('ERROR cargando ordenes data var >> ', dataOrders)
-			setLoadingApp(false)
-			setRefreshing(false)
-			setLoadingScroll(false)
+		onError: (errorCI) => {
+			dispatch(setCarrierInfo({}))
+			console.log('ERROR GET_CARRIER_BY_USER_EMAIL >> ', JSON.stringify(errorCI, null, 2))
 		},
-		fetchPolicy: "no-cache"
+		fetchPolicy: "no-cache",
 	})
 
 	const [createVacation, { loading, error, data }] = useMutation(CREATE_VACATION, {
-		onCompleted: (data) => {
-			getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
+		onCompleted: async (data) => {
+			await getCarrierInfo()
 			let newHolyDay = {
 				node: {
 					description: data.vacationCreate.vacation.description,

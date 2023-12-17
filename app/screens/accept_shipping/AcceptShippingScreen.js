@@ -12,6 +12,7 @@ import { FloatingAction } from 'react-native-floating-action'
 import Colors from '../../constants/Colors'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { useTheme } from '@react-navigation/native'
+import { carrierInfo } from '../../redux/userlogin/userLoginSlice'
 
 
 const AcceptShippingScreen = ({ route, navigation }) => {
@@ -19,10 +20,12 @@ const AcceptShippingScreen = ({ route, navigation }) => {
     const [orders, setOrders] = useState([])
     const [refreshing, setRefreshing] = useState(false)
     const [loadingScroll, setLoadingScroll] = useState(false)
+    const [onVacation, setOnVacation] = useState(false)
     const [hasNextPage, setHasNextPage] = useState(false)
     const [endCursor, setEndCursor] = useState("")
     const dispatch = useDispatch()
     const acceptShippingStore = useSelector(state => state.accepShipping)
+    const carrier_info = useSelector(carrierInfo)
     const { colors } = useTheme()
 
     const [getOrdersList, { loading, error, data }] = useLazyQuery(ACCEPT_ORDERS_LIST, {
@@ -64,13 +67,30 @@ const AcceptShippingScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         setLoadingApp(true)
-        getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
+        if (carrier_info?.onVacation) {
+            setOnVacation(true)
+            setLoadingApp(false)
+        } else {
+            setOnVacation(false)
+            getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
+        }
     }, [])
 
     useEffect(() => {
         setOrders(acceptShippingStore.listado)
-        console.log('CAMBIOOOO')
     }, [acceptShippingStore.listado])
+
+    useEffect(() => {
+        setLoadingApp(true)
+        if (carrier_info?.onVacation) {
+            setOnVacation(true)
+            setLoadingApp(false)
+        } else {
+            setOnVacation(false)
+            getOrdersList({ variables: { /* carrier: carrierID, */ after: '', before: '' } })
+        }
+        console.log('CAMBIO EL ESTAO DEL CARRIER', carrier_info?.onVacation)
+    }, [carrier_info])
 
     const renderLoader = () => {
         return loadingScroll ? <Loading /> : null
@@ -154,26 +174,48 @@ const AcceptShippingScreen = ({ route, navigation }) => {
                         )
                 ) :
                 (
-                    <>
-                        <AcceptShippingList
-                            navigation={navigation}
-                            orders_list={orders}
-                            doRefresh={doRefresh}
-                            loadMore={loadMore}
-                            renderLoader={renderLoader}
-                            refreshing={refreshing}
-                        />
-                        <FloatingAction
-                            color={Colors.COLORS.PRIMARY}
-                            overrideWithAction={true}
-                            actions={actionsRefresh}
-                            onPressItem={name => {
-                                doAction(name)
-                            }}
-                        />
-                    </>
+                    onVacation ? (
+                        <View
+                            style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 15, }}
+                        >
+                            <Typography bold h3 color={colors.ON_BACKGROUND}>
+                                No puede aceptar envíos.
+                            </Typography>
+                            <Typography color={colors.ON_BACKGROUND}>
+                                Usted está de vacaciones o las planificó a partir de mañana.
+                            </Typography>
+                            <FloatingAction
+                                color={Colors.COLORS.PRIMARY}
+                                overrideWithAction={true}
+                                actions={actionsRefresh}
+                                onPressItem={name => {
+                                    doAction(name)
+                                }}
+                            />
+                        </View>
+                    ) : (
+                        <>
+                            <AcceptShippingList
+                                navigation={navigation}
+                                orders_list={orders}
+                                doRefresh={doRefresh}
+                                loadMore={loadMore}
+                                renderLoader={renderLoader}
+                                refreshing={refreshing}
+                            />
+                            <FloatingAction
+                                color={Colors.COLORS.PRIMARY}
+                                overrideWithAction={true}
+                                actions={actionsRefresh}
+                                onPressItem={name => {
+                                    doAction(name)
+                                }}
+                            />
+                        </>
+                    )
+
                 )}
-        </View>
+        </View >
     )
 }
 

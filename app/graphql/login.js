@@ -161,6 +161,7 @@ export const CARRIER_INFO = gql`
 		myCarrierInfo{
 			id
 			kyc
+			onVacation
 			isActive
 			serverId
 			piPhotoFrontal{
