@@ -17,6 +17,7 @@ import { useTheme } from '@react-navigation/native'
 import { ACCOUNT_REGISTER } from '../../graphql/login'
 import Colors from '../../constants/Colors'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { Button, Typography } from '../../components'
 
 export default function RegisterScreen({ navigation }) {
 	const { colors } = useTheme()
@@ -246,16 +247,16 @@ export default function RegisterScreen({ navigation }) {
 					</Text>
 				) : (null)}
 				<View style={{ marginTop: 50 }}>
-					<TouchableOpacity
+					<Button
 						style={{ alignItems: 'center', marginBottom: 10 }}
 						onPress={() => handleRegister(email, password, repeatPassword)}
 					>
 						{loading ? (
 							<ActivityIndicator size="small" color="white" />
 						) : (
-							<Text color="#ffffff">Crear Cuenta</Text>
+							<Typography color="#ffffff">Crear Cuenta</Typography>
 						)}
-					</TouchableOpacity>
+					</Button>
 					<TouchableOpacity
 						style={{ alignItems: 'center' }}
 						//color="trasparent"

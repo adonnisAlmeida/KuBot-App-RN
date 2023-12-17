@@ -1,8 +1,8 @@
 import { Dimensions } from 'react-native'
 //const URL = 'http://ec2-3-143-244-135.us-east-2.compute.amazonaws.com:8000/'
 //const URL = 'http://lajabitadelloco.com:8000/' cambiado
-//const URL = 'https://lajabitadelloco.com/'
-const URL = 'http://192.168.42.24:8000/'
+const URL = 'https://lajabitadelloco.com/'
+//const URL = 'http://192.168.42.24:8000/'
 const URL_API = URL + 'graphql/'
 
 const { height, width } = Dimensions.get('window');

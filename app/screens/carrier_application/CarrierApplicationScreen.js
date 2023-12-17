@@ -255,7 +255,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 				}
 
 				if (direccion1.length == 0) error_data.push('direccion1')
-				if (direccion2.length == 0) error_data.push('direccion2')
+				//if (direccion2.length == 0) error_data.push('direccion2')
 				//if (apellidos.length == 0) error_data.push('lastName')
 				if (error_data.length > 0) {
 					setErrors(error_data)
