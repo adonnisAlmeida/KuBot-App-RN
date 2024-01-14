@@ -524,6 +524,7 @@ export const ORDER_ID = gql`
 export const ORDER_SERVER_ID = gql`
 	query Product($id: ID!) {
 		orderById(id: $id) {
+			serverId
 			id
 			status
 			created

@@ -16,6 +16,7 @@ import ReviewsCard from '../profile/components/ReviewsCard'
 import { user } from '../../redux/userlogin/userLoginSlice'
 import { useLazyQuery } from '@apollo/client'
 import { MY_CONVERSATIONS } from '../../graphql/messages'
+import ReviewRating from './components/ReviewRating'
 
 const SellerDetailsScreen = ({ navigation, route }) => {
     const [seller, setSeller] = useState(route.params?.seller)
@@ -158,13 +159,17 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                     <Typography h3 bold>Calificación y opiniones:</Typography>
                 </View>
                 {seller.reviews && seller.reviews.length > 0 ? (
+                    <ReviewRating reviews={seller.reviews}/>
+                ): (null)}
+                {seller.reviews && seller.reviews.length > 0 ? (
+                    
                     seller.reviews.slice(0).reverse().map((review, index) => {
-                        if (review.approvalStatus == 'PENDING' || review.approvalStatus == 'DISAPPROVED') {
-                            if (review.user.serverId == user_state.serverId) {
+                        if (review.approvalStatus == 'PENDING' || review.approvalStatus == 'DISAPPROVED' || review.approvalStatus == null) {
+                            /* if (review.user.serverId == user_state.serverId) {
                                 return <ReviewsCard key={index} review={review} />
-                            } else {
+                            } else { */
                                 return null
-                            }
+                            /* } */
                         } else {
                             return <ReviewsCard key={index} review={review} />
                         }
@@ -176,6 +181,7 @@ const SellerDetailsScreen = ({ navigation, route }) => {
                         <Typography color={Colors.COLORS.WEB_LINK}>No hay calificaciones para este vendedor.</Typography>
                     </View>
                 )}
+                <Typography></Typography>
             </ScrollView>
         </>
 

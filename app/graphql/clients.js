@@ -97,6 +97,7 @@ export const MY_SELLERS = gql`
                           firstName
                           lastName
                           userName
+                          serverId
                           avatar{
                             url
                             alt

@@ -11,8 +11,6 @@ import { printCreated } from '../../../utils/CommonFunctions'
 const ReviewsCard = ({ review }) => {
     const { dark, colors } = useTheme()
 
-    //console.log('Firs name', review.user.userName)
-
     const avatar =
         review.user.avatar !== null
             ? {

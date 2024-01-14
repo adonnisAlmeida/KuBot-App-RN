@@ -21,6 +21,7 @@ import { BUST_PHOTO_UPDATE, CARRIER_UPDATE, PI_PHOTO_BACK_UPDATE, PI_PHOTO_FRONT
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { ReactNativeFile } from 'apollo-upload-client'
 import ReviewsCard from './components/ReviewsCard'
+import ReviewRating from '../sellers/components/ReviewRating'
 
 //const Sound = require('react-native-sound')
 
@@ -52,24 +53,24 @@ const CarrierDetails = () => {
     const correctImageURI = (type) => {
         switch (type) {
             case 'FRONTAL':
-                if(carrier_info.piPhotoFrontal.image){
+                if (carrier_info.piPhotoFrontal.image) {
                     return carrier_info.piPhotoFrontal.image.url
-                }else {
+                } else {
                     return carrier_info.piPhotoFrontal.uri
                 }
             case 'BACK':
-                if(carrier_info.piPhotoBack.image){
+                if (carrier_info.piPhotoBack.image) {
                     return carrier_info.piPhotoBack.image.url
-                }else {
+                } else {
                     return carrier_info.piPhotoBack.uri
                 }
             case 'BUST':
-                if(carrier_info.bustPhoto.image){
+                if (carrier_info.bustPhoto.image) {
                     return carrier_info.bustPhoto.image.url
-                }else {
+                } else {
                     return carrier_info.bustPhoto.uri
                 }
-        
+
             default:
                 break;
         }
@@ -470,19 +471,22 @@ const CarrierDetails = () => {
                     <Typography style={{ color: Colors.COLORS.ON_SURFACE }} h3 bold>Calificación y opiniones:</Typography>
                 </View>
                 {reviews && reviews.length > 0 ? (
+                    <ReviewRating reviews={reviews} />
+                ) : (null)}
+                {reviews && reviews.length > 0 ? (
                     reviews.slice(0).reverse().map((review, index) => {
-                        if (review.approvalStatus == 'PENDING' || review.approvalStatus == 'DISAPPROVED') {
-                            if (review.user.serverId == user_state.serverId) {
+                        if (review.approvalStatus == 'PENDING' || review.approvalStatus == 'DISAPPROVED' || review.approvalStatus == null) {
+                            /* if (review.user.serverId == user_state.serverId) {
                                 return <ReviewsCard key={index} review={review} />
-                            } else {
-                                return null
-                            }
+                            } else { */
+                            return null
+                            /* } */
                         } else {
                             return <ReviewsCard key={index} review={review} />
                         }
                     })
                 ) : (
-                    <View style={{alignItems: 'center'}}>
+                    <View style={{ alignItems: 'center' }}>
                         <Typography color={Colors.COLORS.WEB_LINK}>Aún no tienes calificaciones.</Typography>
                     </View>
                 )}
