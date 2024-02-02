@@ -22,7 +22,7 @@ const ModalRejected = ({
     envio,
     setShippingStatus,
 }) => {
-    const [justify, setJustify] = useState('')
+    const [justify, setJustify] = useState(envio.orderById.rejectedOrder?.reason)
     const [showModal, setShowModal] = useState(false)
     const [modalTarget, setModalTarget] = useState('')
     const [preViewModal, setPreViewModal] = useState(false)
@@ -112,6 +112,7 @@ const ModalRejected = ({
                     if (dataRejected.orderRejected.order) {
                         if (dataRejected.orderRejected.order.shippingStatus == 'REJECTED') {
                             envio.orderById.shippingStatus = 'REJECTED'
+                            envio.orderById.rejectedOrder = dataRejected.orderRejected.order.rejectedOrder
                             setShippingStatus('REJECTED')
                             const parametros = {
                                 "id": envio.orderById.id,

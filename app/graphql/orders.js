@@ -86,6 +86,26 @@ mutation orderRejected($id: ID!, $input: ReasonRejectedInput!) {
 	orderRejected(id: $id, input: $input) {
 		order{
 			shippingStatus
+			rejectedOrder{
+				id
+				reason
+				shipImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+				signImg{
+				  alt
+				  id
+				  image{
+					url
+					alt
+				  }
+				}
+			}
 		}
 		errors{
 			field
@@ -539,6 +559,17 @@ export const ORDER_SERVER_ID = gql`
 				  firstName
 				}
 			  }
+			  returnedOrder{
+				reason
+				reasonDisapproved
+				returnStatus
+				returnImg{
+					id
+				  image{
+					url
+				  }
+				}
+			  }
 			  signatureImagesDelivery {
 				id
 				image {
@@ -546,6 +577,18 @@ export const ORDER_SERVER_ID = gql`
 				}
 			  }
 			  packageImagesDelivery {
+				id
+				image {
+				  url
+				}
+			  }
+			  signatureImagesPickup {
+				id
+				image {
+				  url
+				}
+			  }
+			  packageImagesPickup {
 				id
 				image {
 				  url

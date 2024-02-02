@@ -292,11 +292,11 @@ export function orderShippingStatusDisplay(status) {
         case 'ACCEPTED':
             return "Aceptado"
         case 'RETURN_APPROVED':
-            return "Rechazo aceptado"
+            return "Devolución aprobada"
         case 'RETURN_REQUEST':
-            return "Solicitud de rechaza"
+            return "Solicitud de devolución"
         case 'RETURN_DISAPPROVED':
-            return "Rechazo desaprobado"
+            return "Devolución no aprobada"
         default:
             return ""
     }
