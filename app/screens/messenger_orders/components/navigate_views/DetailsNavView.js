@@ -1,4 +1,4 @@
-import { View, Image as RNImage, Dimensions, ScrollView, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform } from 'react-native'
+import { View, Image as RNImage, Dimensions, ScrollView, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, ToastAndroid, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Typography } from '../../../../components'
 import { useTheme } from '@react-navigation/native'
@@ -38,6 +38,7 @@ const DetailsNavView = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false)
     const [pickedDate, setPickedDate] = useState('')
     const [sellerContact, setSellerContact] = useState('')
+    const [deliveryItinerary, setDeliveryIninerary] = useState(data.orderById.deliveryItinerary)
     let hasNote = false
     const { colors } = useTheme()
     const conversation_reducer = useSelector(conversations)
@@ -199,7 +200,7 @@ const DetailsNavView = ({ navigation, route }) => {
                     setGifSource(require('../../../../../assets/delivery.gif'))
                     setActionsButton([
                         {
-                            text: "Entregado",
+                            text: "Gestionar Entrega",
                             icon: actionIcon('handshake'),
                             name: "delivered",
                             position: 1,
@@ -285,7 +286,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 setGifSource(require('../../../../../assets/delivery.gif'))
                 setActionsButton([
                     {
-                        text: "Entregado",
+                        text: "Gestionar Entrega",
                         icon: actionIcon('handshake'),
                         name: "delivered",
                         position: 1,
@@ -395,6 +396,7 @@ const DetailsNavView = ({ navigation, route }) => {
                 setShowModalDelivered={setShowModalDelivered}
                 envio={data}
                 setShippingStatus={setShippingStatus}
+                setDeliveryInineraryParent={setDeliveryIninerary}
             />
 
             <ScrollView showsVerticalScrollIndicator={false}/*  style={styles.container} */>
@@ -924,7 +926,56 @@ const DetailsNavView = ({ navigation, route }) => {
                             </View>
                         ) : (null)
                     }
-                    {
+                    { // itinerario de recogida del paquete
+                        data.orderById.shippingStatus == 'IN_TRANSIT' ? (
+                            <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
+                                <Typography h3 style={{ marginBottom: 10 }}>
+                                    Horario de Entrega del Envío
+                                </Typography>
+                                {deliveryItinerary?.length == 0 ? (
+                                    <Typography h4 style={{ marginBottom: 10 }}>
+                                        Itinerario de entrega no encontrado.
+                                    </Typography>
+                                ) : (
+                                    <>
+                                        <View style={styles.wrapper}>
+                                            {/* Table Container */}
+                                            <View style={styles.table}>
+                                                {/* Table Head */}
+                                                <View style={styles.table_head}>
+                                                    <View style={{ width: '60%' }}>
+                                                        <Typography style={styles.table_head_captions}>Día(s)</Typography>
+                                                    </View>
+                                                    <View style={{ width: '20%' }}>
+                                                        <Typography style={styles.table_head_captions}>Desde</Typography>
+                                                    </View>
+                                                    <View style={{ width: '20%' }}>
+                                                        <Typography style={styles.table_head_captions}>Hasta</Typography>
+                                                    </View>
+                                                </View>
+
+                                                {/* Table Body - Single Row */}
+                                                {deliveryItinerary.map(item => (
+                                                    <View key={item.serverId} style={styles.table_body_single_row}>
+                                                        <View style={{ width: '60%' }}>
+                                                            <Typography style={styles.table_data}>{item.days}</Typography>
+                                                        </View>
+                                                        <View style={{ width: '20%', alignSelf: 'center' }}>
+                                                            <Typography style={styles.table_data}>{item.hourInit}</Typography>
+                                                        </View>
+                                                        <View style={{ width: '20%', alignSelf: 'center' }}>
+                                                            <Typography style={styles.table_data}>{item.hourEnd}</Typography>
+                                                        </View>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </View>
+                                    </>
+                                )}
+                            </View>
+                        ) : (null)
+                    }
+                    { // imagenes de recogida del paquete
                         data.orderById.shippingStatus != 'ACCEPTED_CARRIER' ? (
                             <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
                                 <Typography h3 style={{ marginBottom: 10 }}>
@@ -1005,7 +1056,56 @@ const DetailsNavView = ({ navigation, route }) => {
                             </View>
                         ) : (null)
                     }
-                    { // imagenes de recogida del paquete
+                    { // itinerario de recogida del paquete
+                        data.orderById.shippingStatus == 'ACCEPTED_CARRIER' ? (
+                            <View style={[styles.myCard, { backgroundColor: colors.SURFACE }]}>
+                                <Typography h3 style={{ marginBottom: 10 }}>
+                                    Horario de Recogida del Envío
+                                </Typography>
+                                {data.orderById.pickupItinerary?.length == 0 ? (
+                                    <Typography h4 style={{ marginBottom: 10 }}>
+                                        Itinerario de recogida no encontrado.
+                                    </Typography>
+                                ) : (
+                                    <>
+                                        <View style={styles.wrapper}>
+                                            {/* Table Container */}
+                                            <View style={styles.table}>
+                                                {/* Table Head */}
+                                                <View style={styles.table_head}>
+                                                    <View style={{ width: '60%' }}>
+                                                        <Typography style={styles.table_head_captions}>Día(s)</Typography>
+                                                    </View>
+                                                    <View style={{ width: '20%' }}>
+                                                        <Typography style={styles.table_head_captions}>Desde</Typography>
+                                                    </View>
+                                                    <View style={{ width: '20%' }}>
+                                                        <Typography style={styles.table_head_captions}>Hasta</Typography>
+                                                    </View>
+                                                </View>
+
+                                                {/* Table Body - Single Row */}
+                                                {data.orderById.pickupItinerary.map(item => (
+                                                    <View key={item.serverId} style={styles.table_body_single_row}>
+                                                        <View style={{ width: '60%' }}>
+                                                            <Typography style={styles.table_data}>{item.days}</Typography>
+                                                        </View>
+                                                        <View style={{ width: '20%', alignSelf: 'center' }}>
+                                                            <Typography style={styles.table_data}>{item.hourInit}</Typography>
+                                                        </View>
+                                                        <View style={{ width: '20%', alignSelf: 'center' }}>
+                                                            <Typography style={styles.table_data}>{item.hourEnd}</Typography>
+                                                        </View>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </View>
+                                    </>
+                                )}
+                            </View>
+                        ) : (null)
+                    }
+                    { // padddings ...
                         ((data.orderById.shippingStatus == 'PICKED_UP_CARRIER'
                             || data.orderById.shippingStatus == 'IN_TRANSIT')
                             && pickedDate != '') ? (
@@ -1069,6 +1169,41 @@ const DetailsNavView = ({ navigation, route }) => {
 }
 
 const styles = StyleSheet.create({
+    wrapper: {
+        backgroundColor: 'red',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex: 1,
+    },
+    table_head: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderColor: '#ddd',
+        padding: 7,
+        backgroundColor: Colors.COLORS.SWITCH_OFF
+    },
+    table_head_captions: {
+        fontSize: 14,
+        color: '#000'
+    },
+
+    table_body_single_row: {
+        backgroundColor: '#fff',
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderColor: '#ddd',
+        padding: 7,
+    },
+    table_data: {
+        fontSize: 13,
+    },
+    table: {
+        //margin: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 1,
+        backgroundColor: '#fff',
+    },
     aIndicator: {
         position: 'absolute',
         right: 14,

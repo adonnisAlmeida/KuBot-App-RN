@@ -10,7 +10,7 @@ import moment from 'moment'
 import Colors from '../constants/Colors'
 moment.locale('es')
 
-export function TimePickerInput({ label, value, setValue, error, date = null, ...props }) {
+export function TimePickerInput({ label, value, is24 = false, setValue, error, date = null, ...props }) {
 	return (
 		<DatePickerInput
 			label={label}
@@ -20,11 +20,12 @@ export function TimePickerInput({ label, value, setValue, error, date = null, ..
 			type="time"
 			date={date}
 			props={props}
+			is24={is24}
 		/>
 	)
 }
 
-export function TimePickerInputLineal({ label, value, setValue, error, date = null, ...props }) {
+export function TimePickerInputLineal({ label, is24 = false, value, setValue, error, date = null, ...props }) {
 	return (
 		<DatePickerInputLineal
 			label={label}
@@ -34,6 +35,7 @@ export function TimePickerInputLineal({ label, value, setValue, error, date = nu
 			type="time"
 			date={date}
 			props={props}
+			is24={is24}
 		/>
 	)
 }
@@ -42,6 +44,7 @@ export function DatePickerInput({
 	label,
 	value,
 	setValue,
+	is24 = false,
 	error,
 	type = 'date',
 	date = null,
@@ -83,7 +86,7 @@ export function DatePickerInput({
 			</TouchableOpacity>
 			{type == "time" ? (
 				<DateTimePickerModal
-					is24Hour={false}
+					is24Hour={is24}
 					locale="en_GB"
 					isVisible={showDatePicker}
 					mode={type}

@@ -56,6 +56,44 @@ export const ORDER_DELIVERED = gql`
 	}
 `
 
+export const DELIVERY_ITINERARY_CREATE = gql`
+	mutation createDeliveryItinerary($days_: Days_!, $end: Time!, $start: Time, $order:ID!) {
+		createDeliveryItinerary(days_: $days_, hourEnd: $end, order: $order, hourStart: $start) {
+			  orderDeliveryItinerary{
+				days
+				hourInit
+				hourEnd
+				serverId
+			}
+		}
+	}
+`
+
+export const DELIVERY_ITINERARY_UPDATE = gql`
+	mutation updateDeliveryItinerary($days_: Days_!, $end: Time!, $start: Time, $itinerary:ID!) {
+		updateDeliveryItinerary(days_: $days_, hourEnd: $end, itinerary: $itinerary, hourStart: $start) {
+			  orderDeliveryItinerary{
+				days
+				hourInit
+				hourEnd
+				serverId
+			}
+		}
+	}
+`
+
+export const DELIVERY_ITINERARY_DELETE = gql`
+	mutation deleteDeliveryItinerary($itinerary:ID!) {
+		deleteDeliveryItinerary(itinerary: $itinerary) {
+			  orderDeliveryItinerary{
+				days
+				hourInit
+				hourEnd
+			}
+		}
+	}
+`
+
 export const SIGNATURE_IMAGES = gql`
 mutation shipmentDeliveredSignatureImage($id: ID!, $images: [Upload!]) {
 	shipmentDeliveredSignatureImage( id: $id, input: {images: $images} ) {
@@ -551,6 +589,20 @@ export const ORDER_SERVER_ID = gql`
 			shippingStatus
 			paymentStatus
 			allDimensions
+			pickupItinerary{
+				hourInit
+				hourEnd
+				days
+				id
+				serverId
+			}
+			  deliveryItinerary{
+				hourInit
+				hourEnd
+				days
+				id
+				serverId
+			}
 			events{
 				date
 				message
