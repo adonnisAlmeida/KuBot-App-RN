@@ -262,11 +262,13 @@ dependencies {
 
     implementation project(':react-native-splash-screen')
 
+    implementation project(':react-native-pager-view')
+
     // Pushy SDK for Android
-    implementation 'me.pushy:sdk:1.0.89'
+    implementation 'me.pushy:sdk:1.0.103'
 
     // Pushy SDK for React Native Android
-    implementation 'me.pushy:sdk-react-native:1.0.18'
+    implementation 'me.pushy:sdk-react-native:1.0.20'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
