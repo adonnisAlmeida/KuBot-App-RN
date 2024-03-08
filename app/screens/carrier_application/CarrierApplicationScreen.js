@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Keyboard, KeyboardAvoidingView, StyleSheet, ScrollView, TouchableOpacity, Platform, ToastAndroid } from 'react-native'
+import { View, Text, ActivityIndicator, Keyboard, KeyboardAvoidingView, StyleSheet, ScrollView, TouchableOpacity, Platform, ToastAndroid, Modal, TouchableWithoutFeedback } from 'react-native'
 import React from 'react'
 import StepIndicator from 'react-native-step-indicator';
 import Colors from '../../constants/Colors';
@@ -17,6 +17,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCarrierInfo, setUserAddresses } from '../../redux/userlogin/userLoginSlice';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { allDeliveryAreas, setAllDeliveryAreas } from '../../redux/deliveryareas/deliveryareasSlice';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
+import { ReactNativeFile } from 'apollo-upload-client'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 const CarrierApplicationScreen = ({ navigation }) => {
 	const [currentPosition, setCurrentPosition] = useState(0)
@@ -28,6 +31,7 @@ const CarrierApplicationScreen = ({ navigation }) => {
 	const [bustPhotoFile, setBustPhotoFile] = useState(null)
 	const [errors, setErrors] = useState([])
 	const [nombre, setNombre] = useState('')
+	const [resizeInfo, setResizeInfo] = useState(false)
 	const [apellidos, setApellidos] = useState('')
 	const [pais, setPais] = useState(57)
 	const [provincia, setProvincia] = useState(1)
@@ -57,16 +61,22 @@ const CarrierApplicationScreen = ({ navigation }) => {
 			if (Platform.OS === 'android') {
 				ToastAndroid.show('Solicitud de cuenta de mensajero enviada.', ToastAndroid.LONG)
 			}
+			setResizeInfo(false)
 			navigation.navigate('Home')
 		},
 		onError: (errorCarrierRegister, dataCarrierRegister) => {
-			setRegisterCarrier(false)
-			if (Platform.OS === 'android') {
-				ToastAndroid.show(`Error realizando solicitud de mensajero. ${errorCarrierRegister.message}`, ToastAndroid.LONG)
+			if (errorCarrierRegister.message == "Network request failed" || errorCarrierRegister?.networkError?.statusCode == 413) {
+				resizeOptions()
+			} else {
+				setResizeInfo(false)
+				setRegisterCarrier(false)
+				if (Platform.OS === 'android') {
+					ToastAndroid.show(`Error realizando solicitud de mensajero. ${errorCarrierRegister.message}`, ToastAndroid.LONG)
+				}
+				//console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
+				console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
+				console.log('ERROR CARRIER REGISTER dataCarrierRegister>> ', dataCarrierRegister)
 			}
-			//console.log('ERROR CARRIER REGISTER >> ', JSON.stringify(errorCarrierRegister, null, 2))
-			console.log('ERROR CARRIER REGISTER >> ', errorCarrierRegister)
-			console.log('ERROR CARRIER REGISTER dataCarrierRegister>> ', dataCarrierRegister)
 		},
 		fetchPolicy: "no-cache"
 	})
@@ -134,6 +144,63 @@ const CarrierApplicationScreen = ({ navigation }) => {
 		}
 		//getDeliveryZones({ variables: { after: '', before: '' } })
 	}, [])
+
+	const resizeOptions = async () => {
+		let result1 = await ImageResizer.createResizedImage(
+			piPhotoFrontalFile?.uri,
+			500,
+			500,
+			'JPEG',
+			100,
+			0,
+			undefined,
+			false,
+		);
+		let result2 = await ImageResizer.createResizedImage(
+			piPhotoBackFile?.uri,
+			500,
+			500,
+			'JPEG',
+			100,
+			0,
+			undefined,
+			false,
+		);
+		let result3 = await ImageResizer.createResizedImage(
+			bustPhotoFile?.uri,
+			500,
+			500,
+			'JPEG',
+			100,
+			0,
+			undefined,
+			false,
+		);
+		const file1 = new ReactNativeFile({
+			uri: result1.uri,
+			name: piPhotoFrontalFile.name,
+			type: piPhotoFrontalFile.type,
+		});
+		const file2 = new ReactNativeFile({
+			uri: result2.uri,
+			name: piPhotoBackFile.name,
+			type: piPhotoBackFile.type,
+		});
+		const file3 = new ReactNativeFile({
+			uri: result3.uri,
+			name: bustPhotoFile.name,
+			type: bustPhotoFile.type,
+		});
+		setPiPhotoFrontalFile(file1)
+		setPiPhotoBackFile(file2)
+		setBustPhotoFile(file3)
+		setRegisterCarrier(false)
+		setPiPhotoFrontal({ uri: result1.uri })
+		setPiPhotoBack({ uri: result2.uri })
+		setBustPhoto({ uri: result3.uri })
+		setResizeInfo(true)
+		console.log("FALLO A MOSTRAR QUE YA CAMBIO LAS FOTOS")
+	}
 
 	const labels = ["Información Personal", "Información de KYC"];
 	const customStyles = {
@@ -407,70 +474,59 @@ const CarrierApplicationScreen = ({ navigation }) => {
 					</>
 				)
 			}
-			{/* <View style={{
-				backgroundColor: 'red',
-				position: 'absolute',
-				bottom: 0,
-				left: 0,
-				right: 0,
-				flexDirection: 'row',
-				justifyContent: 'space-between',
-				paddingVertical: 10,
-				paddingHorizontal: 15,
-			}}>
-				{currentPosition == 1 ? (
-					<TouchableOpacity
-						onPress={() => setCurrentPosition(currentPosition - 1)}
-						style={{
-							padding: 10,
-							borderRadius: 6,
-							backgroundColor: 'rgba(0,0,0,0.1)',
-						}}
-					>
-						<Typography color={'rgba(0,0,0,0.7)'} >
-							Anterior
-						</Typography>
-					</TouchableOpacity>) : (null)}
-				<Typography></Typography>
-				{currentPosition == 1 ? (
-					<TouchableOpacity
-						onPress={() => makeCarrier()}
-						style={{
-							padding: 10,
-							borderRadius: 6,
-							backgroundColor: Colors.COLORS.PRIMARY,
-
-						}}
-					>
-						{registerCarrier ? (
-							<ActivityIndicator color={'#fff'}></ActivityIndicator>
-						) : (
-							<Typography color={'#fff'}>
-								Crear
-							</Typography>
-						)}
-
-					</TouchableOpacity>
-				) : (
-					<TouchableOpacity
-						onPress={() => makeNext()}
-						style={{
-							padding: 10,
-							borderRadius: 6,
-							backgroundColor: Colors.COLORS.WEB_START_OFF,
-						}}
-					>
-						<Typography color={'rgba(0,0,0,0.7)'}>
-							Siguiente
-						</Typography>
-					</TouchableOpacity>
-				)}
-			</View> */}
+			<Modal
+				visible={resizeInfo}
+				transparent={true}
+				animationType="fade"
+				onRequestClose={() => setResizeInfo(false)}
+			>
+				<TouchableOpacity
+					style={styles.centeredView}
+				 	onPressOut={() => setResizeInfo(false)}
+				>
+					<TouchableWithoutFeedback>
+						<View style={styles.selectModal}>
+							<View>
+								<Typography size={16}>Ha ocurrido un error Enviando información de mensajero. Se han comprimido las imágenes, por favor verifique que cumplan con los requisitos de visualización.</Typography>
+							</View>
+							<TouchableOpacity
+								style={{ paddingHorizontal: 10, paddingVertical: 5, marginTop: 10 }}
+								onPress={() => setResizeInfo(false)}
+							>
+								<Typography size={18} color={Colors.COLORS.WEB_BUTTON}>OK</Typography>
+							</TouchableOpacity>
+						</View>
+					</TouchableWithoutFeedback>
+				</TouchableOpacity>
+			</Modal>
 		</View >
 	)
 }
 
 const styles = StyleSheet.create({
+	selectModal: {
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: 15,
+		width: '90%',
+		backgroundColor: '#fff',
+		margin: 42,
+		borderRadius: 10,
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowColor: '#000000',
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 8,
+	},
+	centeredView: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'rgba(0,0,0,0.7)'
+	},
 	input: {
 		borderRadius: 0,
 		borderWidth: 0,

@@ -15,10 +15,9 @@ import { useMutation } from '@apollo/client'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Image from 'react-native-image-progress';
 import * as Progress from 'react-native-progress';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import ImageResizer from '@bam.tech/react-native-image-resizer';
 
 import { BUST_PHOTO_UPDATE, CARRIER_UPDATE, PI_PHOTO_BACK_UPDATE, PI_PHOTO_FRONTAL_UPDATE } from '../../graphql/profile'
-import AwesomeAlert from 'react-native-awesome-alerts'
 import { ReactNativeFile } from 'apollo-upload-client'
 import ReviewsCard from './components/ReviewsCard'
 import ReviewRating from '../sellers/components/ReviewRating'
@@ -44,6 +43,7 @@ const CarrierDetails = () => {
     const [aborterRefBust, setAbortRefBust] = useState(new AbortController());
     const [reviews, setReviews] = useState(null);
     const carrier_info = useSelector(carrierInfo)
+    const [resizeInfo, setResizeInfo] = useState(false)
     const user_state = useSelector(user)
     const dispatch = useDispatch()
 
@@ -99,24 +99,28 @@ const CarrierDetails = () => {
                 isActive: data.carrierPiPhotoFrontalUpdate.carrier.isActive,
             }))
             setUploadFrontal(false)
+            setResizeInfo(false)
             if (Platform.OS === 'android')
                 ToastAndroid.show('Imagen delantera actualizada.', ToastAndroid.LONG)
-            /* setConfirmModal(false)
-            setPiPhotoFrontal(vistaPrevia) */
         },
         onError: (error, data) => {
-            setUploadFrontal(false)
-            if (error.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Actualización de Imagen delantera cancelada.', ToastAndroid.LONG)
-
+            if (error.message == "Network request failed" || error?.networkError?.statusCode == 413) {
+                resizeOptions(0)
             } else {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Error actualizando Imagen delantera.', ToastAndroid.LONG)
+                setUploadFrontal(false)
+                setResizeInfo(false)
+                if (error.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Actualización de Imagen delantera cancelada.', ToastAndroid.LONG)
+
+                } else {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Error actualizando Imagen delantera.', ToastAndroid.LONG)
+                }
+                setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: correctImageURI('FRONTAL'), } : require('../../../assets/page404.png'))
+                console.log('Error actalizando info de lcarrier >> ', error)
+                console.log('Error actalizando info de data >> ', data)
             }
-            setPiPhotoFrontal(carrier_info.piPhotoFrontal ? { uri: correctImageURI('FRONTAL'), } : require('../../../assets/page404.png'))
-            console.log('Error actalizando info de lcarrier >> ', error)
-            console.log('Error actalizando info de data >> ', data)
         },
         context: {
             fetchOptions: {
@@ -134,25 +138,28 @@ const CarrierDetails = () => {
                 isActive: dataBack.carrierPiPhotoBackUpdate.carrier.isActive,
             }))
             setUploadBack(false)
+            setResizeInfo(false)
             if (Platform.OS === 'android')
                 ToastAndroid.show('Imagen trasera actualizada.', ToastAndroid.LONG)
         },
         onError: (errorBack, dataBack) => {
-            setUploadBack(false)
-            if (errorBack.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Actualización de Imagen trasera cancelada.', ToastAndroid.LONG)
-
+            if (errorBack.message == "Network request failed" || errorBack?.networkError?.statusCode == 413) {
+                resizeOptions(0)
             } else {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Error actualizando Imagen trasera.', ToastAndroid.LONG)
+                setUploadBack(false)
+                setResizeInfo(false)
+                if (errorBack.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Actualización de Imagen trasera cancelada.', ToastAndroid.LONG)
+
+                } else {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Error actualizando Imagen trasera.', ToastAndroid.LONG)
+                }
+                setPiPhotoBack(carrier_info.piPhotoBack ? { uri: correctImageURI('BACK'), } : require('../../../assets/page404.png'))
+                console.log('Error actalizando info del carrier >> ', JSON.stringify(errorBack, null, 2))
+                console.log('Error actalizando info de data >> ', dataBack)
             }
-            setPiPhotoBack(carrier_info.piPhotoBack ? { uri: correctImageURI('BACK'), } : require('../../../assets/page404.png'))
-            /* console.log('Error actalizando info del carrier >> ', typeof(errorBack))
-            console.log('Error actalizando info del carrier >> ', Object.keys(errorBack))
-            console.log('Error actalizando info del carrier >> ', errorBack.message) */
-            console.log('Error actalizando info del carrier >> ', errorBack)
-            console.log('Error actalizando info de data >> ', dataBack)
         },
         context: {
             fetchOptions: {
@@ -170,25 +177,29 @@ const CarrierDetails = () => {
                 isActive: dataBust.carrierBustPhotoUpdate.carrier.isActive,
             }))
             setUploadBust(false)
+            setResizeInfo(false)
             if (Platform.OS === 'android')
                 ToastAndroid.show('Imagen de busto actualizada.', ToastAndroid.LONG)
-            /* setConfirmModal(false)
-            setBustPhoto(vistaPrevia) */
         },
         onError: (errorBust, dataBust) => {
-            setUploadBust(false)
-            //setConfirmModal(false)
-            if (errorBust.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Actualización de Imagen de busto cancelada.', ToastAndroid.LONG)
-
+            if (errorBust.message == "Network request failed" || errorBust?.networkError?.statusCode == 413) {
+                resizeOptions(0)
             } else {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Error actualizando Imagen de busto.', ToastAndroid.LONG)
+                setUploadBust(false)
+                setResizeInfo(false)
+                //setConfirmModal(false)
+                if (errorBust.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Actualización de Imagen de busto cancelada.', ToastAndroid.LONG)
+
+                } else {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Error actualizando Imagen de busto.', ToastAndroid.LONG)
+                }
+                console.log('Error actalizando info de lcarrier >> ', errorBust)
+                console.log('Error actalizando info de data >> ', dataBust)
+                setBustPhoto(carrier_info.bustPhoto ? { uri: correctImageURI('BUST'), } : require('../../../assets/page404.png'))
             }
-            console.log('Error actalizando info de lcarrier >> ', errorBust)
-            console.log('Error actalizando info de data >> ', dataBust)
-            setBustPhoto(carrier_info.bustPhoto ? { uri: correctImageURI('BUST'), } : require('../../../assets/page404.png'))
         },
         context: {
             fetchOptions: {
@@ -297,6 +308,42 @@ const CarrierDetails = () => {
             default:
                 break;
         }
+    }
+
+    const resizeOptions = async (imageType = 0) => {
+        let result = await ImageResizer.createResizedImage(
+            photoFile.uri,
+            500,
+            500,
+            'JPEG',
+            100,
+            0,
+            undefined,
+            false,
+        );
+        const file = new ReactNativeFile({
+            uri: result.uri,
+            name: photoFile.name,
+            type: photoFile.type,
+        });
+        setPhotoFile(file)
+        switch (imageType) {
+            case 0:
+                setUploadFrontal(false)
+                break;
+            case 1:
+                setUploadBack(false)(false)
+                break;
+            case 2:
+                setUploadBust(false)
+                break;
+
+            default:
+                break;
+        }
+        setVistaPrevia({ uri: result.uri, })
+        setResizeInfo(true)
+        setConfirmModal(true)
     }
 
     return (
@@ -509,6 +556,17 @@ const CarrierDetails = () => {
                         style={styles.vistaPrevia}
                         source={vistaPrevia}
                     />
+                    {resizeInfo ? (
+                        <View style={styles.resizeInfoContent}>
+                            <Typography
+                                style={{
+                                    paddingHorizontal: 20
+                                }}
+                                color='#fff'
+                                size={16}
+                            >Ha ocurrido un error actualizando la imagen. Esta es la nueva imagen comprimida, desea enviar esta imagen?</Typography>
+                        </View>
+                    ) : (null)}
                     <View style={styles.topButtons}>
                         <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
                         >
@@ -543,6 +601,10 @@ const CarrierDetails = () => {
 }
 
 const styles = StyleSheet.create({
+    resizeInfoContent: {
+        backgroundColor: Colors.COLORS.WEB_BUTTON,
+        paddingVertical: 15,
+    },
     opinionAvatar: {
         width: 40,
         height: 40,
@@ -552,7 +614,7 @@ const styles = StyleSheet.create({
 
     },
     topButtons: {
-        paddingHorizontal: 25,
+        padding: 25,
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%'
@@ -560,7 +622,7 @@ const styles = StyleSheet.create({
     vistaPrevia: {
         marginTop: 10,
         //marginHorizontal: 10,
-        height: Dimensions.get('window').height * 0.85,
+        height: Dimensions.get('window').height * 0.70,
         width: '100%'
         /* marginTop: 10,
         marginHorizontal: 10,

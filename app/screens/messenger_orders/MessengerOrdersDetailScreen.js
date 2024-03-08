@@ -26,12 +26,12 @@ export default function MessengerOrdersDetailScreen({ route, navigation, ...prop
 		onCompleted: (data) => {
 			setOrderDetails(data)
 			dispatch(setSelectedOrder(data))
-			console.log('On complete >> ', data)
+			// console.log('On complete >> ', data)
 		},
 		onError: (error, data, networkStatus) => {
-			console.log('ERROR cargando Envío >> ', error.errors)
-			console.log('ERROR cargando Envío data var >> ', data)
-			console.log('ERROR cargando Envío networkStatus >> ', networkStatus)
+			console.log('ERROR cargando Envío >> ', JSON.stringify(error, null, 2))
+			console.log('ERROR cargando Envío data var >> ', JSON.stringify(data, null, 2))
+			console.log('ERROR cargando Envío networkStatus >> ', JSON.stringify(networkStatus, null, 2))
 		},
 		fetchPolicy: "no-cache"
 	})

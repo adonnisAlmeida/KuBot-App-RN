@@ -5,6 +5,14 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 import org.devio.rn.splashscreen.SplashScreen;
+import me.pushy.sdk.Pushy;
+/* import android.os.Build;
+import android.provider.Settings;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri; */
 
 public class MainActivity extends ReactActivity {
 
@@ -21,6 +29,17 @@ public class MainActivity extends ReactActivity {
   protected void onCreate(Bundle savedInstanceState) {
     SplashScreen.show(this);  // here
     super.onCreate(savedInstanceState);
+    Pushy.toggleForegroundService(true, this);
+    Pushy.listen(this);
+   /*  // Get instance of Power Manager
+    PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+    // Android M (6) and up only
+    // Check if the user has not already whitelisted your app from battery optimizations
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+        // Display an in-app dialog which will allow the user to exempt your app without leaving it
+        startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:"+getPackageName())));
+    } */
   }
 
   /**
