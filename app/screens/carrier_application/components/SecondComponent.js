@@ -12,6 +12,7 @@ import * as Progress from 'react-native-progress';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { ReactNativeFile } from 'apollo-upload-client'
 import { WebView } from 'react-native-webview';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const SecondComponent = ({
     piPhotoFrontal,
@@ -72,6 +73,44 @@ const SecondComponent = ({
     const bustPhotoEdit = () => {
         setSelectedImage('bustPhoto')
         setShowModal(true)
+    }
+
+    const piPhotoFrontalPreview = async () => {
+        setSelectedImage('piPhotoFrontal')
+        setVistaPrevia(piPhotoFrontal)
+        setConfirmModal(true)
+    }
+    const piPhotoBackPreview = async () => {
+        setSelectedImage('piPhotoBack')
+        setVistaPrevia(piPhotoBack)
+        setConfirmModal(true)
+    }
+    const bustPhotoPreview = () => {
+        setSelectedImage('bustPhoto')
+        setVistaPrevia(bustPhoto)
+        setConfirmModal(true)
+    }
+
+    const closePreviewModal = () => {
+        switch (selectedImage) {
+            case 'piPhotoFrontal':
+                setConfirmModal(false)
+                setPiPhotoFrontal(require('../../../../assets/user_avatar.png'))
+                setPiPhotoFrontalFile(null)
+                break;
+            case 'piPhotoBack':
+                setConfirmModal(false)
+                setPiPhotoBack(require('../../../../assets/user_avatar.png'))
+                setPiPhotoBackFile(null)
+                break;
+            case 'bustPhoto':
+                setConfirmModal(false)
+                setBustPhoto(require('../../../../assets/user_avatar.png'))
+                setBustPhotoFile(null)
+                break;
+            default:
+                break;
+        }
     }
 
     const openCamera = async () => {
@@ -169,17 +208,29 @@ const SecondComponent = ({
                     <Typography color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen delantera del CI</Typography>
                     <View style={styles.imageContainer}>
                         <View style={styles.editIcon}>
-                            <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
-                                <MaterialIcons
-                                    name="add-photo-alternate"
-                                    color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
-                                    size={25}
-                                />
+                            <TouchableOpacity style={{ padding: 10 }} onPress={() => piPhotoFrontalEdit()} >
+                                {piPhotoFrontalFile != null ? (
+                                    <MaterialCommunityIcons
+                                        name="image-edit-outline"
+                                        color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                        size={25}
+                                    />
+                                ) : (
+                                    <MaterialIcons
+                                        name="add-photo-alternate"
+                                        color={hasErrors('piPhotoFrontalFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                        size={25}
+                                    />
+                                )}
+
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity onPress={() => piPhotoFrontalEdit()} >
+                        <TouchableOpacity
+                            onPress={() => piPhotoFrontalPreview()}
+                            disabled={piPhotoFrontalFile == null}
+                        >
                             <Image
-                                defaultSource={piPhotoBack}
+                                //defaultSource={piPhotoBack}
                                 backgroundColor='white'
                                 source={piPhotoFrontal}
                                 imageStyle={styles.imageStyles}
@@ -196,15 +247,26 @@ const SecondComponent = ({
                     <Typography color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen trasera del CI</Typography>
                     <View style={styles.imageContainer}>
                         <View style={styles.editIcon}>
-                            <TouchableOpacity onPress={() => piPhotoBackEdit()}>
-                                <MaterialIcons
-                                    name="add-photo-alternate"
-                                    color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
-                                    size={25}
-                                />
+                            <TouchableOpacity style={{ padding: 10 }} onPress={() => piPhotoBackEdit()}>
+                                {piPhotoBackFile != null ? (
+                                    <MaterialCommunityIcons
+                                        name="image-edit-outline"
+                                        color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                        size={25}
+                                    />
+                                ) : (
+                                    <MaterialIcons
+                                        name="add-photo-alternate"
+                                        color={hasErrors('piPhotoBackFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                        size={25}
+                                    />
+                                )}
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity onPress={() => piPhotoBackEdit()}>
+                        <TouchableOpacity
+                            onPress={() => piPhotoBackPreview()}
+                            disabled={piPhotoBackFile == null}
+                        >
                             <Image
                                 indicator={Progress.Pie}
                                 indicatorProps={{
@@ -222,15 +284,26 @@ const SecondComponent = ({
                     <Typography color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : colors.ON_SURFACE_VARIANT}>Imagen de Busto</Typography>
                     <View style={styles.imageContainer}>
                         <View style={styles.editIcon}>
-                            <TouchableOpacity onPress={() => bustPhotoEdit()}>
-                                <MaterialIcons
-                                    name="add-photo-alternate"
-                                    color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
-                                    size={25}
-                                />
+                            <TouchableOpacity style={{ padding: 10 }} onPress={() => bustPhotoEdit()}>
+                                {bustPhotoFile != null ? (
+                                    <MaterialCommunityIcons
+                                        name="image-edit-outline"
+                                        color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                        size={25}
+                                    />
+                                ) : (
+                                    <MaterialIcons
+                                        name="add-photo-alternate"
+                                        color={hasErrors('bustPhotoFile') ? Colors.COLORS.ERROR : Colors.COLORS.PRIMARY}
+                                        size={25}
+                                    />
+                                )}
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity onPress={() => bustPhotoEdit()}>
+                        <TouchableOpacity
+                            onPress={() => bustPhotoPreview()}
+                            disabled={bustPhotoFile == null}
+                        >
                             <Image
                                 indicator={Progress.Pie}
                                 indicatorProps={{
@@ -315,7 +388,7 @@ const SecondComponent = ({
                         source={vistaPrevia}
                     />
                     <View style={styles.topButtons}>
-                        <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
+                        <TouchableOpacity style={styles.cancelIcon} onPress={() => closePreviewModal()}
                         >
                             <Ionicons
                                 name='ios-close-circle-outline'
@@ -481,9 +554,9 @@ const styles = StyleSheet.create({
     }, */
     editIcon: {
         position: 'absolute',
-        top: 15,
+        top: 5,
         //right: 0,
-        left: 15,
+        left: 5,
         zIndex: 10
     },
     imageContainer: {

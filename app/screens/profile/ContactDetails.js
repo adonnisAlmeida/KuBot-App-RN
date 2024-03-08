@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Platform, ToastAndroid, RefreshControl } from 'react-native'
+import { StyleSheet, ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, ActivityIndicator, Platform, ToastAndroid, RefreshControl, Text } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -119,19 +119,19 @@ const ContactDetails = ({ navigation }) => {
     })
 
     const [getLogedUserInfo, { loadingUserInfo, errorUserInfo, dataUserInfo }] = useLazyQuery(USER_INFO, {
-		onCompleted: (dataUserInfo) => {
-			//console.log("Info del usuario logueado >> ", dataUserInfo.me)
-			if(dataUserInfo.me){
-				dispatch(setUser(dataUserInfo.me))
-			}
+        onCompleted: (dataUserInfo) => {
+            //console.log("Info del usuario logueado >> ", dataUserInfo.me)
+            if (dataUserInfo.me) {
+                dispatch(setUser(dataUserInfo.me))
+            }
             setRefreshing(false)
-		},
-		onError: (errorUserInfo) => {
+        },
+        onError: (errorUserInfo) => {
             setRefreshing(false)
-			console.log("Error Info User >> ", errorUserInfo)
-		},
-		fetchPolicy: "no-cache"
-	})
+            console.log("Error Info User >> ", errorUserInfo)
+        },
+        fetchPolicy: "no-cache"
+    })
 
     const [addressUpdate, { loadingAddressUpdate, errorAddressUpdate, dataAddressUpdate }] = useMutation(ADDRESS_UPDATE, {
         onCompleted: (dataAddressUpdate) => {
@@ -272,7 +272,7 @@ const ContactDetails = ({ navigation }) => {
         if (error_data.length > 0) {
             setErrors(error_data)
         } else {
-            
+
             if (actionToDo == 'EDIT') {
                 console.log("A editar invalidMun >> ", invalidMun)
                 console.log("A editar invalidProv >> ", invalidProv)
@@ -394,6 +394,7 @@ const ContactDetails = ({ navigation }) => {
                     <ProfileUpdate />
                 </View>
             </View>
+
 
             <ScrollView
                 keyboardShouldPersistTaps={'handled'}

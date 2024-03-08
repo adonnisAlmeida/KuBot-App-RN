@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux'
 import { EVIDENCE_REJECTED_IMAGES, ORDER_REJECTED, SIGNATURE_REJECTED_IMAGES } from '../../../../../graphql/orders'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../../redux/messenger_orders/messenger_ordersSlice'
 import ImageCard from './ImageCard'
+import ImageResizer from '@bam.tech/react-native-image-resizer';
 
 const ModalRejected = ({
     showModalRejected,
@@ -23,6 +24,7 @@ const ModalRejected = ({
     setShippingStatus,
 }) => {
     const [justify, setJustify] = useState(envio.orderById.rejectedOrder?.reason)
+    const [resizeInfo, setResizeInfo] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [modalTarget, setModalTarget] = useState('')
     const [preViewModal, setPreViewModal] = useState(false)
@@ -46,23 +48,29 @@ const ModalRejected = ({
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
             }
+            setResizeInfo(false)
             setUploadingImage(false)
             setPreViewModal(false)
             setSignatureImages(dataSignature.signatureImagesRejection.order.rejectedOrder.signImg)
         },
         onError: (errorSignature, dataSignature) => {
-            if (errorSignature.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+            if (errorSignature.message == "Network request failed" || errorSignature?.networkError?.statusCode == 413) {
+                resizeOptions()
             } else {
-                if (Platform.OS === 'android') {
-                    ToastAndroid.show('Ha ocurrido un error adicionado la imagen de firma.', ToastAndroid.LONG)
+                setResizeInfo(false)
+                if (errorSignature.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+                } else {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Ha ocurrido un error adicionado la imagen de firma.', ToastAndroid.LONG)
+                    }
                 }
+                console.log('Error subiendo imagen >> ', JSON.stringify(errorSignature, null, 2))
+                console.log('Error subiendo imagen dataSignature >> ', dataSignature)
+                setUploadingImage(false)
+                setPreViewModal(false)
             }
-            console.log('Error subiendo imagen >> ', JSON.stringify(errorSignature, null, 2))
-            console.log('Error subiendo imagen dataSignature >> ', dataSignature)
-            setUploadingImage(false)
-            setPreViewModal(false)
         },
         context: {
             fetchOptions: {
@@ -78,23 +86,29 @@ const ModalRejected = ({
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de evidencia correctamente.', ToastAndroid.LONG)
             }
+            setResizeInfo(false)
             setUploadingImage(false)
             setPreViewModal(false)
             setEvidenceImages(dataEvidence.evidenceImagesRejection.order.rejectedOrder.shipImg)
         },
         onError: (errorEvidence, dataEvidence) => {
-            if (errorEvidence.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+            if (errorEvidence.message == "Network request failed" || errorEvidence?.networkError?.statusCode == 413) {
+                resizeOptions()
             } else {
-                if (Platform.OS === 'android') {
-                    ToastAndroid.show('Ha ocurrido un error adicionado la imagen de evidencia.', ToastAndroid.LONG)
+                setResizeInfo(false)
+                if (errorEvidence.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+                } else {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Ha ocurrido un error adicionado la imagen de evidencia.', ToastAndroid.LONG)
+                    }
                 }
+                console.log('Error subiendo imagen >> ', errorEvidence)
+                console.log('Error subiendo imagen dataEvidence >> ', dataEvidence)
+                setUploadingImage(false)
+                setPreViewModal(false)
             }
-            console.log('Error subiendo imagen >> ', errorEvidence)
-            console.log('Error subiendo imagen dataEvidence >> ', dataEvidence)
-            setUploadingImage(false)
-            setPreViewModal(false)
         },
         context: {
             fetchOptions: {
@@ -102,6 +116,28 @@ const ModalRejected = ({
             }
         },
     })
+
+    const resizeOptions = async () => {
+        let result = await ImageResizer.createResizedImage(
+            imageURI.uri,
+            500,
+            500,
+            'JPEG',
+            100,
+            0,
+            undefined,
+            false,
+        );
+        const file = new ReactNativeFile({
+            uri: result.uri,
+            name: imageURI.name,
+            type: imageURI.type,
+        });
+        setImageURI(file)
+        setUploadingImage(false)
+        setVistaPrevia({ uri: result.uri })
+        setResizeInfo(true)
+    }
 
     const [orderRejected, { loadingRejected, errorRejected, dataRejected }] = useMutation(ORDER_REJECTED, {
         onCompleted: (dataRejected) => {
@@ -132,7 +168,7 @@ const ModalRejected = ({
             setActualizando(false)
         },
         onError: (errorRejected) => {
-            console.log('Error cambiando estado de envio a REJECTED >> ', errorRejected)
+            console.log('Error cambiando estado de envio a REJECTED >> ', JSON.stringify(errorRejected, null, 2))
             setActualizando(false)
         }
     })
@@ -204,7 +240,8 @@ const ModalRejected = ({
 
     const makeRejected = () => {
         //setDisplayLoading(true)
-        if (justify === '') {
+        console.log("ENTROOOO", justify)
+        if (justify === '' || justify == undefined) {
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Debe completar la Justificación.', ToastAndroid.LONG)
             }
@@ -227,6 +264,7 @@ const ModalRejected = ({
     }
 
     const abortUpload = () => {
+        setResizeInfo(false)
         switch (modalTarget) {
             case 'SIGNATURE':
                 aborterRefSignature.abort();
@@ -272,7 +310,7 @@ const ModalRejected = ({
 
                 </View>
                 <View
-                    behavior={"padding"} style={styles.centeredView}
+                    behavior={"padding"} style={styles.centeredViewOtro}
                 >
                     <ImageBackground
                         resizeMode='contain'
@@ -284,33 +322,47 @@ const ModalRejected = ({
                         style={{ width: '100%' }}
                         keyboardVerticalOffset={-20}
                     >
-                        <TextInput
-                            style={styles.commentInput}
-                            autoComplete='off'
-                            placeholder='Descripción (opcional)'
-                            multiline={true}
-                            placeholderTextColor='rgba(255,255,255,0.7)'
-                            onChangeText={text => setDescription(text)}
-                        />
-                        {uploadingImage ? (
-                            <ActivityIndicator
-                                style={styles.aIndicator}
-                                color={Colors.COLORS.SUCCESS}
-                                size='large'
+                        {resizeInfo ? (
+                            <View style={styles.resizeInfoContent}>
+                                <Typography
+                                    style={{
+                                        paddingHorizontal: 20
+                                    }}
+                                    color='#fff'
+                                    size={16}
+                                >Ha ocurrido un error actualizando la imagen. Esta es la nueva imagen comprimida, desea enviar esta imagen?</Typography>
+                            </View>
+                        ) : (null)}
+                        <View style={{ marginBottom: 20 }}>
+                            <TextInput
+                                style={styles.commentInput}
+                                autoComplete='off'
+                                placeholder='Descripción (opcional)'
+                                multiline={true}
+                                placeholderTextColor='rgba(255,255,255,0.7)'
+                                onChangeText={text => setDescription(text)}
                             />
-                        ) : (
-                            <TouchableOpacity
-                                style={styles.okInputIcon}
-                                onPress={() => sendImage()}
-                            >
-
-                                <Ionicons
-                                    name='ios-checkmark-circle-outline'
-                                    size={40}
+                            {uploadingImage ? (
+                                <ActivityIndicator
+                                    style={styles.aIndicator}
                                     color={Colors.COLORS.SUCCESS}
+                                    size='large'
                                 />
-                            </TouchableOpacity>
-                        )}
+                            ) : (
+                                <TouchableOpacity
+                                    style={styles.okInputIcon}
+                                    onPress={() => sendImage()}
+                                >
+
+                                    <Ionicons
+                                        name='ios-checkmark-circle-outline'
+                                        size={40}
+                                        color={Colors.COLORS.SUCCESS}
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+
                     </KeyboardAvoidingView>
                 </View>
             </Modal>
@@ -487,6 +539,11 @@ const ModalRejected = ({
 }
 
 const styles = StyleSheet.create({
+    resizeInfoContent: {
+        backgroundColor: Colors.COLORS.WEB_BUTTON,
+        paddingVertical: 15,
+        marginBottom: 10,
+    },
     aIndicator: {
         position: 'absolute',
         right: 14,
@@ -507,8 +564,8 @@ const styles = StyleSheet.create({
         paddingRight: 60,
     },
     vistaPrevia: {
-        marginTop: 10,
-        height: Dimensions.get('window').height * 0.75,
+        //marginTop: 10,
+        height: Dimensions.get('window').height * 0.70,
         width: '100%'
     },
     modalButtons: {
@@ -537,6 +594,13 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.7)'
+    },
+    centeredViewOtro: {
+        flex: 1,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        //backgroundColor: 'red'
         backgroundColor: 'rgba(0,0,0,0.7)'
     },
     selectModal: {

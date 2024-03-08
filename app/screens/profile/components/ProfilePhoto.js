@@ -14,6 +14,8 @@ import { ReactNativeFile } from 'apollo-upload-client'
 import { useDispatch, useSelector } from 'react-redux'
 import { setUser, user } from '../../../redux/userlogin/userLoginSlice'
 import { useEffect } from 'react'
+import ImageResizer from '@bam.tech/react-native-image-resizer';
+import { Typography } from '../../../components'
 
 const ProfilePhoto = ({ avatar, setAvatar }) => {
     const { colors } = useTheme()
@@ -21,9 +23,9 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
     const [showModal, setShowModal] = useState(false)
     const [vistaPrevia, setVistaPrevia] = useState(null)
     const [confirmModal, setConfirmModal] = useState(false)
-    const [errors, setErrors] = useState([])
     const [activity, setActivity] = useState(false)
     const [photoFile, setPhotoFile] = useState(null)
+    const [resizeInfo, setResizeInfo] = useState(false)
     const user_state = useSelector(user)
     const dispatch = useDispatch()
 
@@ -41,6 +43,7 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
                 ToastAndroid.show('Avatar actualizado correctamente.', ToastAndroid.LONG)
             setActivity(false)
             setConfirmModal(false)
+            setResizeInfo(false)
             setAvatarURL(vistaPrevia)
             dispatch(
                 setUser({
@@ -50,14 +53,41 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
             )
         },
         onError: (errorAvatar, dataAvatar) => {
-            setActivity(false)
-            setConfirmModal(false)
-            if (Platform.OS === 'android')
-                ToastAndroid.show('Error actualizando el avatar.', ToastAndroid.LONG)
+            if (errorAvatar.message == "Network request failed" || errorAvatar?.networkError?.statusCode == 413) {
+                resizeOptions()
+            } else {
+                setActivity(false)
+                setConfirmModal(false)
+                setResizeInfo(false)
+                if (Platform.OS === 'android')
+                    ToastAndroid.show('Error actualizando el avatar.', ToastAndroid.LONG)
+            }
             console.log('Error userAvatarUpdate >> ', JSON.stringify(errorAvatar, null, 2))
             console.log('Error userAvatarUpdate  dataAvatar >> ', dataAvatar)
         }
     })
+
+    const resizeOptions = async () => {
+        let result = await ImageResizer.createResizedImage(
+            photoFile.uri,
+            500,
+            500,
+            'JPEG',
+            100,
+            0,
+            undefined,
+            false,
+        );
+        const file = new ReactNativeFile({
+            uri: result.uri,
+            name: photoFile.name,
+            type: photoFile.type,
+        });
+        setPhotoFile(file)
+        setActivity(false)
+        setVistaPrevia({ uri: result.uri, })
+        setResizeInfo(true)
+    }
 
     const profilePhotoEdit = () => {
         setShowModal(true)
@@ -99,7 +129,6 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
 
     const sendImage = () => {
         setActivity(true)
-        console.log("photoFile >> ", photoFile)
         userAvatarUpdate({
             variables: { image: photoFile }
         })
@@ -147,6 +176,17 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
                         style={styles.vistaPrevia}
                         source={vistaPrevia}
                     />
+                    {resizeInfo ? (
+                        <View style={styles.resizeInfoContent}>
+                            <Typography
+                                style={{
+                                    paddingHorizontal: 20
+                                }}
+                                color='#fff'
+                                size={16}
+                            >Ha ocurrido un error actualizando la imagen de perfil. Esta es la nueva imagen comprimida, desea enviar esta imagen?</Typography>
+                        </View>
+                    ) : (null)}
                     <View style={styles.topButtons}>
                         <TouchableOpacity style={styles.cancelIcon} onPress={() => setConfirmModal(false)}
                         >
@@ -212,8 +252,12 @@ const ProfilePhoto = ({ avatar, setAvatar }) => {
 }
 
 const styles = StyleSheet.create({
+    resizeInfoContent: {
+        backgroundColor: Colors.COLORS.WEB_BUTTON,
+        paddingVertical: 15,
+    },
     topButtons: {
-        paddingHorizontal: 25,
+        padding: 25,
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%'
@@ -254,8 +298,9 @@ const styles = StyleSheet.create({
     vistaPrevia: {
         marginTop: 10,
         //marginHorizontal: 10,
-        height: Dimensions.get('window').height * 0.85,
-        width: '100%'
+        height: Dimensions.get('window').height * 0.70,
+        width: '100%',
+        //backgroundColor: 'red',
         /* marginTop: 10,
         marginHorizontal: 10,
         height: 500,

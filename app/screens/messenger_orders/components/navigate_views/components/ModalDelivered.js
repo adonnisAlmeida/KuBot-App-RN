@@ -16,6 +16,7 @@ import { useDispatch } from 'react-redux'
 import { DELIVERED_ITINERARY_CREATE, DELIVERY_ITINERARY_CREATE, DELIVERY_ITINERARY_DELETE, DELIVERY_ITINERARY_UPDATE, ORDER_DELIVERED, PACKAGE_IMAGES, SIGNATURE_IMAGES } from '../../../../../graphql/orders'
 import { setOrderShippingStatus, setSelectedOrderShippingStatus } from '../../../../../redux/messenger_orders/messenger_ordersSlice'
 import ImageCard from './ImageCard'
+import ImageResizer from '@bam.tech/react-native-image-resizer';
 
 const ModalDelivered = ({
     showModalDelivered,
@@ -25,7 +26,7 @@ const ModalDelivered = ({
     setDeliveryInineraryParent
 }) => {
     const [showModal, setShowModal] = useState(false)
-
+    const [resizeInfo, setResizeInfo] = useState(false)
     const [modalTarget, setModalTarget] = useState('')
     const [preViewModal, setPreViewModal] = useState(false)
     const [vistaPrevia, setVistaPrevia] = useState(null)
@@ -171,22 +172,28 @@ const ModalDelivered = ({
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de firma correctamente.', ToastAndroid.LONG)
             }
+            setResizeInfo(false)
             setUploadingImage(false)
             setPreViewModal(false)
         },
         onError: (errorSignature, dataSignature) => {
-            if (errorSignature.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+            if (errorSignature.message == "Network request failed" || errorSignature?.networkError?.statusCode == 413) {
+                resizeOptions()
             } else {
-                if (Platform.OS === 'android') {
-                    ToastAndroid.show('Ha ocurrido un error adicionado la imagen de firma.', ToastAndroid.LONG)
+                setResizeInfo(false)
+                if (errorSignature.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+                } else {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Ha ocurrido un error adicionado la imagen de firma.', ToastAndroid.LONG)
+                    }
                 }
+                console.log('Error subiendo imagen >> ', errorSignature)
+                console.log('Error subiendo imagen dataSignature >> ', dataSignature)
+                setUploadingImage(false)
+                setPreViewModal(false)
             }
-            console.log('Error subiendo imagen >> ', errorSignature)
-            console.log('Error subiendo imagen dataSignature >> ', dataSignature)
-            setUploadingImage(false)
-            setPreViewModal(false)
         },
         context: {
             fetchOptions: {
@@ -203,22 +210,28 @@ const ModalDelivered = ({
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Se adicionó la imagen de paquete correctamente.', ToastAndroid.LONG)
             }
+            setResizeInfo(false)
             setPreViewModal(false)
             setUploadingImage(false)
         },
         onError: (errorPackage, dataPackage) => {
-            if (errorPackage.message == 'Aborted') {
-                if (Platform.OS === 'android')
-                    ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+            if (errorPackage.message == "Network request failed" || errorPackage?.networkError?.statusCode == 413) {
+                resizeOptions()
             } else {
-                if (Platform.OS === 'android') {
-                    ToastAndroid.show('Ha ocurrido un error adicionado la imagen de paquete.', ToastAndroid.LONG)
+                setResizeInfo(false)
+                if (errorPackage.message == 'Aborted') {
+                    if (Platform.OS === 'android')
+                        ToastAndroid.show('Imagen cancelada.', ToastAndroid.LONG)
+                } else {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Ha ocurrido un error adicionado la imagen de paquete.', ToastAndroid.LONG)
+                    }
                 }
+                console.log('Error subiendo imagen >> ', errorPackage)
+                console.log('Error subiendo imagen dataPackage >> ', dataPackage)
+                setUploadingImage(false)
+                setPreViewModal(false)
             }
-            console.log('Error subiendo imagen >> ', errorPackage)
-            console.log('Error subiendo imagen dataPackage >> ', dataPackage)
-            setUploadingImage(false)
-            setPreViewModal(false)
         },
         context: {
             fetchOptions: {
@@ -227,7 +240,30 @@ const ModalDelivered = ({
         },
     })
 
+    const resizeOptions = async () => {
+        let result = await ImageResizer.createResizedImage(
+            imageURI.uri,
+            500,
+            500,
+            'JPEG',
+            100,
+            0,
+            undefined,
+            false,
+        );
+        const file = new ReactNativeFile({
+            uri: result.uri,
+            name: imageURI.name,
+            type: imageURI.type,
+        });
+        setImageURI(file)
+        setUploadingImage(false)
+        setVistaPrevia({ uri: result.uri })
+        setResizeInfo(true)
+    }
+
     const abortUpload = () => {
+        setResizeInfo(false)
         switch (modalTarget) {
             case 'SIGNATURE':
                 aborterRefSignature.abort();
@@ -495,12 +531,14 @@ const ModalDelivered = ({
                 animationType="fade"
                 onRequestClose={() => abortUpload(false)}
             >
-                <View style={{
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                    flexDirection: 'row'
-                }}>
+                <View
+                    style={{
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        justifyContent: 'space-between',
+                        paddingTop: 10,
+                        flexDirection: 'row'
+                    }}
+                >
                     <Typography>
                     </Typography>
                     <TouchableOpacity
@@ -515,7 +553,7 @@ const ModalDelivered = ({
 
                 </View>
                 <View
-                    behavior={"padding"} style={styles.centeredView}
+                    behavior={"padding"} style={styles.centeredViewOtro}
                 >
                     <ImageBackground
                         resizeMode='contain'
@@ -527,33 +565,46 @@ const ModalDelivered = ({
                         style={{ width: '100%' }}
                         keyboardVerticalOffset={-20}
                     >
-                        <TextInput
-                            style={styles.commentInput}
-                            autoComplete='off'
-                            placeholder='Descripción (opcional)'
-                            multiline={true}
-                            placeholderTextColor='rgba(255,255,255,0.7)'
-                            onChangeText={text => setDescription(text)}
-                        />
-                        {uploadingImage ? (
-                            <ActivityIndicator
-                                style={styles.aIndicator}
-                                color={Colors.COLORS.SUCCESS}
-                                size='large'
+                        {resizeInfo ? (
+                            <View style={styles.resizeInfoContent}>
+                                <Typography
+                                    style={{
+                                        paddingHorizontal: 20
+                                    }}
+                                    color='#fff'
+                                    size={16}
+                                >Ha ocurrido un error actualizando la imagen. Esta es la nueva imagen comprimida, desea enviar esta imagen?</Typography>
+                            </View>
+                        ) : (null)}
+                        <View style={{marginBottom: 20}}>
+                            <TextInput
+                                style={styles.commentInput}
+                                autoComplete='off'
+                                placeholder='Descripción (opcional)'
+                                multiline={true}
+                                placeholderTextColor='rgba(255,255,255,0.7)'
+                                onChangeText={text => setDescription(text)}
                             />
-                        ) : (
-                            <TouchableOpacity
-                                style={styles.okInputIcon}
-                                onPress={() => sendImage()}
-                            >
-
-                                <Ionicons
-                                    name='ios-checkmark-circle-outline'
-                                    size={40}
+                            {uploadingImage ? (
+                                <ActivityIndicator
+                                    style={styles.aIndicator}
                                     color={Colors.COLORS.SUCCESS}
+                                    size='large'
                                 />
-                            </TouchableOpacity>
-                        )}
+                            ) : (
+                                <TouchableOpacity
+                                    style={styles.okInputIcon}
+                                    onPress={() => sendImage()}
+                                >
+
+                                    <Ionicons
+                                        name='ios-checkmark-circle-outline'
+                                        size={40}
+                                        color={Colors.COLORS.SUCCESS}
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </KeyboardAvoidingView>
                 </View>
             </Modal>
@@ -1026,6 +1077,11 @@ const ModalDelivered = ({
 }
 
 const styles = StyleSheet.create({
+    resizeInfoContent: {
+        backgroundColor: Colors.COLORS.WEB_BUTTON,
+        paddingVertical: 15,
+        marginBottom: 10,
+    },
     itineraryModal: {
         width: '95%',
         //height: 'auto',
@@ -1115,8 +1171,8 @@ const styles = StyleSheet.create({
         paddingRight: 60,
     },
     vistaPrevia: {
-        marginTop: 10,
-        height: Dimensions.get('window').height * 0.75,
+        //marginTop: 10,
+        height: Dimensions.get('window').height * 0.70,
         width: '100%'
     },
     modalButtons: {
@@ -1143,6 +1199,12 @@ const styles = StyleSheet.create({
     centeredView: {
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.7)'
+    },
+    centeredViewOtro: {
+        flex: 1,
+        justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.7)'
     },

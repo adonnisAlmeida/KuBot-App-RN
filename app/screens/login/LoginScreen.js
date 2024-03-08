@@ -18,7 +18,6 @@ import { Button, Typography } from '../../components'
 import { TOKEN_CREATE, GET_CARRIER_BY_USER_EMAIL } from '../../graphql/login'
 import { login, setCarrierInfo } from '../../redux/userlogin/userLoginSlice'
 import Colors from '../../constants/Colors'
-import { ComplexAnimationBuilder } from 'react-native-reanimated'
 
 //import Pushy from 'pushy-react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -90,8 +89,8 @@ export default function LoginScreen({ navigation }) {
 			setLoadingButton(false)
 			setErrorLogin(true)
 			setErrorMessage(`Error de conexión >>> ${errorToken}`)
-			console.log('ERROR LOGIN errorToken >> ', JSON.stringify(errorToken, 2, null))
-			console.log('ERROR LOGIN dataToken >> ', dataToken)
+			console.log('ERROR LOGIN errorToken >> ', JSON.stringify(errorToken, null, 2))
+			console.log('ERROR LOGIN dataToken >> ', JSON.stringify(dataToken,null, 2))
 		},
 		fetchPolicy: "no-cache"
 	})

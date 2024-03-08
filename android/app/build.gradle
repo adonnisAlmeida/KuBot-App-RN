@@ -264,6 +264,8 @@ dependencies {
 
     implementation project(':react-native-pager-view')
 
+    implementation project(':react-native-image-resizer')
+
     // Pushy SDK for Android
     implementation 'me.pushy:sdk:1.0.103'
 
